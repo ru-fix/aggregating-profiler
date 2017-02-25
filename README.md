@@ -1,2 +1,2 @@
 # commons-profiler
-Provides profiling API  
+Commons Profiler provide basic API for application metrics measurement.  
