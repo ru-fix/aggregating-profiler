@@ -15,8 +15,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Kamil Asfandiyarov
  */
-public class ProfilingITLR {
-    private static final Logger log = LoggerFactory.getLogger(ProfilingITLR.class);
+public class ProfilingTest {
+    private static final Logger log = LoggerFactory.getLogger(ProfilingTest.class);
 
     private void doSomething(int delay) {
         try {
