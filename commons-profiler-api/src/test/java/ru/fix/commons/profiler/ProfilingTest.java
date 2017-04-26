@@ -235,7 +235,7 @@ public class ProfilingTest {
     }
 
     @Test
-    public void payload_min_max_total() throws Exception{
+    public void payload_min_max_total() throws Exception {
 
         Profiler profiler = new SimpleProfiler();
         ProfilerReporter reporter = profiler.createReporter();
@@ -260,7 +260,44 @@ public class ProfilingTest {
         ProfilerCallReport callReport = report.getProfilerCallReports().get(0);
         assertEquals("payloadMin", 1, callReport.payloadMin);
         assertEquals("payloadMax", 12, callReport.payloadMax);
-        assertEquals("payloadMax", 1+12+6, callReport.payloadTotal);
+        assertEquals("payloadMax", 1 + 12 + 6, callReport.payloadTotal);
     }
 
+    @Test
+    public void skip_empty_metrics() throws Exception {
+        Profiler profiler = new SimpleProfiler();
+        ProfilerReporter reporter = profiler.createReporter();
+
+        ProfiledCall call = profiler.profiledCall("call_1");
+        ProfiledCall call2 = profiler.profiledCall("call_2");
+
+        call.start();
+        call.stop();
+        call.start();
+        call.stop();
+
+        call2.start();
+        call2.stop();
+
+        ProfilerReport report = reporter.buildReportAndReset();
+        assertEquals(true, report.getIndicators().isEmpty());
+        assertEquals(2, report.getProfilerCallReports().size());
+        assertEquals(2L, report.getProfilerCallReports().get(0).getCallsCount());
+        assertEquals("call_1", report.getProfilerCallReports().get(0).getName());
+        assertEquals(1L, report.getProfilerCallReports().get(1).getCallsCount());
+        assertEquals("call_2", report.getProfilerCallReports().get(1).getName());
+
+        call2.start();
+        call2.stop();
+        call2.start();
+        call2.stop();
+        call2.start();
+        call2.stop();
+
+        report = reporter.buildReportAndReset();
+        assertEquals(true, report.getIndicators().isEmpty());
+        assertEquals(1, report.getProfilerCallReports().size());
+        assertEquals(3L, report.getProfilerCallReports().get(0).getCallsCount());
+        assertEquals("call_2", report.getProfilerCallReports().get(0).getName());
+    }
 }

@@ -7,6 +7,7 @@ import ru.fix.commons.profiler.ProfilerReport;
 import ru.fix.commons.profiler.ProfilerReporter;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -54,12 +55,14 @@ class ProfilerReporterImpl implements ProfilerReporter {
                 .stream()
                 .sorted()
                 .map(name -> buildReportAndReset(name, spentTime))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList()));
         return report;
     }
 
 
-    private ProfilerCallReport buildReportAndReset(String name, long elapsed) {
+    private Optional<ProfilerCallReport> buildReportAndReset(String name, long elapsed) {
         SharedCounters counters = sharedCounters.get(name);
 
         long callsCount = counters.getCallsCount().sumThenReset();
@@ -67,12 +70,12 @@ class ProfilerReporterImpl implements ProfilerReporter {
 
         if (callsCount == 0) {
             cleanCounters(counters);
-            return new ProfilerCallReport(name);
+            return Optional.empty();
         }
 
         long payloadTotal = counters.getPayloadSum().sumThenReset();
 
-        return new ProfilerCallReport(name)
+        return Optional.of(new ProfilerCallReport(name)
                 .setMinLatency(counters.getLatencyMin().getAndSet(Long.MAX_VALUE))
                 .setMaxLatency(counters.getLatencyMax().getAndSet(0))
                 .setAvgLatency(sumStartStopLatency / callsCount)
@@ -87,7 +90,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
                 .setPayloadAvg(payloadTotal / callsCount)
                 .setPayloadThroughput(elapsed != 0 ? payloadTotal * 1000 / elapsed : 0)
 
-                .setReportingTime(elapsed);
+                .setReportingTime(elapsed));
     }
 
     private void cleanCounters(SharedCounters counters) {
