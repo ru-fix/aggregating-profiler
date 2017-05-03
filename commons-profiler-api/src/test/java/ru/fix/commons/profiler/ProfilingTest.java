@@ -7,7 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.fix.commons.profiler.impl.SimpleProfiler;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.LongAdder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -300,4 +305,53 @@ public class ProfilingTest {
         assertEquals(3L, report.getProfilerCallReports().get(0).getCallsCount());
         assertEquals("call_2", report.getProfilerCallReports().get(0).getName());
     }
+
+    @Test
+    @Ignore(value = "manual running test")
+    public void reportBuildAndReset() throws Exception {
+        Profiler profiler = new SimpleProfiler();
+        ProfilerReporter reporter = profiler.createReporter();
+
+        AtomicInteger threadIdx = new AtomicInteger();
+        int writers = Math.max(Runtime.getRuntime().availableProcessors() - 1, 1);
+        ExecutorService executorService = Executors.newFixedThreadPool(writers,
+                r -> new Thread(r, "thread-" + threadIdx.getAndIncrement())
+        );
+
+        LongAdder callCount = new LongAdder();
+        AtomicBoolean isRunning = new AtomicBoolean(true);
+        for (int i = 0; i < writers; i++) {
+            executorService.execute(() -> {
+                while (isRunning.get()) {
+                    ProfiledCall profiledCall = profiler.profiledCall(Thread.currentThread().getName());
+                    profiledCall.start();
+                    profiledCall.stop();
+
+                    callCount.increment();
+                }
+            });
+        }
+
+
+        List<ProfilerReport> reports = new ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+            TimeUnit.MILLISECONDS.sleep(100);
+
+            reports.add(reporter.buildReportAndReset());
+        }
+
+        isRunning.set(false);
+        executorService.shutdown();
+        executorService.awaitTermination(5, TimeUnit.SECONDS);
+
+        reports.add(reporter.buildReportAndReset());
+
+        long callCountFromReports = reports.stream()
+                .flatMap(profilerReport -> profilerReport.getProfilerCallReports().stream())
+                .map(ProfilerCallReport::getCallsCount)
+                .reduce(0L, Long::sum);
+
+        assertEquals("some profiler calls lost", callCount.sum(), callCountFromReports);
+    }
+
 }

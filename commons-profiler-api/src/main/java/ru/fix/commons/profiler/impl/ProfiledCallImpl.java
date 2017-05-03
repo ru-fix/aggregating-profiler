@@ -47,8 +47,7 @@ class ProfiledCallImpl implements ProfiledCall {
             throw new IllegalArgumentException("Stop method was already called.");
         }
 
-        for (SharedCounters sharedCounters : profiler.getSharedCounters(profiledCallName)) {
-
+        profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
             sharedCounters.getCallsCount().increment();
 
             sharedCounters.getSumStartStopLatency().add(latencyValue);
@@ -59,7 +58,7 @@ class ProfiledCallImpl implements ProfiledCall {
             sharedCounters.getPayloadMin().accumulateAndGet(payload, Math::min);
             sharedCounters.getPayloadMax().accumulateAndGet(payload, Math::max);
             sharedCounters.getPayloadSum().add(payload);
-        }
+        });
     }
 
     @Override

@@ -29,16 +29,16 @@ public class ProfilerReport {
     public String toString() {
         StringBuilder sumReport = new StringBuilder();
         sumReport.append("Indicators:\n");
-        indicators.entrySet().stream().forEach(i ->
-            sumReport.append(i.getKey())
-                    .append(" = ")
-                    .append(i.getValue())
-                    .append("\n")
+        indicators.entrySet().forEach(i ->
+                sumReport.append(i.getKey())
+                        .append(" = ")
+                        .append(i.getValue())
+                        .append('\n')
         );
         sumReport.append("Profilers:\n");
-        profilerCallReports.stream().forEach(pr -> {
+        profilerCallReports.forEach(pr -> {
             sumReport.append(pr.toString());
-            sumReport.append("\n");
+            sumReport.append('\n');
         });
         return sumReport.toString();
     }
