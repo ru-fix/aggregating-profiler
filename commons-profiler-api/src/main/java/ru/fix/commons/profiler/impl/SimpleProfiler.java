@@ -5,11 +5,10 @@ import ru.fix.commons.profiler.ProfiledCall;
 import ru.fix.commons.profiler.Profiler;
 import ru.fix.commons.profiler.ProfilerReporter;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 
 /**
@@ -46,10 +45,8 @@ public class SimpleProfiler implements Profiler {
         indicators.remove(name);
     }
 
-    Collection<SharedCounters> getSharedCounters(String profiledCallName) {
-        return profilerReporters.stream()
-                .map(reporter -> reporter.getSharedCounters(profiledCallName))
-                .collect(Collectors.toList());
+    void applyToSharedCounters(String profiledCallName, Consumer<SharedCounters> consumer) {
+        profilerReporters.forEach(reporter -> reporter.applyToSharedCounters(profiledCallName, consumer));
     }
 
     Map<String, IndicationProvider> getIndicators() {

@@ -6,9 +6,13 @@ import ru.fix.commons.profiler.ProfilerCallReport;
 import ru.fix.commons.profiler.ProfilerReport;
 import ru.fix.commons.profiler.ProfilerReporter;
 
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 class ProfilerReporterImpl implements ProfilerReporter {
@@ -16,9 +20,16 @@ class ProfilerReporterImpl implements ProfilerReporter {
 
     private final Map<String, SharedCounters> sharedCounters = new ConcurrentHashMap<>();
 
+    private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
+    // update counters lock
+    private final Lock readLock = readWriteLock.readLock();
+    // create report and then reset counters lock
+    private final Lock writeLock = readWriteLock.writeLock();
+
     private final SimpleProfiler profiler;
 
-    private AtomicLong lastReportTimestamp = new AtomicLong();
+    private final AtomicLong lastReportTimestamp = new AtomicLong();
 
 
     public ProfilerReporterImpl(SimpleProfiler profiler) {
@@ -26,15 +37,19 @@ class ProfilerReporterImpl implements ProfilerReporter {
         this.profiler.registerReporter(this);
     }
 
-    public SharedCounters getSharedCounters(String profiledCallName) {
-        return sharedCounters.computeIfAbsent(profiledCallName, key -> new SharedCounters());
+    public void applyToSharedCounters(String profiledCallName, Consumer<SharedCounters> consumer) {
+        readLock.lock();
+        try {
+            consumer.accept(sharedCounters.computeIfAbsent(profiledCallName, key -> new SharedCounters()));
+        } finally {
+            readLock.unlock();
+        }
     }
 
     @Override
     public ProfilerReport buildReportAndReset() {
         long timestamp = System.currentTimeMillis();
-        long spentTime = timestamp - lastReportTimestamp.get();
-        lastReportTimestamp.set(timestamp);
+        long spentTime = timestamp - lastReportTimestamp.getAndSet(timestamp);
 
         ProfilerReport report = new ProfilerReport();
         report.setIndicators(profiler.getIndicators()
@@ -50,18 +65,33 @@ class ProfilerReporterImpl implements ProfilerReporter {
                             return null;
                         })));
 
-        report.setProfilerCallReports(sharedCounters.keySet()
-                .stream()
-                .sorted()
-                .map(name -> buildReportAndReset(name, spentTime))
-                .collect(Collectors.toList()));
+        List<ProfilerCallReport> collect = new ArrayList<>();
+
+        writeLock.lock();
+        try {
+            for (Iterator<Map.Entry<String, SharedCounters>> iterator = sharedCounters.entrySet().iterator();
+                 iterator.hasNext(); ) {
+                Map.Entry<String, SharedCounters> entry = iterator.next();
+                ProfilerCallReport counterReport = buildReportAndReset(entry.getKey(), entry.getValue(), spentTime);
+
+                // skip and remove empty counter
+                if (counterReport.getCallsCount() == 0) {
+                    iterator.remove();
+                    continue;
+                }
+
+                collect.add(counterReport);
+            }
+        } finally {
+            writeLock.unlock();
+        }
+
+        collect.sort(Comparator.comparing(ProfilerCallReport::getName));
+        report.setProfilerCallReports(collect);
         return report;
     }
 
-
-    private ProfilerCallReport buildReportAndReset(String name, long elapsed) {
-        SharedCounters counters = sharedCounters.get(name);
-
+    private ProfilerCallReport buildReportAndReset(String name, SharedCounters counters, long elapsed) {
         long callsCount = counters.getCallsCount().sumThenReset();
         long sumStartStopLatency = counters.getSumStartStopLatency().sumThenReset();
 
