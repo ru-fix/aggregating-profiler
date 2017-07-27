@@ -1,5 +1,7 @@
 package ru.fix.commons.profiler.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.fix.commons.profiler.ProfiledCall;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -9,6 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Kamil Asfandiyarov
  */
 class ProfiledCallImpl implements ProfiledCall {
+    private static final Logger log = LoggerFactory.getLogger(ProfiledCallImpl.class);
 
     final AtomicBoolean started = new AtomicBoolean();
 
@@ -39,13 +42,13 @@ class ProfiledCallImpl implements ProfiledCall {
 
     @Override
     public void stop(long payload) {
-
+        if (!started.compareAndSet(true, false)) {
+            log.debug("Stop method called on profiler call that currently is not running: {}", profiledCallName);
+            return;
+        }
 
         long stopTime = System.nanoTime();
         long latencyValue = (stopTime - startTime.get()) / 1000000;
-        if (!started.compareAndSet(true, false)) {
-            throw new IllegalArgumentException("Stop method was already called.");
-        }
 
         profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
             sharedCounters.getCallsCount().increment();
