@@ -29,12 +29,13 @@ class ProfilerReporterImpl implements ProfilerReporter {
 
     private final SimpleProfiler profiler;
 
-    private final AtomicLong lastReportTimestamp = new AtomicLong();
+    private final AtomicLong lastReportTimestamp;
 
 
     public ProfilerReporterImpl(SimpleProfiler profiler) {
         this.profiler = profiler;
         this.profiler.registerReporter(this);
+        lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
     }
 
     public void applyToSharedCounters(String profiledCallName, Consumer<SharedCounters> consumer) {
