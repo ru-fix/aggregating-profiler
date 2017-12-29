@@ -29,7 +29,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
 
     private final SimpleProfiler profiler;
 
-    private final AtomicLong lastReportTimestamp = new AtomicLong();
+    private final AtomicLong lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
 
 
     public ProfilerReporterImpl(SimpleProfiler profiler) {
