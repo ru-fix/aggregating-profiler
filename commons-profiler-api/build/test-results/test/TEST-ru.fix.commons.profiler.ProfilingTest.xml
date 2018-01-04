@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ru.fix.commons.profiler.ProfilingTest" tests="10" skipped="4" failures="0" errors="0" timestamp="2018-01-04T18:11:35" hostname="home-nb" time="7.131">
+  <properties/>
+  <testcase name="between_thread_call_fixed_latency" classname="ru.fix.commons.profiler.ProfilingTest" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="simple_start_stop_with_zero_payload" classname="ru.fix.commons.profiler.ProfilingTest" time="0.122"/>
+  <testcase name="parallel_threads_fixed_latency" classname="ru.fix.commons.profiler.ProfilingTest" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="skip_empty_metrics" classname="ru.fix.commons.profiler.ProfilingTest" time="0.0"/>
+  <testcase name="single_thread_fixed_latency" classname="ru.fix.commons.profiler.ProfilingTest" time="5.008"/>
+  <testcase name="report_name" classname="ru.fix.commons.profiler.ProfilingTest" time="0.0"/>
+  <testcase name="single_thread_fixed_throughput" classname="ru.fix.commons.profiler.ProfilingTest" time="1.988"/>
+  <testcase name="payload_min_max_total" classname="ru.fix.commons.profiler.ProfilingTest" time="0.001"/>
+  <testcase name="parallel_threads_fixed_throughput" classname="ru.fix.commons.profiler.ProfilingTest" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="reportBuildAndReset" classname="ru.fix.commons.profiler.ProfilingTest" time="0.001">
+    <skipped/>
+  </testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[[Test worker] INFO ru.fix.commons.profiler.ProfilingTest - Report: Indicators:
+Profilers:
+simple_start_stop_with_zero_payload: LatMin: 100, LatMax: 100, LatAvg: 100, CallsCnt: 1, CallsThrpt: 8, RepTime: 115, PldMin 0, PldMax 0, PldAvg 0, PldTot: 0, PldThrpt: 0
+
+[Test worker] INFO ru.fix.commons.profiler.ProfilingTest - single_thread_fixed_latency: LatMin: 100, LatMax: 100, LatAvg: 100, CallsCnt: 50, CallsThrpt: 9, RepTime: 5006, PldMin 1, PldMax 1, PldAvg 1, PldTot: 50, PldThrpt: 9
+[Test worker] INFO ru.fix.commons.profiler.ProfilingTest - single_thread_fixed_throughput: LatMin: 0, LatMax: 20, LatAvg: 19, CallsCnt: 100, CallsThrpt: 50, RepTime: 1980, PldMin 1, PldMax 1, PldAvg 1, PldTot: 100, PldThrpt: 50
+[Test worker] INFO ru.fix.commons.profiler.ProfilingTest - Report: Indicators:
+Profilers:
+payload_min_max_total: LatMin: 0, LatMax: 0, LatAvg: 0, CallsCnt: 3, CallsThrpt: 0, RepTime: 0, PldMin 1, PldMax 12, PldAvg 6, PldTot: 19, PldThrpt: 0
+
+]]></system-err>
+</testsuite>
