@@ -6,21 +6,29 @@ import ru.fix.gradle.release.plugin.release.ReleaseExtension
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.artifacts.dsl.*
+import org.gradle.kotlin.dsl.extra
 
 buildscript {
+
+//    val repositoryUrl: String by extra
+    val repositoryUrl: String by project.properties
+
     repositories {
-        mavenLocal()
         mavenCentral()
         jcenter()
+//        maven(url = "http://artifactory.vasp/artifactory/ru-fix-repo/")
+        maven(url = repositoryUrl)
     }
+
     dependencies {
-        classpath(Libs.gradleReleasePlugin)
+        classpath("ru.fix:gradle-release-plugin:1.2.14")
     }
 }
 
+
 plugins {
     base
-    kotlin("jvm") version Vers.kotlin apply false
+    kotlin("jvm") version "1.1.61" apply false
     id("maven-publish")
 }
 
@@ -32,6 +40,7 @@ apply {
 val repositoryUser by project
 val repositoryPassword by project
 val repositoryUrl by project
+
 
 
 allprojects {
@@ -74,16 +83,16 @@ allprojects {
                 }
             }
         }
-    }
 
-    repositories {
-        maven {
-            credentials {
-                username = "$repositoryUser"
-                password = "$repositoryPassword"
+        repositories {
+            maven {
+                credentials {
+                    username = "$repositoryUser"
+                    password = "$repositoryPassword"
+                }
+                name = "remoteRepository"
+                url = URI("$repositoryUrl")
             }
-            name = "remoteRepository"
-            url = URI("$repositoryUrl")
         }
     }
 }
