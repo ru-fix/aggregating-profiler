@@ -10,14 +10,11 @@ import org.gradle.kotlin.dsl.extra
 
 buildscript {
 
-//    val repositoryUrl: String by extra
-    val repositoryUrl: String by project.properties
-
     repositories {
         mavenCentral()
         jcenter()
-//        maven(url = "http://artifactory.vasp/artifactory/ru-fix-repo/")
-        maven(url = repositoryUrl)
+        //TODO: remove private repository after publication on maven central
+        maven(url = "http://artifactory.vasp/artifactory/ru-fix-repo/")
     }
 
     dependencies {
