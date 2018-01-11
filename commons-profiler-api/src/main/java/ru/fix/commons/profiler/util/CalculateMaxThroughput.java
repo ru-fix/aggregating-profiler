@@ -20,15 +20,17 @@ public class CalculateMaxThroughput {
     public void call(long eventCount) {
         long time = timeBeginningOfSecond.get();
         long count = callCount.addAndGet(eventCount);
-        long max = maxCallCountPerSecond.get();
         long now = currentTimeMillis();
 
         if (time + ONE_SECOND_MS < now) {
             if (timeBeginningOfSecond.compareAndSet(time, now)) {
                 callCount.addAndGet(-count);
-                if (count > max) {
-                    maxCallCountPerSecond.compareAndSet(max, count);
-                }
+
+                boolean doWhile;
+                do {
+                    long max = maxCallCountPerSecond.get();
+                    doWhile = count > max && !maxCallCountPerSecond.compareAndSet(max, count);
+                } while (doWhile);
             }
         }
     }
@@ -39,7 +41,6 @@ public class CalculateMaxThroughput {
 
     public long getMaxAndReset() {
         call(0);
-        timeBeginningOfSecond.set(currentTimeMillis());
         return maxCallCountPerSecond.getAndSet(0);
     }
 
