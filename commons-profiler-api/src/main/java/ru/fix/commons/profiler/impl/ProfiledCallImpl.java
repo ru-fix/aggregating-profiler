@@ -61,6 +61,8 @@ class ProfiledCallImpl implements ProfiledCall {
             sharedCounters.getPayloadMin().accumulateAndGet(payload, Math::min);
             sharedCounters.getPayloadMax().accumulateAndGet(payload, Math::max);
             sharedCounters.getPayloadSum().add(payload);
+            sharedCounters.getMaxThroughput().call();
+            sharedCounters.getMaxPayloadThroughput().call(payload);
         });
     }
 

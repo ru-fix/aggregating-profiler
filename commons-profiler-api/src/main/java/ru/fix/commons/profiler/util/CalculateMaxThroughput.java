@@ -17,13 +17,13 @@ public class CalculateMaxThroughput {
         call(1);
     }
 
-    public void call(int eventCount) {
+    public void call(long eventCount) {
         long time = timeBeginningOfSecond.get();
         long count = callCount.addAndGet(eventCount);
         long max = maxCallCountPerSecond.get();
         long now = currentTimeMillis();
 
-        if (time + ONE_SECOND_MS > now) {
+        if (time + ONE_SECOND_MS < now) {
             if (timeBeginningOfSecond.compareAndSet(time, now)) {
                 callCount.addAndGet(-count);
                 if (count > max) {
@@ -37,10 +37,14 @@ public class CalculateMaxThroughput {
         return System.currentTimeMillis();
     }
 
-    public long getMaxCallPerSecondAndReset() {
+    public long getMaxAndReset() {
         call(0);
         timeBeginningOfSecond.set(currentTimeMillis());
         return maxCallCountPerSecond.getAndSet(0);
+    }
+
+    public void reset() {
+        getMaxAndReset();
     }
 }
 

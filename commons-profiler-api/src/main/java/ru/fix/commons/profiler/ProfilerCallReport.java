@@ -22,6 +22,9 @@ public class ProfilerCallReport {
     long payloadTotal;
     long payloadThroughput;
 
+    long maxThroughputPerSecond;
+    long maxPayloadThroughputPerSecond;
+
     public ProfilerCallReport(String name) {
         this.name = name;
     }
@@ -31,7 +34,8 @@ public class ProfilerCallReport {
         return String.format("%s: LatMin: %d, LatMax: %d, LatAvg: %d," +
                         " CallsCnt: %d, CallsThrpt: %d, RepTime: %d," +
                         " PldMin %d, PldMax %d, PldAvg %d," +
-                        " PldTot: %d, PldThrpt: %d",
+                        " PldTot: %d, PldThrpt: %d" +
+                        " MaxThrpt: %d, MaxPldThrpt: %d",
                 getName(),
                 minLatency,
                 maxLatency,
@@ -46,7 +50,10 @@ public class ProfilerCallReport {
                 payloadAvg,
 
                 payloadTotal,
-                payloadThroughput);
+                payloadThroughput,
+
+                maxThroughputPerSecond,
+                maxPayloadThroughputPerSecond);
     }
 
     public String getName() {
@@ -151,6 +158,24 @@ public class ProfilerCallReport {
 
     public ProfilerCallReport setPayloadThroughput(long payloadThroughput) {
         this.payloadThroughput = payloadThroughput;
+        return this;
+    }
+
+    public long getMaxThroughputPerSecond() {
+        return maxThroughputPerSecond;
+    }
+
+    public ProfilerCallReport setMaxThroughputPerSecond(long maxThroughputPerSecond) {
+        this.maxThroughputPerSecond = maxThroughputPerSecond;
+        return this;
+    }
+
+    public long getMaxPayloadThroughputPerSecond() {
+        return maxPayloadThroughputPerSecond;
+    }
+
+    public ProfilerCallReport setMaxPayloadThroughputPerSecond(long maxPayloadThroughputPerSecond) {
+        this.maxPayloadThroughputPerSecond = maxPayloadThroughputPerSecond;
         return this;
     }
 }
