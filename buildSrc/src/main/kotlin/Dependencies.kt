@@ -16,6 +16,7 @@ object Libs {
 
     val junit = "junit:junit:4.12"
     val guava = "com.google.guava:guava:21.0"
+    val mockito = "org.mockito:mockito-all:1.10.19"
 }
 
 
