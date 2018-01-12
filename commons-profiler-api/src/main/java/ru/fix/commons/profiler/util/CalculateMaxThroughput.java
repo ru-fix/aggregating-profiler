@@ -40,6 +40,9 @@ public class CalculateMaxThroughput {
     }
 
     public long getMaxAndReset() {
+        /**
+         * update current max in case there was no calls involved before building report
+         */
         call(0);
         return maxCallCountPerSecond.getAndSet(0);
     }
