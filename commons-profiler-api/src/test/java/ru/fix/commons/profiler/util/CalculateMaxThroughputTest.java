@@ -1,11 +1,15 @@
 package ru.fix.commons.profiler.util;
 
+import com.google.common.util.concurrent.RateLimiter;
 import org.junit.Test;
-import org.mockito.Mockito;
-import org.mockito.stubbing.Stubber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.doReturn;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -14,9 +18,11 @@ import static org.mockito.Mockito.when;
  * Created 11.01.18.
  */
 public class CalculateMaxThroughputTest {
+    private static final Logger log = LoggerFactory.getLogger(CalculateMaxThroughputTest.class);
+
 
     @Test
-    public void name() throws Exception {
+    public void testCall() throws Exception {
         CalculateMaxThroughput c = spy(new CalculateMaxThroughput());
 
         when(c.currentTimeMillis()).thenReturn(1000L, 1100L, 2000L);
@@ -36,7 +42,49 @@ public class CalculateMaxThroughputTest {
     }
 
     @Test
-    public void name1() throws Exception {
+    public void loadTest() throws Exception {
+        int threadCount = 3;
+        int rateLimitInThread = 300;
+        int testSecond = 5;
 
+        int perInSec = threadCount * rateLimitInThread;
+        AtomicLong allCount = new AtomicLong(perInSec * testSecond);
+
+        RateLimiter[] rateLimiters = new RateLimiter[threadCount];
+        for (int i = 0; i < threadCount; i++) {
+            rateLimiters[i] = RateLimiter.create(rateLimitInThread);
+        }
+
+        CompletableFuture[] threads = new CompletableFuture[threadCount];
+        AtomicLong callCount = new AtomicLong();
+        CalculateMaxThroughput maxThroughput = new CalculateMaxThroughput();
+
+        ExecutorService poolExecutor = Executors.newFixedThreadPool(threadCount);
+
+
+        long startTime = System.currentTimeMillis();
+        for (int threadNumber = 0; threadNumber < threadCount; threadNumber++) {
+            final RateLimiter limiter = rateLimiters[threadNumber];
+            threads[threadNumber] = CompletableFuture.runAsync(() -> {
+                while (callCount.incrementAndGet() < allCount.get()) {
+                    limiter.acquire();
+                    maxThroughput.call();
+                }
+            }, poolExecutor);
+        }
+        CompletableFuture.allOf(threads).join();
+        long stopTime = System.currentTimeMillis();
+
+
+        long workSec = TimeUnit.MILLISECONDS.toSeconds(stopTime - startTime);
+        long maxThrp = maxThroughput.getMaxAndReset();
+        String mess = String.format("Input value: threadCount %s, rateLimitInThread %s, testSecond %s, perInSec %s. " +
+                        "Test result: workSec %s, maxThrp '%s'.",
+                threadCount, rateLimitInThread, testSecond, perInSec, workSec, maxThrp);
+        log.info(mess);
+
+        int approximately = (int) (perInSec * 0.10);
+        assertTrue("Throughput is not correct. " + mess,
+                maxThrp > (perInSec - approximately) && maxThrp < (perInSec + approximately));
     }
 }
