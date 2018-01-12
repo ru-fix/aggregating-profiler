@@ -25,7 +25,7 @@ public class CalculateMaxThroughputTest {
         c.call();
         assertEquals(2, c.getMaxAndReset());
 
-        when(c.currentTimeMillis()).thenReturn(3000L, 4000L, 4100L, 4200L);
+        when(c.currentTimeMillis()).thenReturn(3000L, 4000L, 4100L, 4200L, 5000L);
         c.call();
         c.call();
         c.call();
@@ -33,5 +33,10 @@ public class CalculateMaxThroughputTest {
         assertEquals(3, c.getMaxAndReset());
 
         assertEquals(0, c.getMaxAndReset());
+    }
+
+    @Test
+    public void name1() throws Exception {
+
     }
 }
