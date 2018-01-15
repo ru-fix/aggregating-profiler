@@ -23,8 +23,8 @@ public class CalculateMaxThroughput {
     }
 
     public void call(long eventCount) {
-        long time = timeBeginningOfSecond.get();
         long count = callCount.getAndAdd(eventCount);
+        long time = timeBeginningOfSecond.get();
         long now = currentTimeMillis();
 
         log.trace("begin time {}, count {}, now {}", time, count, now);
