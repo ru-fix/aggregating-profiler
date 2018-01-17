@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Gleb Beliaev (gbeliaev@fix.ru)
  * Created 11.01.18.
  */
-public class CalculateMaxThroughput {
-    private static final Logger log = LoggerFactory.getLogger(CalculateMaxThroughput.class);
+public class MaxThroughputCalculator {
+    private static final Logger log = LoggerFactory.getLogger(MaxThroughputCalculator.class);
 
     private final AtomicLong maxCallCountPerSecond = new AtomicLong();
     private final AtomicLong callCount = new AtomicLong();

@@ -1,6 +1,6 @@
 package ru.fix.commons.profiler.impl;
 
-import ru.fix.commons.profiler.util.CalculateMaxThroughput;
+import ru.fix.commons.profiler.util.MaxThroughputCalculator;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
@@ -19,8 +19,8 @@ class SharedCounters {
     private final AtomicLong payloadMax = new AtomicLong();
     private final LongAdder payloadSum = new LongAdder();
 
-    private final CalculateMaxThroughput maxThroughput = new CalculateMaxThroughput();
-    private final CalculateMaxThroughput maxPayloadThroughput = new CalculateMaxThroughput();
+    private final MaxThroughputCalculator maxThroughput = new MaxThroughputCalculator();
+    private final MaxThroughputCalculator maxPayloadThroughput = new MaxThroughputCalculator();
 
 
 
@@ -52,11 +52,11 @@ class SharedCounters {
         return payloadSum;
     }
 
-    public CalculateMaxThroughput getMaxThroughput() {
+    public MaxThroughputCalculator getMaxThroughput() {
         return maxThroughput;
     }
 
-    public CalculateMaxThroughput getMaxPayloadThroughput() {
+    public MaxThroughputCalculator getMaxPayloadThroughput() {
         return maxPayloadThroughput;
     }
 }

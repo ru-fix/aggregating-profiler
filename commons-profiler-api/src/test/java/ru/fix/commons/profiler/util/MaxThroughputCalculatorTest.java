@@ -17,13 +17,13 @@ import static org.mockito.Mockito.when;
  * @author Gleb Beliaev (gbeliaev@fix.ru)
  * Created 11.01.18.
  */
-public class CalculateMaxThroughputTest {
-    private static final Logger log = LoggerFactory.getLogger(CalculateMaxThroughputTest.class);
+public class MaxThroughputCalculatorTest {
+    private static final Logger log = LoggerFactory.getLogger(MaxThroughputCalculatorTest.class);
 
 
     @Test
     public void testCall() throws Exception {
-        CalculateMaxThroughput c = spy(new CalculateMaxThroughput());
+        MaxThroughputCalculator c = spy(new MaxThroughputCalculator());
 
         when(c.currentTimeMillis()).thenReturn(1000L, 1100L, 2000L);
         c.call();
@@ -57,7 +57,7 @@ public class CalculateMaxThroughputTest {
 
         CompletableFuture[] threads = new CompletableFuture[threadCount];
         AtomicLong callCount = new AtomicLong();
-        CalculateMaxThroughput maxThroughput = new CalculateMaxThroughput();
+        MaxThroughputCalculator maxThroughput = new MaxThroughputCalculator();
 
         ExecutorService poolExecutor = Executors.newFixedThreadPool(threadCount);
 

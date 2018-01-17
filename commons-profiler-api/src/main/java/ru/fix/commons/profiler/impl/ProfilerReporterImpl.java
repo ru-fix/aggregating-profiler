@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import ru.fix.commons.profiler.ProfilerCallReport;
 import ru.fix.commons.profiler.ProfilerReport;
 import ru.fix.commons.profiler.ProfilerReporter;
-import ru.fix.commons.profiler.util.CalculateMaxThroughput;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
