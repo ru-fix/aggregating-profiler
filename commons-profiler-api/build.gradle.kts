@@ -19,6 +19,7 @@ dependencies {
      * Tests
      */
     testCompile(Libs.junit)
+    testCompile(Libs.mockito)
     testCompile(Libs.slf4j_simple)
     testCompile(Libs.guava)
 }

@@ -118,7 +118,10 @@ class ProfilerReporterImpl implements ProfilerReporter {
                 .setPayloadAvg(payloadTotal / callsCount)
                 .setPayloadThroughput(elapsed != 0 ? payloadTotal * 1000 / elapsed : 0)
 
-                .setReportingTime(elapsed);
+                .setReportingTime(elapsed)
+
+                .setMaxThroughputPerSecond(counters.getMaxThroughput().getMaxAndReset())
+                .setMaxPayloadThroughputPerSecond(counters.getMaxPayloadThroughput().getMaxAndReset());
     }
 
     private void cleanCounters(SharedCounters counters) {
@@ -131,6 +134,8 @@ class ProfilerReporterImpl implements ProfilerReporter {
         counters.getPayloadSum().reset();
         counters.getPayloadMax().set(0);
         counters.getPayloadMin().set(Long.MAX_VALUE);
+        counters.getMaxThroughput().reset();
+        counters.getMaxPayloadThroughput().reset();
     }
 
     @Override

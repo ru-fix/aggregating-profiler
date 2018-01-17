@@ -13,7 +13,6 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
-        //TODO: remove private repository after publication on maven central
         maven(url = "http://artifactory.vasp/artifactory/ru-fix-repo/")
     }
 
