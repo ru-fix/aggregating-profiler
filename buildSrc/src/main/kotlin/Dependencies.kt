@@ -1,5 +1,5 @@
 object Vers {
-    val kotlin = "1.1.61"
+    val kotlin = "1.2.21"
     val sl4j = "1.7.25"
     val logback = "1.1.10"
 }
@@ -9,7 +9,7 @@ object Libs {
     val kotlin_jre8 = "org.jetbrains.kotlin:kotlin-stdlib-jre8:${Vers.kotlin}"
     val kotlin_reflect = "org.jetbrains.kotlin:kotlin-reflect:${Vers.kotlin}"
 
-    val gradleReleasePlugin = "ru.fix:gradle-release-plugin:1.2.14"
+    val gradleReleasePlugin = "ru.fix:gradle-release-plugin:1.2.17"
 
     val slf4j_api = "org.slf4j:slf4j-api:${Vers.sl4j}"
     val slf4j_simple = "org.slf4j:slf4j-simple:${Vers.sl4j}"

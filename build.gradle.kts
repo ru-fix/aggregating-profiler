@@ -13,18 +13,16 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
-        maven(url = "http://artifactory.vasp/artifactory/ru-fix-repo/")
     }
 
     dependencies {
-        classpath("ru.fix:gradle-release-plugin:1.2.14")
+        classpath(Libs.gradleReleasePlugin)
     }
 }
 
-
 plugins {
     base
-    kotlin("jvm") version "1.1.61" apply false
+    kotlin("jvm") version Vers.kotlin apply false
     id("maven-publish")
 }
 
