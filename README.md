@@ -1,22 +1,64 @@
 # commons-profiler
 Commons Profiler provide basic API for application metrics measurement.  
+Profiler consist of two parts: metric recording API to trace events and metric reporting API 
+to export metrics to external storage system or in simple case into stdout.  
 
-## Profile simple method call 
+## Metric recording
+
+Suppose that we want to trace how much time it takes for SmartService to compute and return result.  
+We can  measure several metrics: 
+ - latency - time between two points: when method invoked and when method completed);
+ - throughput - how often method was invoked (invocation per second)
+ - max throughput - we made measurement  during 2 minutes and want to find point in time 
+ where throughput reached its maximum
+ - callsCount - how many time method was invoked 
+ 
+Here is and example how we can record such metrics with profiler.  
+In real life application you can use custom aspect to wrap method invocation, etc.  
+ 
+Sync example: 
 ```java
 Profiler profiler = new SimpleProfiler();
 
-ProfiledCall call = profiler.profiledCall("some.method");
+ProfiledCall call = profiler.profiledCall("smart.service");
 call.start();
-someMethod();
+
+SmartResult result = smartService.doSmartComputation();
+
 call.stop();
 ```
 
-## Profile method call with payload
+Async example: 
 ```java
 Profiler profiler = new SimpleProfiler();
 
-ProfiledCall call = profiler.profiledCall("some.method");
+ProfiledCall call = profiler.profiledCall("smart.service");
 call.start();
-Long paylaod = someMethodWithPayload();
-call.stop(payload);
+
+CompletableFuture<SmartResult> result = smartService.doSmartComputation();
+
+result.thenRun(){ 
+    call.stop();
+}
+
 ```
+
+Some times method invocation is not sufficient and you need to record information about payload 
+of the method. Profiler API provide a way to register integer value of custom payload: 
+
+```java
+
+long argumentForComputation = ...
+
+Profiler profiler = new SimpleProfiler();
+
+ProfiledCall call = profiler.profiledCall("smart.service,with.payload");
+call.start();
+
+Long paylaod = smartService.doAnotherSmartComputation(argumentForComputation);
+
+call.stop(argumentForComputation);
+```
+
+## Metric reporting
+
