@@ -27,6 +27,13 @@ class ProfiledCallImpl implements ProfiledCall {
     }
 
     @Override
+    public void call() {
+        profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
+            sharedCounters.getCallsCount().increment();
+        });
+    }
+
+    @Override
     public ProfiledCall start() {
         if (!started.compareAndSet(false, true)) {
             throw new IllegalArgumentException("Start method was already called.");

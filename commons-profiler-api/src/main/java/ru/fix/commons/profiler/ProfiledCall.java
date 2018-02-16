@@ -6,6 +6,13 @@ package ru.fix.commons.profiler;
 public interface ProfiledCall {
 
     /**
+     * If you want to evaluate calls count or whether the method was called
+     */
+    void call();
+
+    /**
+     * if you want to know some metrics then you should start and stop profiled call
+     *
      * @throws IllegalStateException if method start called twice
      */
     ProfiledCall start();
