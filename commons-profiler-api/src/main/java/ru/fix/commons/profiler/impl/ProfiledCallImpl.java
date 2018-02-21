@@ -30,6 +30,7 @@ class ProfiledCallImpl implements ProfiledCall {
     public void call() {
         profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
             sharedCounters.getCallsCount().increment();
+            sharedCounters.getMaxThroughput().call();
         });
     }
 
