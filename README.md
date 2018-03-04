@@ -62,3 +62,19 @@ call.stop(argumentForComputation);
 
 ## Metric reporting
 
+## How to build this project
+```
+gradle clean build
+```
+
+## Other tracing projects
+There are several projects for tracing that you can take a look to:
+
+OpenTracing:  
+https://github.com/opentracing/opentracing-java  
+
+HTrace:  
+https://github.com/apache/incubator-htrace  
+
+Zipkin
+https://github.com/openzipkin/zipkin/
