@@ -13,10 +13,7 @@ import org.gradle.kotlin.dsl.repositories
 import org.gradle.kotlin.dsl.version
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-
-
 val groupId = "ru.fix"
-val artifactId = "gradle-release-plugin"
 
 buildscript {
 
@@ -42,7 +39,6 @@ plugins {
     kotlin("jvm") version "${Vers.kotlin}"
     id("org.jetbrains.dokka") version "${Vers.dokkav}"
     signing
-    java
 }
 
 apply {
@@ -63,6 +59,7 @@ allprojects {
 
     plugins {
         kotlin("jvm") version Vers.kotlin apply false
+        java
         maven
         signing
         id("org.jetbrains.dokka") version "${Vers.dokkav}"
@@ -72,6 +69,7 @@ allprojects {
     apply {
         plugin("maven")
         plugin("signing")
+        plugin("java")
     }
 
     repositories {
@@ -79,7 +77,9 @@ allprojects {
         jcenter()
     }
 
-    if (components.names.contains("java")) {
+    if(tasks.names.contains("javadoc")){
+
+        println("WWWWWWWWW: ${project.name}")
 
         val sourcesJar by tasks.creating(Jar::class) {
             classifier = "sources"
@@ -87,16 +87,11 @@ allprojects {
             from("src/main/kotlin")
         }
 
-
-        val javadocTask by tasks.creating(Javadoc::class) {
-            val mainSourceSet = the<JavaPluginConvention>().sourceSets["main"]!!
-            source = mainSourceSet.allSource
-        }
-
-
         val javadocJar by tasks.creating(Jar::class) {
             classifier = "javadoc"
-            from(javadocTask.destinationDir)
+
+            val javadoc = tasks.getByPath("javadoc") as Javadoc
+            from(javadoc.destinationDir)
         }
 
         artifacts {
@@ -131,11 +126,11 @@ allprojects {
 
                             pom.project {
                                 withGroovyBuilder {
-                                    "artifactId"("$artifactId")
+                                    "artifactId"("${project.name}")
                                     "groupId"("$groupId")
                                     "version"("$version")
 
-                                    "name"("${groupId}:${artifactId}")
+                                    "name"("${groupId}:${project.name}")
                                     "description"("Commons Profiler provide basic API" +
                                             " for application metrics measurement.")
 
@@ -177,6 +172,5 @@ allprojects {
                 kotlinOptions.jvmTarget = "1.8"
             }
         }
-
     }
 }
