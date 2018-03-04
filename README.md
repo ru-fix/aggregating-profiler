@@ -76,5 +76,5 @@ https://github.com/opentracing/opentracing-java
 HTrace:  
 https://github.com/apache/incubator-htrace  
 
-Zipkin
+Zipkin:  
 https://github.com/openzipkin/zipkin/
