@@ -1,4 +1,4 @@
-package ru.fix.commons.profiler.util;
+package ru.fix.commons.profiler.impl;
 
 import com.google.common.util.concurrent.RateLimiter;
 import org.junit.Test;
@@ -87,8 +87,10 @@ public class MaxThroughputCalculatorTest {
         log.info(mess);
 
         int approximately = (int) (perInSec * 0.10);
-        assertTrue("Throughput is not correct. " + mess,
-                maxThrp > (perInSec - approximately) && maxThrp < (perInSec + approximately));
+        assertTrue(
+                "Throughput is not correct. " + mess,
+                maxThrp > (perInSec - approximately) && maxThrp < (perInSec + approximately)
+                );
     }
 
 

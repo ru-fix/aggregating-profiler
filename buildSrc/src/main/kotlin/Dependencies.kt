@@ -1,7 +1,8 @@
 object Vers {
-    val kotlin = "1.2.21"
+    val kotlin = "1.2.30"
     val sl4j = "1.7.25"
-    val logback = "1.1.10"
+    val junit_gradle_plugin = "1.1.0"
+    val dokkav = "0.9.14"
 }
 
 object Libs {
@@ -15,8 +16,13 @@ object Libs {
     val slf4j_simple = "org.slf4j:slf4j-simple:${Vers.sl4j}"
 
     val junit = "junit:junit:4.12"
+
     val guava = "com.google.guava:guava:21.0"
     val mockito = "org.mockito:mockito-all:1.10.19"
+    val mockito_kotiln = "com.nhaarman:mockito-kotlin-kt1.1:1.5.0"
+    val kotlin_logging = "io.github.microutils:kotlin-logging:1.4.9"
+
+    val junit_gradle_plugin = "org.junit.platform:junit-platform-gradle-plugin:${Vers.junit_gradle_plugin}"
 }
 
 

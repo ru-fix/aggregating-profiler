@@ -1,4 +1,4 @@
-package ru.fix.commons.profiler.util;
+package ru.fix.commons.profiler.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,18 +2,19 @@ import org.gradle.kotlin.dsl.*
 
 
 plugins {
-    kotlin("jvm")
     java
+}
+
+apply {
+    plugin("java")
 }
 
 
 dependencies {
-
     /**
      * Runtime
      */
     compile(Libs.slf4j_api)
-
 
     /**
      * Tests
@@ -23,4 +24,5 @@ dependencies {
     testCompile(Libs.slf4j_simple)
     testCompile(Libs.guava)
 }
+
 

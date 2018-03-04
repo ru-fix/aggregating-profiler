@@ -1,7 +1,5 @@
 package ru.fix.commons.profiler.impl;
 
-import ru.fix.commons.profiler.util.MaxThroughputCalculator;
-
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 

@@ -1,7 +1,6 @@
 package ru.fix.commons.profiler;
 
 import com.google.common.util.concurrent.RateLimiter;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +15,7 @@ import java.util.concurrent.atomic.LongAdder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 
 /**
  * @author Kamil Asfandiyarov
@@ -100,7 +100,6 @@ public class ProfilingTest {
         }
     }
 
-    @Ignore//CPAPSM-3324
     @Test
     public void parallel_threads_fixed_throughput() throws Exception {
 
@@ -132,7 +131,6 @@ public class ProfilingTest {
         }
     }
 
-    @Ignore//CPAPSM-3324
     @Test
     public void parallel_threads_fixed_latency() throws Exception {
 
@@ -162,7 +160,6 @@ public class ProfilingTest {
         }
     }
 
-    @Ignore//CPAPSM-3324
     @Test
     public void between_thread_call_fixed_latency() throws Exception {
 
@@ -235,7 +232,7 @@ public class ProfilingTest {
 
         log.info("Report: {}", report);
 
-        assertEquals("payloadTotal", 0, report.getProfilerCallReports().get(0).payloadTotal);
+        assertEquals(0, report.getProfilerCallReports().get(0).payloadTotal);
 
     }
 
@@ -263,9 +260,9 @@ public class ProfilingTest {
         log.info("Report: {}", report);
 
         ProfilerCallReport callReport = report.getProfilerCallReports().get(0);
-        assertEquals("payloadMin", 1, callReport.payloadMin);
-        assertEquals("payloadMax", 12, callReport.payloadMax);
-        assertEquals("payloadMax", 1 + 12 + 6, callReport.payloadTotal);
+        assertEquals(1, callReport.payloadMin);
+        assertEquals(12, callReport.payloadMax);
+        assertEquals(1 + 12 + 6, callReport.payloadTotal);
     }
 
     @Test
@@ -307,7 +304,6 @@ public class ProfilingTest {
     }
 
     @Test
-    @Ignore(value = "manual running test")
     public void reportBuildAndReset() throws Exception {
         Profiler profiler = new SimpleProfiler();
         ProfilerReporter reporter = profiler.createReporter();
@@ -351,7 +347,7 @@ public class ProfilingTest {
                 .map(ProfilerCallReport::getCallsCount)
                 .reduce(0L, Long::sum);
 
-        assertEquals("some profiler calls lost", callCount.sum(), callCountFromReports);
+        assertEquals(callCount.sum(), callCountFromReports);
     }
 
 }
