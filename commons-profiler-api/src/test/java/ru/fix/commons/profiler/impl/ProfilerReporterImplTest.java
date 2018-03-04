@@ -5,7 +5,10 @@ import ru.fix.commons.profiler.ProfiledCall;
 import ru.fix.commons.profiler.ProfilerCallReport;
 import ru.fix.commons.profiler.ProfilerReport;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * @author Gleb Beliaev (gbeliaev@fix.ru)

@@ -8,12 +8,10 @@ plugins {
 
 
 dependencies {
-
     /**
      * Runtime
      */
     compile(Libs.slf4j_api)
-
 
     /**
      * Tests
@@ -23,4 +21,5 @@ dependencies {
     testCompile(Libs.slf4j_simple)
     testCompile(Libs.guava)
 }
+
 

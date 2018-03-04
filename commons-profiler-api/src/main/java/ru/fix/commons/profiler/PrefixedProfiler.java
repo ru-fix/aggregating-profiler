@@ -33,7 +33,4 @@ public class PrefixedProfiler implements Profiler {
         return profiler.createReporter();
     }
 
-    /**
-     * It would be better to remove string concatenation and use hashmap mapping names to prefixed names to reduce GC overhead
-     */
 }
