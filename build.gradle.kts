@@ -36,8 +36,7 @@ repositories {
 }
 
 plugins {
-    kotlin("jvm") version "${Vers.kotlin}"
-    id("org.jetbrains.dokka") version "${Vers.dokkav}"
+    kotlin("jvm") version "${Vers.kotlin}" apply false
     signing
 }
 
@@ -54,14 +53,13 @@ signing {
     sign(configurations.archives)
 }
 
-allprojects {
+subprojects {
     group = "ru.fix"
 
     plugins {
-        kotlin("jvm") version Vers.kotlin apply false
-        java
         maven
         signing
+        kotlin("jvm") version "${Vers.kotlin}"
         id("org.jetbrains.dokka") version "${Vers.dokkav}"
     }
 
@@ -77,100 +75,96 @@ allprojects {
         jcenter()
     }
 
-    if(tasks.names.contains("javadoc")){
 
-        println("WWWWWWWWW: ${project.name}")
+    val sourcesJar by tasks.creating(Jar::class) {
+        classifier = "sources"
+        from("src/main/java")
+        from("src/main/kotlin")
+    }
 
-        val sourcesJar by tasks.creating(Jar::class) {
-            classifier = "sources"
-            from("src/main/java")
-            from("src/main/kotlin")
-        }
+    val javadocJar by tasks.creating(Jar::class) {
+        classifier = "javadoc"
 
-        val javadocJar by tasks.creating(Jar::class) {
-            classifier = "javadoc"
+        val javadoc = tasks.getByPath("javadoc") as Javadoc
+        from(javadoc.destinationDir)
+    }
 
-            val javadoc = tasks.getByPath("javadoc") as Javadoc
-            from(javadoc.destinationDir)
-        }
+    artifacts {
+        add("archives", sourcesJar)
+        add("archives", javadocJar)
+    }
 
-        artifacts {
-            add("archives", sourcesJar)
-            add("archives", javadocJar)
-        }
+    tasks {
 
+        "uploadArchives"(Upload::class) {
 
-        tasks {
+            dependsOn(javadocJar, sourcesJar)
 
-            "uploadArchives"(Upload::class) {
-                dependsOn(javadocJar, sourcesJar)
+            repositories {
+                withConvention(MavenRepositoryHandlerConvention::class) {
+                    mavenDeployer {
 
-                repositories {
-                    withConvention(MavenRepositoryHandlerConvention::class) {
-                        mavenDeployer {
-
-                            withGroovyBuilder {
-                                //Sign pom.xml file
-                                "beforeDeployment" {
-                                    signing.signPom(delegate as MavenDeployment)
-                                }
-
-                                "repository"(
-                                        "url" to URI("$repositoryUrl")) {
-                                    "authentication"(
-                                            "userName" to "$repositoryUser",
-                                            "password" to "$repositoryPassword"
-                                    )
-                                }
+                        withGroovyBuilder {
+                            //Sign pom.xml file
+                            "beforeDeployment" {
+                                signing.signPom(delegate as MavenDeployment)
                             }
 
-                            pom.project {
-                                withGroovyBuilder {
-                                    "artifactId"("${project.name}")
-                                    "groupId"("$groupId")
-                                    "version"("$version")
+                            "repository"(
+                                    "url" to URI("$repositoryUrl")) {
+                                "authentication"(
+                                        "userName" to "$repositoryUser",
+                                        "password" to "$repositoryPassword"
+                                )
+                            }
+                        }
 
-                                    "name"("${groupId}:${project.name}")
-                                    "description"("Commons Profiler provide basic API" +
-                                            " for application metrics measurement.")
+                        pom.project {
+                            withGroovyBuilder {
+                                "artifactId"("${project.name}")
+                                "groupId"("$groupId")
+                                "version"("$version")
 
+                                "name"("${groupId}:${project.name}")
+                                "description"("Commons Profiler provide basic API" +
+                                        " for application metrics measurement.")
+
+                                "url"("https://github.com/ru-fix/commons-profiler")
+
+                                "licenses" {
+                                    "license" {
+                                        "name"("The Apache License, Version 2.0")
+                                        "url"("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                                    }
+                                }
+
+
+                                "developers" {
+                                    "developer"{
+                                        "id"("gbelyaev")
+                                        "name"("Gleb Belyaev")
+                                        "url"("https://github.com/gbelyaev")
+                                    }
+                                    "developer"{
+                                        "id"("swarmshine")
+                                        "name"("Kamil Asfandiyarov")
+                                        "url"("https://github.com/swarmshine")
+                                    }
+                                }
+                                "scm" {
                                     "url"("https://github.com/ru-fix/commons-profiler")
-
-                                    "licenses" {
-                                        "license" {
-                                            "name"("The Apache License, Version 2.0")
-                                            "url"("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                                        }
-                                    }
-
-
-                                    "developers" {
-                                        "developer"{
-                                            "id"("gbelyaev")
-                                            "name"("Gleb Belyaev")
-                                            "url"("https://github.com/gbelyaev")
-                                        }
-                                        "developer"{
-                                            "id"("swarmshine")
-                                            "name"("Kamil Asfandiyarov")
-                                            "url"("https://github.com/swarmshine")
-                                        }
-                                    }
-                                    "scm" {
-                                        "url"("https://github.com/ru-fix/commons-profiler")
-                                        "connection"("https://github.com/ru-fix/commons-profiler.git")
-                                        "developerConnection"("https://github.com/ru-fix/commons-profiler.git")
-                                    }
+                                    "connection"("https://github.com/ru-fix/commons-profiler.git")
+                                    "developerConnection"("https://github.com/ru-fix/commons-profiler.git")
                                 }
                             }
                         }
                     }
                 }
             }
+        }
 
-            withType<KotlinCompile> {
-                kotlinOptions.jvmTarget = "1.8"
-            }
+        withType<KotlinCompile> {
+            kotlinOptions.jvmTarget = "1.8"
         }
     }
 }

@@ -2,8 +2,11 @@ import org.gradle.kotlin.dsl.*
 
 
 plugins {
-    kotlin("jvm")
     java
+}
+
+apply {
+    plugin("java")
 }
 
 
