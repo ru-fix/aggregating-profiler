@@ -49,9 +49,6 @@ val repositoryUser by project
 val repositoryPassword by project
 val repositoryUrl by project
 
-signing {
-    sign(configurations.archives)
-}
 
 subprojects {
     group = "ru.fix"
@@ -92,6 +89,10 @@ subprojects {
     artifacts {
         add("archives", sourcesJar)
         add("archives", javadocJar)
+    }
+
+    configure<SigningExtension> {
+        sign(configurations.archives)
     }
 
     tasks {
