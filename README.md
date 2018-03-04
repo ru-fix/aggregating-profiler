@@ -18,8 +18,10 @@ In real life application you can use custom aspect to wrap method invocation, et
  
 Sync example: 
 ```java
+// Init single profiler instance per application 
 Profiler profiler = new SimpleProfiler();
 
+// Create profiled call each time you want to make measurement 
 ProfiledCall call = profiler.profiledCall("smart.service");
 call.start();
 
@@ -30,8 +32,11 @@ call.stop();
 
 Async example: 
 ```java
+// Init single profiler instance per application
 Profiler profiler = new SimpleProfiler();
 
+// Create profiled call each time you want to make measurement
+// Profiled call could be started and closed in different threads
 ProfiledCall call = profiler.profiledCall("smart.service");
 call.start();
 
