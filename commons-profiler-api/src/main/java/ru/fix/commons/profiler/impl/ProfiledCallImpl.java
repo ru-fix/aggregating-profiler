@@ -70,8 +70,16 @@ class ProfiledCallImpl implements ProfiledCall {
             sharedCounters.getPayloadMax().accumulateAndGet(payload, Math::max);
             sharedCounters.getPayloadSum().add(payload);
             sharedCounters.getMaxThroughput().call();
-            sharedCounters.getMaxPayloadThroughput().call(payload);
+            sharedCounters.getMaxPayloadThroughput().call(payload); 
         });
+    }
+
+    @Override
+    public void cancel() {
+        if (!started.compareAndSet(true, false)) {
+            log.debug("Cancel method called on profiler call that currently is not running: {}", profiledCallName);
+            return;
+        }
     }
 
     @Override
