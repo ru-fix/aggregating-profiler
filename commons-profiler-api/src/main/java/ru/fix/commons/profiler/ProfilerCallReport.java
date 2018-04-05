@@ -13,6 +13,7 @@ public class ProfilerCallReport {
 
     long callsThroughput;
     long callsCount;
+    long startedCallsCount;
 
     long reportingTime;
 
@@ -35,7 +36,7 @@ public class ProfilerCallReport {
     @Override
     public String toString() {
         return String.format("%s: LatMin: %d, LatMax: %d, LatAvg: %d," +
-                        " CallsCnt: %d, CallsThrpt: %d, RepTime: %d," +
+                        " CallsCnt: %d, CallsThrpt: %d, StCallsCnt: %d, RepTime: %d," +
                         " PldMin %d, PldMax %d, PldAvg %d," +
                         " PldTot: %d, PldThrpt: %d," +
                         " MaxThrpt: %d, MaxPldThrpt: %d," +
@@ -47,6 +48,7 @@ public class ProfilerCallReport {
 
                 callsCount,
                 callsThroughput,
+                startedCallsCount,
                 reportingTime,
 
                 payloadMin,
@@ -147,6 +149,15 @@ public class ProfilerCallReport {
 
     public ProfilerCallReport setCallsCount(long callsCount) {
         this.callsCount = callsCount;
+        return this;
+    }
+
+    public long getStartedCallsCount() {
+        return startedCallsCount;
+    }
+
+    public ProfilerCallReport setStartedCallsCount(long startedCallsCount) {
+        this.startedCallsCount = startedCallsCount;
         return this;
     }
 

@@ -2,7 +2,6 @@ package ru.fix.commons.profiler.impl;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import ru.fix.commons.profiler.ProfiledCall;
 import ru.fix.commons.profiler.ProfilerCallReport;
@@ -107,7 +106,6 @@ public class ProfilerReporterImplActiveCallsTest {
         assertTrue(callsAfterReset.containsAll(longestCalls));
     }
 
-    @Ignore
     @Test
     public void noCallsEnded_resetsActiveCallsToLimit() {
         Collection<ProfiledCall> longestCalls = new LinkedList<>();
@@ -123,7 +121,7 @@ public class ProfilerReporterImplActiveCallsTest {
         assertEquals(numberOfActiveCallsToKeepBetweenReports, callsAfterReset.size());
         assertTrue(callsAfterReset.containsAll(longestCalls));
     }
-    
+
     @Test
     public void disableActiveCallsMaxLatency_afterCallsWereStarted_removesCallsFromActiveWhenTheyAreEnded() {
         ProfiledCall call1 = profiler.profiledCall("Test").start();

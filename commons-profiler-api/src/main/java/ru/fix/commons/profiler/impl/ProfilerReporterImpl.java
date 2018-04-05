@@ -150,11 +150,13 @@ class ProfilerReporterImpl implements ProfilerReporter {
 
     private ProfilerCallReport buildReportAndReset(String name, SharedCounters counters, long elapsed) {
         long callsCount = counters.getCallsCount().sumThenReset();
+        long startedCallsCount = counters.getStartedCallsCount().sumThenReset();
         long sumStartStopLatency = counters.getSumStartStopLatency().sumThenReset();
 
         if (callsCount == 0) {
             cleanCounters(name, counters);
-            return new ProfilerCallReport(name);
+            return new ProfilerCallReport(name)
+                    .setStartedCallsCount(startedCallsCount);
         }
 
         long payloadTotal = counters.getPayloadSum().sumThenReset();
@@ -167,6 +169,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
                 .setCallsThroughput(elapsed != 0 ? callsCount * 1000 / elapsed : 0)
 
                 .setCallsCount(callsCount)
+                .setStartedCallsCount(startedCallsCount)
 
                 .setPayloadMin(counters.getPayloadMin().getAndSet(Long.MAX_VALUE))
                 .setPayloadMax(counters.getPayloadMax().getAndSet(0))

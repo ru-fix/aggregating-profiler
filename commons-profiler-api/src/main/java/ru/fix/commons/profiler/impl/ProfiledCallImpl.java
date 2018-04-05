@@ -41,6 +41,9 @@ class ProfiledCallImpl implements ProfiledCall {
         }
         startTime.set(System.nanoTime());
         profiler.callStarted(this);
+        profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
+            sharedCounters.getStartedCallsCount().increment();
+        });
         return this;
     }
 

@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.LongAdder;
  */
 class SharedCounters {
     private final LongAdder callsCount = new LongAdder();
+    private final LongAdder startedCallsCount = new LongAdder();
     private final LongAdder sumStartStopLatency = new LongAdder();
     
     private final AtomicLong latencyMin = new AtomicLong(Long.MAX_VALUE);
@@ -24,6 +25,10 @@ class SharedCounters {
 
     public LongAdder getCallsCount() {
         return callsCount;
+    }
+
+    public LongAdder getStartedCallsCount() {
+        return startedCallsCount;
     }
 
     public LongAdder getSumStartStopLatency() {
