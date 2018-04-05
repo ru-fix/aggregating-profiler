@@ -32,4 +32,13 @@ public interface Profiler {
      * Reporter is closable resource
      */
     ProfilerReporter createReporter();
+
+    /**
+     * Create new instance of reporter.
+     * Reporter is closable resource.
+     *
+     * @param enableActiveCallsMaxLatency     see {@link ProfilerReporter#setEnableActiveCallsMaxLatency(boolean)}
+     * @param activeCallsToKeepBetweenReports see {@link ProfilerReporter#setNumberOfActiveCallsToKeepBetweenReports(int)}
+     */
+    ProfilerReporter createReporter(boolean enableActiveCallsMaxLatency, int activeCallsToKeepBetweenReports);
 }

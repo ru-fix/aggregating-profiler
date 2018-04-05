@@ -25,6 +25,9 @@ public class ProfilerCallReport {
     long maxThroughputPerSecond;
     long maxPayloadThroughputPerSecond;
 
+    long activeCallsCount;
+    long activeCallsMaxLatency;
+
     public ProfilerCallReport(String name) {
         this.name = name;
     }
@@ -35,7 +38,8 @@ public class ProfilerCallReport {
                         " CallsCnt: %d, CallsThrpt: %d, RepTime: %d," +
                         " PldMin %d, PldMax %d, PldAvg %d," +
                         " PldTot: %d, PldThrpt: %d," +
-                        " MaxThrpt: %d, MaxPldThrpt: %d",
+                        " MaxThrpt: %d, MaxPldThrpt: %d," +
+                        " ActCallsCnt: %d, ActCallsLatMax: %d",
                 getName(),
                 minLatency,
                 maxLatency,
@@ -53,7 +57,10 @@ public class ProfilerCallReport {
                 payloadThroughput,
 
                 maxThroughputPerSecond,
-                maxPayloadThroughputPerSecond);
+                maxPayloadThroughputPerSecond,
+
+                activeCallsCount,
+                activeCallsMaxLatency);
     }
 
     public String getName() {
@@ -176,6 +183,24 @@ public class ProfilerCallReport {
 
     public ProfilerCallReport setMaxPayloadThroughputPerSecond(long maxPayloadThroughputPerSecond) {
         this.maxPayloadThroughputPerSecond = maxPayloadThroughputPerSecond;
+        return this;
+    }
+
+    public long getActiveCallsCount() {
+        return activeCallsCount;
+    }
+
+    public ProfilerCallReport setActiveCallsCount(long activeCallsCount) {
+        this.activeCallsCount = activeCallsCount;
+        return this;
+    }
+
+    public long getActiveCallsMaxLatency() {
+        return activeCallsMaxLatency;
+    }
+
+    public ProfilerCallReport setActiveCallsMaxLatency(long activeCallsMaxLatency) {
+        this.activeCallsMaxLatency = activeCallsMaxLatency;
         return this;
     }
 }

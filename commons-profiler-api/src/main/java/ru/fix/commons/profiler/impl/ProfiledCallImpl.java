@@ -40,6 +40,7 @@ class ProfiledCallImpl implements ProfiledCall {
             throw new IllegalArgumentException("Start method was already called.");
         }
         startTime.set(System.nanoTime());
+        profiler.callStarted(this);
         return this;
     }
 
@@ -55,8 +56,9 @@ class ProfiledCallImpl implements ProfiledCall {
             return;
         }
 
-        long stopTime = System.nanoTime();
-        long latencyValue = (stopTime - startTime.get()) / 1000000;
+        long latencyValue = timeFromCallStartInMs();
+
+        profiler.callEnded(this);
 
         profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
             sharedCounters.getCallsCount().increment();
@@ -74,12 +76,21 @@ class ProfiledCallImpl implements ProfiledCall {
         });
     }
 
+    Long startTime() {
+        return startTime.get();
+    }
+
+    long timeFromCallStartInMs() {
+        return (System.nanoTime() - startTime.get()) / 1000000;
+    }
+
     @Override
     public void cancel() {
         if (!started.compareAndSet(true, false)) {
             log.debug("Cancel method called on profiler call that currently is not running: {}", profiledCallName);
             return;
         }
+        profiler.callEnded(this);
     }
 
     @Override
