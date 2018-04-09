@@ -1,7 +1,10 @@
 package ru.fix.commons.profiler.impl;
 
+import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.stream.Stream;
 
 /**
  * @author Kamil Asfandiyarov
@@ -10,10 +13,10 @@ class SharedCounters {
     private final LongAdder callsCount = new LongAdder();
     private final LongAdder startedCallsCount = new LongAdder();
     private final LongAdder sumStartStopLatency = new LongAdder();
-    
+
     private final AtomicLong latencyMin = new AtomicLong(Long.MAX_VALUE);
     private final AtomicLong latencyMax = new AtomicLong();
-    
+
     private final AtomicLong payloadMin = new AtomicLong(Long.MAX_VALUE);
     private final AtomicLong payloadMax = new AtomicLong();
     private final LongAdder payloadSum = new LongAdder();
@@ -21,6 +24,8 @@ class SharedCounters {
     private final MaxThroughputCalculator maxThroughput = new MaxThroughputCalculator();
     private final MaxThroughputCalculator maxPayloadThroughput = new MaxThroughputCalculator();
 
+    private final LongAdder activeCallsCounter = new LongAdder();
+    private final ActiveCallsSet activeCalls = new ActiveCallsSet();
 
 
     public LongAdder getCallsCount() {
@@ -61,5 +66,48 @@ class SharedCounters {
 
     public MaxThroughputCalculator getMaxPayloadThroughput() {
         return maxPayloadThroughput;
+    }
+
+    public LongAdder getActiveCallsCounter() {
+        return activeCallsCounter;
+    }
+
+    public ActiveCallsSet getActiveCalls() {
+        return activeCalls;
+    }
+
+    public static class ActiveCallsSet {
+        private ConcurrentHashMap<ProfiledCallImpl, Boolean> activeCalls = new ConcurrentHashMap<>();
+
+        public void add(ProfiledCallImpl call) {
+            activeCalls.put(call, true);
+        }
+
+        public void remove(ProfiledCallImpl call) {
+            activeCalls.remove(call);
+        }
+
+        public boolean isEmpty() {
+            return activeCalls.isEmpty();
+        }
+
+        public int size() {
+            return activeCalls.size();
+        }
+
+        public boolean containsAll(Collection<?> collection) {
+            return activeCalls.keySet().containsAll(collection);
+        }
+
+        public Stream<ProfiledCallImpl> stream() {
+            return activeCalls.keySet().stream();
+        }
+
+        /**
+         * NOT SYNCHRONIZED!
+         */
+        public void reset() {
+            activeCalls = new ConcurrentHashMap<>();
+        }
     }
 }

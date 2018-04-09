@@ -9,7 +9,6 @@ import ru.fix.commons.profiler.ProfilerReport;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -101,9 +100,10 @@ public class ProfilerReporterImplActiveCallsTest {
 
         reporter.buildReportAndReset();
 
-        Set<ProfiledCallImpl> callsAfterReset = reporter.longestActiveCalls.get("Test");
-        assertEquals(numberOfActiveCallsToKeepBetweenReports, callsAfterReset.size());
-        assertTrue(callsAfterReset.containsAll(longestCalls));
+        reporter.applyToSharedCounters("Test", counters -> {
+            assertEquals(numberOfActiveCallsToKeepBetweenReports, counters.getActiveCalls().size());
+            assertTrue(counters.getActiveCalls().containsAll(longestCalls));
+        });
     }
 
     @Test
@@ -117,21 +117,23 @@ public class ProfilerReporterImplActiveCallsTest {
 
         reporter.buildReportAndReset();
 
-        Set<ProfiledCallImpl> callsAfterReset = reporter.longestActiveCalls.get("Test");
-        assertEquals(numberOfActiveCallsToKeepBetweenReports, callsAfterReset.size());
-        assertTrue(callsAfterReset.containsAll(longestCalls));
+        reporter.applyToSharedCounters("Test", counters -> {
+            assertEquals(numberOfActiveCallsToKeepBetweenReports, counters.getActiveCalls().size());
+            assertTrue(counters.getActiveCalls().containsAll(longestCalls));
+        });
     }
 
     @Test
-    public void disableActiveCallsMaxLatency_afterCallsWereStarted_removesCallsFromActiveWhenTheyAreEnded() {
-        ProfiledCall call1 = profiler.profiledCall("Test").start();
-        ProfiledCall call2 = profiler.profiledCall("Test").start();
+    public void disableActiveCallsMaxLatency_afterCallsWereStarted_removesCallsFromActiveOnNextReport() {
+        profiler.profiledCall("Test").start();
+        profiler.profiledCall("Test").start();
 
         reporter.setEnableActiveCallsMaxLatency(false);
-        call1.stop();
-        call2.cancel();
+        reporter.buildReportAndReset();
 
-        assertTrue(reporter.longestActiveCalls.get("Test").isEmpty());
+        reporter.applyToSharedCounters("Test", counters ->
+                assertTrue(counters.getActiveCalls().isEmpty())
+        );
     }
 
     private ProfilerCallReport getCallReport(ProfilerReport profilerReport) {
