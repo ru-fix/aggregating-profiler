@@ -57,4 +57,11 @@ public class SimpleProfiler implements Profiler {
     public ProfilerReporter createReporter() {
         return new ProfilerReporterImpl(this);
     }
+
+    @Override
+    public ProfilerReporter createReporter(
+            boolean enableActiveCallsMaxLatency,
+            int activeCallsToKeepBetweenReports) {
+        return new ProfilerReporterImpl(this, enableActiveCallsMaxLatency, activeCallsToKeepBetweenReports);
+    }
 }

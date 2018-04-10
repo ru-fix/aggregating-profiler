@@ -33,4 +33,8 @@ public class PrefixedProfiler implements Profiler {
         return profiler.createReporter();
     }
 
+    @Override
+    public ProfilerReporter createReporter(boolean enableActiveCallsMaxLatency, int activeCallsToKeepBetweenReports) {
+        return profiler.createReporter(enableActiveCallsMaxLatency, activeCallsToKeepBetweenReports);
+    }
 }

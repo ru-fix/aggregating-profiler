@@ -8,6 +8,8 @@ import ru.fix.commons.profiler.ProfilerReporter;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -31,17 +33,45 @@ class ProfilerReporterImpl implements ProfilerReporter {
 
     private final AtomicLong lastReportTimestamp;
 
+    private final AtomicBoolean enableActiveCallsMaxLatency;
+    private final AtomicInteger numberOfActiveCallsToKeepBetweenReports;
 
     public ProfilerReporterImpl(SimpleProfiler profiler) {
+        this(profiler, false, 20);
+    }
+
+    public ProfilerReporterImpl(SimpleProfiler profiler,
+                                boolean enableActiveCallsMaxLatency,
+                                int numberOfActiveCallsToKeepBetweenReports) {
         this.profiler = profiler;
         this.profiler.registerReporter(this);
+        this.enableActiveCallsMaxLatency = new AtomicBoolean(enableActiveCallsMaxLatency);
+        this.numberOfActiveCallsToKeepBetweenReports = new AtomicInteger(numberOfActiveCallsToKeepBetweenReports);
         lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
+    }
+
+    @Override
+    public boolean setEnableActiveCallsMaxLatency(boolean enable) {
+        boolean prevValue = this.enableActiveCallsMaxLatency.getAndSet(enable);
+
+        sharedCounters.values().forEach((counters) ->
+                counters.setRecordActiveCalls(enable)
+        );
+
+        return prevValue;
+    }
+
+    @Override
+    public int setNumberOfActiveCallsToKeepBetweenReports(int number) {
+        return this.numberOfActiveCallsToKeepBetweenReports.getAndSet(number);
     }
 
     public void applyToSharedCounters(String profiledCallName, Consumer<SharedCounters> consumer) {
         readLock.lock();
         try {
-            consumer.accept(sharedCounters.computeIfAbsent(profiledCallName, key -> new SharedCounters()));
+            consumer.accept(sharedCounters.computeIfAbsent(profiledCallName, key ->
+                    new SharedCounters(enableActiveCallsMaxLatency.get())
+            ));
         } finally {
             readLock.unlock();
         }
@@ -76,7 +106,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
                 ProfilerCallReport counterReport = buildReportAndReset(entry.getKey(), entry.getValue(), spentTime);
 
                 // skip and remove empty counter
-                if (counterReport.getCallsCount() == 0) {
+                if (counterReport.getCallsCount() == 0 && counterReport.getActiveCallsCount() == 0) {
                     iterator.remove();
                     continue;
                 }
@@ -94,11 +124,15 @@ class ProfilerReporterImpl implements ProfilerReporter {
 
     private ProfilerCallReport buildReportAndReset(String name, SharedCounters counters, long elapsed) {
         long callsCount = counters.getCallsCount().sumThenReset();
+        long startedCallsCount = counters.getStartedCallsCount().sumThenReset();
         long sumStartStopLatency = counters.getSumStartStopLatency().sumThenReset();
 
         if (callsCount == 0) {
             cleanCounters(counters);
-            return new ProfilerCallReport(name);
+            return new ProfilerCallReport(name)
+                    .setStartedCallsCount(startedCallsCount)
+                    .setActiveCallsCount(counters.getActiveCallsCounter().sum())
+                    .setActiveCallsMaxLatency(activeCallsMaxLatencyAndResetActiveCalls(counters));
         }
 
         long payloadTotal = counters.getPayloadSum().sumThenReset();
@@ -111,6 +145,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
                 .setCallsThroughput(elapsed != 0 ? callsCount * 1000 / elapsed : 0)
 
                 .setCallsCount(callsCount)
+                .setStartedCallsCount(startedCallsCount)
 
                 .setPayloadMin(counters.getPayloadMin().getAndSet(Long.MAX_VALUE))
                 .setPayloadMax(counters.getPayloadMax().getAndSet(0))
@@ -121,7 +156,49 @@ class ProfilerReporterImpl implements ProfilerReporter {
                 .setReportingTime(elapsed)
 
                 .setMaxThroughputPerSecond(counters.getMaxThroughput().getMaxAndReset())
-                .setMaxPayloadThroughputPerSecond(counters.getMaxPayloadThroughput().getMaxAndReset());
+                .setMaxPayloadThroughputPerSecond(counters.getMaxPayloadThroughput().getMaxAndReset())
+
+                .setActiveCallsCount(counters.getActiveCallsCounter().sum())
+                .setActiveCallsMaxLatency(activeCallsMaxLatencyAndResetActiveCalls(counters));
+    }
+
+    private long activeCallsMaxLatencyAndResetActiveCalls(SharedCounters counters) {
+        Optional<ProfiledCallImpl> longestCall = resetActiveCallsAndGetLongest(counters);
+        return longestCall
+                .map(ProfiledCallImpl::timeFromCallStartInMs)
+                .orElse(0L);
+
+    }
+
+    private Optional<ProfiledCallImpl> resetActiveCallsAndGetLongest(SharedCounters counters) {
+        if (!enableActiveCallsMaxLatency.get() && !counters.getActiveCalls().isEmpty()) {
+            counters.getActiveCalls().reset();
+            return Optional.empty();
+        }
+
+        ProfiledCallImpl[] longest = new ProfiledCallImpl[1];
+
+        Set<ProfiledCallImpl> top = new HashSet<>();
+        counters.getActiveCalls()
+                .stream()
+                .sorted(Comparator.comparingLong(ProfiledCallImpl::startTime))
+                .limit(numberOfActiveCallsToKeepBetweenReports.get())
+                .forEachOrdered(call -> {
+                    if (top.isEmpty()) {
+                        longest[0] = call;
+                    }
+                    top.add(call);
+                });
+
+        Iterator<ProfiledCallImpl> calls = counters.getActiveCalls().iterator();
+        while (calls.hasNext()) {
+            ProfiledCallImpl call = calls.next();
+            if (!top.contains(call)) {
+                calls.remove();
+            }
+        }
+
+        return Optional.ofNullable(longest[0]);
     }
 
     private void cleanCounters(SharedCounters counters) {
@@ -139,7 +216,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         profiler.unregisterReporter(this);
     }
 }

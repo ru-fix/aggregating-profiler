@@ -40,6 +40,12 @@ class ProfiledCallImpl implements ProfiledCall {
             throw new IllegalArgumentException("Start method was already called.");
         }
         startTime.set(System.nanoTime());
+        profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
+            sharedCounters.getStartedCallsCount().increment();
+
+            sharedCounters.getActiveCalls().add(this);
+            sharedCounters.getActiveCallsCounter().increment();
+        });
         return this;
     }
 
@@ -55,8 +61,7 @@ class ProfiledCallImpl implements ProfiledCall {
             return;
         }
 
-        long stopTime = System.nanoTime();
-        long latencyValue = (stopTime - startTime.get()) / 1000000;
+        long latencyValue = timeFromCallStartInMs();
 
         profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
             sharedCounters.getCallsCount().increment();
@@ -71,6 +76,29 @@ class ProfiledCallImpl implements ProfiledCall {
             sharedCounters.getPayloadSum().add(payload);
             sharedCounters.getMaxThroughput().call();
             sharedCounters.getMaxPayloadThroughput().call(payload);
+
+            sharedCounters.getActiveCalls().remove(this);
+            sharedCounters.getActiveCallsCounter().decrement();
+        });
+    }
+
+    Long startTime() {
+        return startTime.get();
+    }
+
+    long timeFromCallStartInMs() {
+        return (System.nanoTime() - startTime.get()) / 1000000;
+    }
+
+    @Override
+    public void cancel() {
+        if (!started.compareAndSet(true, false)) {
+            log.debug("Cancel method called on profiler call that currently is not running: {}", profiledCallName);
+            return;
+        }
+        profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
+            sharedCounters.getActiveCalls().remove(this);
+            sharedCounters.getActiveCallsCounter().decrement();
         });
     }
 
