@@ -163,18 +163,17 @@ class ProfilerReporterImpl implements ProfilerReporter {
     }
 
     private long activeCallsMaxLatencyAndResetActiveCalls(SharedCounters counters) {
-        ProfiledCallImpl longestCall = resetActiveCallsAndGetLongest(counters);
-        if (longestCall == null) {
-            return 0L;
-        }
+        Optional<ProfiledCallImpl> longestCall = resetActiveCallsAndGetLongest(counters);
+        return longestCall
+                .map(ProfiledCallImpl::timeFromCallStartInMs)
+                .orElse(0L);
 
-        return longestCall.timeFromCallStartInMs();
     }
 
-    private ProfiledCallImpl resetActiveCallsAndGetLongest(SharedCounters counters) {
+    private Optional<ProfiledCallImpl> resetActiveCallsAndGetLongest(SharedCounters counters) {
         if (!enableActiveCallsMaxLatency.get() && !counters.getActiveCalls().isEmpty()) {
             counters.getActiveCalls().reset();
-            return null;
+            return Optional.empty();
         }
 
         ProfiledCallImpl[] longest = new ProfiledCallImpl[1];
@@ -199,7 +198,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
             }
         }
 
-        return longest[0];
+        return Optional.ofNullable(longest[0]);
     }
 
     private void cleanCounters(SharedCounters counters) {
