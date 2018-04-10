@@ -121,11 +121,8 @@ class SharedCounters {
             return activeCalls.keySet().stream();
         }
 
-        /**
-         * NOT SYNCHRONIZED!
-         */
         public void reset() {
-            activeCalls = new ConcurrentHashMap<>();
+            activeCalls.clear();
         }
     }
 }

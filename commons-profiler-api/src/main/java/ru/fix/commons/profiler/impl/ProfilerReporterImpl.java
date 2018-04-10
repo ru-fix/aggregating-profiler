@@ -173,8 +173,6 @@ class ProfilerReporterImpl implements ProfilerReporter {
 
     private ProfiledCallImpl resetActiveCallsAndGetLongest(SharedCounters counters) {
         if (!enableActiveCallsMaxLatency.get() && !counters.getActiveCalls().isEmpty()) {
-            // reset is not synchronized but it does not matter.
-            // At worst we'll loose a few new calls on enabling this metric
             counters.getActiveCalls().reset();
             return null;
         }
