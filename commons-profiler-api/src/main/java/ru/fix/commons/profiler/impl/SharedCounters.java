@@ -1,6 +1,7 @@
 package ru.fix.commons.profiler.impl;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
@@ -76,7 +77,7 @@ class SharedCounters {
         return activeCalls;
     }
 
-    public static class ActiveCallsSet {
+    public static class ActiveCallsSet implements Iterable<ProfiledCallImpl> {
         private ConcurrentHashMap<ProfiledCallImpl, Boolean> activeCalls = new ConcurrentHashMap<>();
 
         public void add(ProfiledCallImpl call) {
@@ -97,6 +98,11 @@ class SharedCounters {
 
         public boolean containsAll(Collection<?> collection) {
             return activeCalls.keySet().containsAll(collection);
+        }
+
+        @Override
+        public Iterator<ProfiledCallImpl> iterator() {
+            return activeCalls.keySet().iterator();
         }
 
         public Stream<ProfiledCallImpl> stream() {

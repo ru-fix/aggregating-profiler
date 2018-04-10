@@ -184,26 +184,33 @@ class ProfilerReporterImpl implements ProfilerReporter {
     private ProfiledCallImpl resetActiveCallsAndGetLongest(SharedCounters counters) {
         if (!enableActiveCallsMaxLatency.get() && !counters.getActiveCalls().isEmpty()) {
             // reset is not synchronized but it does not matter.
-            // At worse we'll loose a few new calls on enabling this metric
+            // At worst we'll loose a few new calls on enabling this metric
             counters.getActiveCalls().reset();
             return null;
         }
 
-        final int activeCallsLimit = numberOfActiveCallsToKeepBetweenReports.get();
-        int counter[] = new int[] {0};
-
         ProfiledCallImpl[] longest = new ProfiledCallImpl[1];
+
+        Set<ProfiledCallImpl> top = new HashSet<>();
         counters.getActiveCalls()
                 .stream()
                 .sorted(Comparator.comparingLong(ProfiledCallImpl::startTime))
+                .limit(numberOfActiveCallsToKeepBetweenReports.get())
                 .forEachOrdered(call -> {
-                    if (counter[0] == 0) {
+                    if (top.isEmpty()) {
                         longest[0] = call;
-                    } else if (counter[0] >= activeCallsLimit) {
-                        counters.getActiveCalls().remove(call);
                     }
-                    counter[0]++;
+                    top.add(call);
                 });
+
+        Iterator<ProfiledCallImpl> calls = counters.getActiveCalls().iterator();
+        while (calls.hasNext()) {
+            ProfiledCallImpl call = calls.next();
+            if (!top.contains(call)) {
+                calls.remove();
+            }
+        }
+
         return longest[0];
     }
 
