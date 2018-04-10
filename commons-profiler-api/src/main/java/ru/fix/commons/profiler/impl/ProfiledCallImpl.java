@@ -40,9 +40,11 @@ class ProfiledCallImpl implements ProfiledCall {
             throw new IllegalArgumentException("Start method was already called.");
         }
         startTime.set(System.nanoTime());
-        profiler.callStarted(this);
         profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
             sharedCounters.getStartedCallsCount().increment();
+
+            sharedCounters.getActiveCalls().add(this);
+            sharedCounters.getActiveCallsCounter().increment();
         });
         return this;
     }
@@ -61,9 +63,10 @@ class ProfiledCallImpl implements ProfiledCall {
 
         long latencyValue = timeFromCallStartInMs();
 
-        profiler.callEnded(this);
-
         profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
+            sharedCounters.getActiveCalls().remove(this);
+            sharedCounters.getActiveCallsCounter().decrement();
+
             sharedCounters.getCallsCount().increment();
 
             sharedCounters.getSumStartStopLatency().add(latencyValue);
@@ -75,7 +78,10 @@ class ProfiledCallImpl implements ProfiledCall {
             sharedCounters.getPayloadMax().accumulateAndGet(payload, Math::max);
             sharedCounters.getPayloadSum().add(payload);
             sharedCounters.getMaxThroughput().call();
-            sharedCounters.getMaxPayloadThroughput().call(payload); 
+            sharedCounters.getMaxPayloadThroughput().call(payload);
+
+            sharedCounters.getActiveCalls().remove(this);
+            sharedCounters.getActiveCallsCounter().decrement();
         });
     }
 
@@ -93,7 +99,10 @@ class ProfiledCallImpl implements ProfiledCall {
             log.debug("Cancel method called on profiler call that currently is not running: {}", profiledCallName);
             return;
         }
-        profiler.callEnded(this);
+        profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
+            sharedCounters.getActiveCalls().remove(this);
+            sharedCounters.getActiveCallsCounter().decrement();
+        });
     }
 
     @Override

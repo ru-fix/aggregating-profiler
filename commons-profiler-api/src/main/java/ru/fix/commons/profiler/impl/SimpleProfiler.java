@@ -49,14 +49,6 @@ public class SimpleProfiler implements Profiler {
         profilerReporters.forEach(reporter -> reporter.applyToSharedCounters(profiledCallName, consumer));
     }
 
-    void callStarted(ProfiledCallImpl call) {
-        profilerReporters.forEach(reporter -> reporter.callStarted(call));
-    }
-
-    void callEnded(ProfiledCallImpl call) {
-        profilerReporters.forEach(reporter -> reporter.callEnded(call));
-    }
-
     Map<String, IndicationProvider> getIndicators() {
         return indicators;
     }

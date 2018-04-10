@@ -52,7 +52,13 @@ class ProfilerReporterImpl implements ProfilerReporter {
 
     @Override
     public boolean setEnableActiveCallsMaxLatency(boolean enable) {
-        return this.enableActiveCallsMaxLatency.getAndSet(enable);
+        boolean prevValue = this.enableActiveCallsMaxLatency.getAndSet(enable);
+
+        sharedCounters.values().forEach((counters) ->
+                counters.setRecordActiveCalls(enable)
+        );
+
+        return prevValue;
     }
 
     @Override
@@ -63,28 +69,12 @@ class ProfilerReporterImpl implements ProfilerReporter {
     public void applyToSharedCounters(String profiledCallName, Consumer<SharedCounters> consumer) {
         readLock.lock();
         try {
-            consumer.accept(sharedCounters.computeIfAbsent(profiledCallName, key -> new SharedCounters()));
+            consumer.accept(sharedCounters.computeIfAbsent(profiledCallName, key ->
+                    new SharedCounters(enableActiveCallsMaxLatency.get())
+            ));
         } finally {
             readLock.unlock();
         }
-    }
-
-    public void callStarted(ProfiledCallImpl call) {
-        this.applyToSharedCounters(call.profiledCallName, counters -> {
-            counters.getActiveCallsCounter().increment();
-            if (enableActiveCallsMaxLatency.get()) {
-                counters.getActiveCalls().add(call);
-            }
-        });
-    }
-
-    public void callEnded(ProfiledCallImpl call) {
-        this.applyToSharedCounters(call.profiledCallName, counters -> {
-            counters.getActiveCallsCounter().decrement();
-            if (enableActiveCallsMaxLatency.get()) {
-                counters.getActiveCalls().remove(call);
-            }
-        });
     }
 
     @Override
