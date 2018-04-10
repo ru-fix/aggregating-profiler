@@ -64,9 +64,6 @@ class ProfiledCallImpl implements ProfiledCall {
         long latencyValue = timeFromCallStartInMs();
 
         profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
-            sharedCounters.getActiveCalls().remove(this);
-            sharedCounters.getActiveCallsCounter().decrement();
-
             sharedCounters.getCallsCount().increment();
 
             sharedCounters.getSumStartStopLatency().add(latencyValue);
