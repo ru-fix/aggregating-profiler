@@ -20,6 +20,16 @@ public class NamedProfilerTest {
     }
 
     @Test
+    public void whenCreatesProfiledCallWithDotNameThenProfiledCallContainsTrueNameChain() {
+
+        Profiler sp = new SimpleProfiler();
+        Profiler root = new NamedProfiler(sp, "root.");
+        Profiler node1 = new NamedProfiler(root, ".node1.");
+
+        Assert.assertEquals("root.node1.some_metric", node1.profiledCall("some_metric").toString());
+    }
+
+    @Test
     public void whenUsePrefixedProfilerThenProfiledCallContainsTrueNameChain() {
 
         PrefixedProfiler srv1 = new PrefixedProfiler(new SimpleProfiler(), "srv1.");

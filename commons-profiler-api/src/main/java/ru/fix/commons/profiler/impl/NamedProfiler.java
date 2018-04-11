@@ -13,22 +13,22 @@ public class NamedProfiler implements Profiler {
 
     public NamedProfiler(Profiler profiler, String name) {
         this.profiler = profiler;
-        this.profilerName = name;
+        this.profilerName = trimDots(name);
     }
 
     @Override
     public ProfiledCall profiledCall(String name) {
-        return profiler.profiledCall(profilerName + "." + name);
+        return profiler.profiledCall(profilerName + "." + trimDots(name));
     }
 
     @Override
     public void attachIndicator(String name, IndicationProvider indicationProvider) {
-        profiler.attachIndicator(profilerName + "." + name, indicationProvider);
+        profiler.attachIndicator(profilerName + "." + trimDots(name), indicationProvider);
     }
 
     @Override
     public void detachIndicator(String name) {
-        profiler.detachIndicator(profilerName + "." + name);
+        profiler.detachIndicator(profilerName + "." + trimDots(name));
     }
 
     @Override
@@ -39,5 +39,12 @@ public class NamedProfiler implements Profiler {
     @Override
     public ProfilerReporter createReporter(boolean enableActiveCallsMaxLatency, int activeCallsToKeepBetweenReports) {
         return profiler.createReporter(enableActiveCallsMaxLatency, activeCallsToKeepBetweenReports);
+    }
+
+    private String trimDots(String s) {
+        if (s == null) {
+            throw new NullPointerException("Given null instead of string");
+        }
+        return s.trim().replaceAll("^\\.|\\.$", "");
     }
 }
