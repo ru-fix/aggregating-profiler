@@ -5,13 +5,13 @@ import ru.fix.commons.profiler.ProfiledCall;
 import ru.fix.commons.profiler.Profiler;
 import ru.fix.commons.profiler.ProfilerReporter;
 
-public class NamedProfiler implements Profiler {
+public class SuffixedProfiler implements Profiler {
 
     private Profiler profiler;
 
     private String profilerName;
 
-    public NamedProfiler(Profiler profiler, String name) {
+    public SuffixedProfiler(Profiler profiler, String name) {
         this.profiler = profiler;
         this.profilerName = trimDots(name);
     }
