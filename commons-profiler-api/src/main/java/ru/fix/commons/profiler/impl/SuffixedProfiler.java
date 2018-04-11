@@ -9,26 +9,26 @@ public class SuffixedProfiler implements Profiler {
 
     private Profiler profiler;
 
-    private String profilerName;
+    private TrimmedDotsString profilerName;
 
     public SuffixedProfiler(Profiler profiler, String name) {
         this.profiler = profiler;
-        this.profilerName = trimDots(name);
+        this.profilerName = new TrimmedDotsString(name);
     }
 
     @Override
     public ProfiledCall profiledCall(String name) {
-        return profiler.profiledCall(profilerName + "." + trimDots(name));
+        return profiler.profiledCall(profilerName + "." + new TrimmedDotsString(name));
     }
 
     @Override
     public void attachIndicator(String name, IndicationProvider indicationProvider) {
-        profiler.attachIndicator(profilerName + "." + trimDots(name), indicationProvider);
+        profiler.attachIndicator(profilerName + "." + new TrimmedDotsString(name), indicationProvider);
     }
 
     @Override
     public void detachIndicator(String name) {
-        profiler.detachIndicator(profilerName + "." + trimDots(name));
+        profiler.detachIndicator(profilerName + "." + new TrimmedDotsString(name));
     }
 
     @Override
@@ -41,10 +41,5 @@ public class SuffixedProfiler implements Profiler {
         return profiler.createReporter(enableActiveCallsMaxLatency, activeCallsToKeepBetweenReports);
     }
 
-    private String trimDots(String s) {
-        if (s == null) {
-            throw new NullPointerException("Given null instead of string");
-        }
-        return s.trim().replaceAll("^\\.|\\.$", "");
-    }
+
 }
