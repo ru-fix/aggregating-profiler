@@ -145,7 +145,7 @@ public class ProfilingTest {
                     ProfiledCall call = profiler.profiledCall("parallel_threads_fixed_latency");
                     for (int i = 0; i < 100; i++) {
                         call.start();
-                        doSomething(100);
+                        doSomething(50);
                         call.stop();
                     }
                 });
@@ -156,7 +156,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertEquals(true, report.minLatency >= 90);
+            assertEquals(true, report.minLatency >= 30);
         }
     }
 
@@ -170,7 +170,7 @@ public class ProfilingTest {
 
             reporter.buildReportAndReset();
 
-            CompletableFuture[] futures = new CompletableFuture[20_000];
+            CompletableFuture[] futures = new CompletableFuture[20];
 
             for (int callNumber = 0; callNumber < futures.length; callNumber++) {
 
@@ -187,18 +187,25 @@ public class ProfilingTest {
 
                 ProfiledCall call = profiler.profiledCall("between_thread_call_fixed_latency");
 
-                futures[callNumber] = CompletableFuture
+                CompletableFuture<Void> future = CompletableFuture
                         .runAsync(() -> {
                             call.start();
-                            doSomething(ThreadLocalRandom.current().nextInt(100, 200));
+                            doSomething(getRandomInt(100, 200));
                         }, poolA)
 
-                        .thenRunAsync(() -> doSomething(ThreadLocalRandom.current().nextInt(100, 200)), poolB)
+                        .thenRunAsync(() -> doSomething(getRandomInt(100, 200)), poolB)
 
                         .thenRunAsync(() -> {
-                            doSomething(ThreadLocalRandom.current().nextInt(100, 200));
+                            doSomething(getRandomInt(100, 200));
                             call.stop();
                         }, poolA);
+
+                future.exceptionally(throwable -> {
+                    log.error("Failed to build future chain", throwable);
+                    return null;
+                });
+
+                futures[callNumber] = future;
 
             }
             log.info("before await");
@@ -212,6 +219,10 @@ public class ProfilingTest {
 
             assertEquals(true, report.minLatency >= 250);
         }
+    }
+
+    private static int getRandomInt(int origin, int bound) {
+        return ThreadLocalRandom.current().nextInt(origin, bound);
     }
 
     @Test
