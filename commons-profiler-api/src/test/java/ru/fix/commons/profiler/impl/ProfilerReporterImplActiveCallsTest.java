@@ -83,8 +83,8 @@ public class ProfilerReporterImplActiveCallsTest {
         assertTrue(call3Time < report.getActiveCallsMaxLatency() &&
                 report.getActiveCallsMaxLatency() < call1Time
         );
-        assertTrue(call2Time < report.getActiveCallsMaxLatency() &&
-                report.getActiveCallsMaxLatency() < call2AfterReportTime
+        assertTrue(call2Time <= report.getActiveCallsMaxLatency() &&
+                report.getActiveCallsMaxLatency() <= call2AfterReportTime
         );
     }
 
