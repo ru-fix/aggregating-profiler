@@ -44,10 +44,11 @@ class ProfilerReporterImpl implements ProfilerReporter {
                                 boolean enableActiveCallsMaxLatency,
                                 int numberOfActiveCallsToKeepBetweenReports) {
         this.profiler = profiler;
-        this.profiler.registerReporter(this);
         this.enableActiveCallsMaxLatency = new AtomicBoolean(enableActiveCallsMaxLatency);
         this.numberOfActiveCallsToKeepBetweenReports = new AtomicInteger(numberOfActiveCallsToKeepBetweenReports);
         lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
+
+        this.profiler.registerReporter(this);
     }
 
     @Override
