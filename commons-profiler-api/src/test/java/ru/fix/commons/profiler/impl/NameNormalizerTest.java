@@ -2,33 +2,32 @@ package ru.fix.commons.profiler.impl;
 
 import org.junit.Assert;
 import org.junit.Test;
+import ru.fix.commons.profiler.util.NameNormalizer;
 
-import static org.junit.Assert.*;
-
-public class TrimmedDotsStringTest {
+public class NameNormalizerTest {
 
     @Test
     public void stringWithoutDotsDoesNotChanges() {
-        Assert.assertEquals("s", new TrimmedDotsString("s").toString());
+        Assert.assertEquals("s", NameNormalizer.trimDots("s"));
     }
 
     @Test
     public void ifStringEndsByDotThenDotRemove() {
-        Assert.assertEquals("s", new TrimmedDotsString("s.").toString());
+        Assert.assertEquals("s", NameNormalizer.trimDots("s."));
     }
 
     @Test
     public void ifStringStartsByDotThenDotRemove() {
-        Assert.assertEquals("s", new TrimmedDotsString(".s").toString());
+        Assert.assertEquals("s", NameNormalizer.trimDots(".s"));
     }
 
     @Test
     public void ifStringStartsByDotAndEndsByDotThenDotRemove() {
-        Assert.assertEquals("s", new TrimmedDotsString(".s.").toString());
+        Assert.assertEquals("s", NameNormalizer.trimDots(".s."));
     }
 
     @Test
     public void ifStringHasBlanksThenBlanksWillBeRemoved() {
-        Assert.assertEquals("s", new TrimmedDotsString(" s ").toString());
+        Assert.assertEquals("s", NameNormalizer.trimDots(" s "));
     }
 }

@@ -1,6 +1,6 @@
 package ru.fix.commons.profiler;
 
-import ru.fix.commons.profiler.impl.TrimmedDotsString;
+import ru.fix.commons.profiler.util.NameNormalizer;
 
 /**
  * Attach fixed prefix to profiled calls and indicator names
@@ -8,26 +8,26 @@ import ru.fix.commons.profiler.impl.TrimmedDotsString;
  */
 public class PrefixedProfiler implements Profiler {
     private final Profiler profiler;
-    private final TrimmedDotsString profilerPrefix;
+    private final String profilerPrefix;
 
     public PrefixedProfiler(Profiler profiler, String profilerPrefix) {
         this.profiler = profiler;
-        this.profilerPrefix = new TrimmedDotsString(profilerPrefix);
+        this.profilerPrefix = NameNormalizer.trimDots(profilerPrefix);
     }
 
     @Override
     public ProfiledCall profiledCall(String name) {
-        return profiler.profiledCall(profilerPrefix + "." + new TrimmedDotsString(name));
+        return profiler.profiledCall(profilerPrefix + "." + NameNormalizer.trimDots(name));
     }
 
     @Override
     public void attachIndicator(String name, IndicationProvider indicationProvider) {
-        profiler.attachIndicator(profilerPrefix + "." + new TrimmedDotsString(name), indicationProvider);
+        profiler.attachIndicator(profilerPrefix + "." + NameNormalizer.trimDots(name), indicationProvider);
     }
 
     @Override
     public void detachIndicator(String name) {
-        profiler.detachIndicator(profilerPrefix + "." + new TrimmedDotsString(name));
+        profiler.detachIndicator(profilerPrefix + "." + NameNormalizer.trimDots(name));
     }
 
     @Override
