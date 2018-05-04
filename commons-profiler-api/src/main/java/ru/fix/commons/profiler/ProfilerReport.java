@@ -5,9 +5,13 @@ import java.util.Map;
 
 public class ProfilerReport {
 
-    private Map<String, Long> indicators;
+    private final Map<String, Long> indicators;
+    private final List<ProfilerCallReport> profilerCallReports;
 
-    private List<ProfilerCallReport> profilerCallReports;
+    public ProfilerReport(Map<String, Long> indicators, List<ProfilerCallReport> profilerCallReports) {
+        this.indicators = indicators;
+        this.profilerCallReports = profilerCallReports;
+    }
 
     public Map<String, Long> getIndicators() {
         return indicators;
@@ -17,29 +21,21 @@ public class ProfilerReport {
         return profilerCallReports;
     }
 
-    public void setIndicators(Map<String, Long> indicators) {
-        this.indicators = indicators;
-    }
-
-    public void setProfilerCallReports(List<ProfilerCallReport> profilerCallReports) {
-        this.profilerCallReports = profilerCallReports;
-    }
-
     @Override
     public String toString() {
         StringBuilder sumReport = new StringBuilder();
         sumReport.append("Indicators:\n");
-        indicators.entrySet().forEach(i ->
-                sumReport.append(i.getKey())
+        indicators.forEach((key, value) ->
+                sumReport.append(key)
                         .append(" = ")
-                        .append(i.getValue())
+                        .append(value)
                         .append('\n')
         );
         sumReport.append("Profilers:\n");
-        profilerCallReports.forEach(pr -> {
-            sumReport.append(pr.toString());
-            sumReport.append('\n');
-        });
+        profilerCallReports.forEach(pr ->
+                sumReport.append(pr.toString())
+                        .append('\n')
+        );
         return sumReport.toString();
     }
 }
