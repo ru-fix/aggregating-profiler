@@ -123,6 +123,58 @@ class ProfilerReporterImpl implements ProfilerReporter {
         return report;
     }
 
+    private boolean anyMatch(String source, List<Pattern> ptrns) {
+        
+    }
+    
+    @Override
+    public ProfilerReport buildReportAndResetRE(List<Pattern> patterns) {
+        long timestamp = System.currentTimeMillis();
+        long spentTime = timestamp - lastReportTimestamp.getAndSet(timestamp);
+
+        ProfilerReport report = new ProfilerReport();
+        report.setIndicators(profiler.getIndicators()
+                .entrySet()
+                .stream()
+                .filter(entry -> patterns
+                        .stream()
+                        .filter(p -> p.matcher(entry.getKey()).match()))
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        e -> {
+                            try {
+                                return e.getValue().get();
+                            } catch (Exception ex) {
+                                log.error(ex.getMessage(), ex);
+                            }
+                            return null;
+                        })));
+
+        List<ProfilerCallReport> collect = new ArrayList<>();
+
+        writeLock.lock();
+        try {
+            for (Iterator<Map.Entry<String, SharedCounters>> iterator = sharedCounters.entrySet().iterator();
+                 iterator.hasNext(); ) {
+                Map.Entry<String, SharedCounters> entry = iterator.next();
+                ProfilerCallReport counterReport = buildReportAndReset(entry.getKey(), entry.getValue(), spentTime);
+
+                // skip and remove empty counter
+                if (counterReport.getCallsCount() == 0 && counterReport.getActiveCallsCount() == 0) {
+                    iterator.remove();
+                    continue;
+                }
+
+                collect.add(counterReport);
+            }
+        } finally {
+            writeLock.unlock();
+        }
+
+        collect.sort(Comparator.comparing(ProfilerCallReport::getName));
+        report.setProfilerCallReports(collect);
+        return report;
+    }
+
     private ProfilerCallReport buildReportAndReset(String name, SharedCounters counters, long elapsed) {
         long callsCount = counters.getCallsCount().sumThenReset();
         long startedCallsCount = counters.getStartedCallsCount().sumThenReset();
