@@ -7,6 +7,7 @@ import ru.fix.commons.profiler.ProfilerReport;
 import ru.fix.commons.profiler.ProfilerReporter;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -123,12 +124,8 @@ class ProfilerReporterImpl implements ProfilerReporter {
         return report;
     }
 
-    private boolean anyMatch(String source, List<Pattern> ptrns) {
-        
-    }
-    
     @Override
-    public ProfilerReport buildReportAndResetRE(List<Pattern> patterns) {
+    public ProfilerReport buildReportAndReset(List<Pattern> patterns) {
         long timestamp = System.currentTimeMillis();
         long spentTime = timestamp - lastReportTimestamp.getAndSet(timestamp);
 
@@ -138,7 +135,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
                 .stream()
                 .filter(entry -> patterns
                         .stream()
-                        .filter(p -> p.matcher(entry.getKey()).match()))
+                        .anyMatch(p -> p.matcher(entry.getKey()).matches()))
                 .collect(Collectors.toMap(Map.Entry::getKey,
                         e -> {
                             try {
@@ -156,6 +153,11 @@ class ProfilerReporterImpl implements ProfilerReporter {
             for (Iterator<Map.Entry<String, SharedCounters>> iterator = sharedCounters.entrySet().iterator();
                  iterator.hasNext(); ) {
                 Map.Entry<String, SharedCounters> entry = iterator.next();
+                if( ! patterns
+                    .stream()
+                    .anyMatch(p -> p.matcher(entry.getKey()).matches())) {
+                    continue;
+                }
                 ProfilerCallReport counterReport = buildReportAndReset(entry.getKey(), entry.getValue(), spentTime);
 
                 // skip and remove empty counter
