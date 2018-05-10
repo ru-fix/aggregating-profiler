@@ -81,51 +81,11 @@ class ProfilerReporterImpl implements ProfilerReporter {
 
     @Override
     public ProfilerReport buildReportAndReset() {
-        long timestamp = System.currentTimeMillis();
-        long spentTime = timestamp - lastReportTimestamp.getAndSet(timestamp);
-
-        ProfilerReport report = new ProfilerReport();
-        report.setIndicators(profiler.getIndicators()
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey,
-                        e -> {
-                            try {
-                                return e.getValue().get();
-                            } catch (Exception ex) {
-                                log.error(ex.getMessage(), ex);
-                            }
-                            return null;
-                        })));
-
-        List<ProfilerCallReport> collect = new ArrayList<>();
-
-        writeLock.lock();
-        try {
-            for (Iterator<Map.Entry<String, SharedCounters>> iterator = sharedCounters.entrySet().iterator();
-                 iterator.hasNext(); ) {
-                Map.Entry<String, SharedCounters> entry = iterator.next();
-                ProfilerCallReport counterReport = buildReportAndReset(entry.getKey(), entry.getValue(), spentTime);
-
-                // skip and remove empty counter
-                if (counterReport.getCallsCount() == 0 && counterReport.getActiveCallsCount() == 0) {
-                    iterator.remove();
-                    continue;
-                }
-
-                collect.add(counterReport);
-            }
-        } finally {
-            writeLock.unlock();
-        }
-
-        collect.sort(Comparator.comparing(ProfilerCallReport::getName));
-        report.setProfilerCallReports(collect);
-        return report;
+        return buildReportAndReset(Optional.empty());
     }
 
     @Override
-    public ProfilerReport buildReportAndReset(List<Pattern> patterns) {
+    public ProfilerReport buildReportAndReset(Optional<List<Pattern>> patterns) {
         long timestamp = System.currentTimeMillis();
         long spentTime = timestamp - lastReportTimestamp.getAndSet(timestamp);
 
@@ -133,7 +93,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
         report.setIndicators(profiler.getIndicators()
                 .entrySet()
                 .stream()
-                .filter(entry -> patterns
+                .filter(entry -> ! patterns.isPresent() || patterns.get()
                         .stream()
                         .anyMatch(p -> p.matcher(entry.getKey()).matches()))
                 .collect(Collectors.toMap(Map.Entry::getKey,
@@ -153,9 +113,9 @@ class ProfilerReporterImpl implements ProfilerReporter {
             for (Iterator<Map.Entry<String, SharedCounters>> iterator = sharedCounters.entrySet().iterator();
                  iterator.hasNext(); ) {
                 Map.Entry<String, SharedCounters> entry = iterator.next();
-                if( ! patterns
-                    .stream()
-                    .anyMatch(p -> p.matcher(entry.getKey()).matches())) {
+                if( patterns.isPresent() && ! patterns.get()
+                   .stream()
+                   .anyMatch(p -> p.matcher(entry.getKey()).matches())) {
                     continue;
                 }
                 ProfilerCallReport counterReport = buildReportAndReset(entry.getKey(), entry.getValue(), spentTime);

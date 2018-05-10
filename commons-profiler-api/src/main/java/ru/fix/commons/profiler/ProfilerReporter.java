@@ -2,6 +2,7 @@ package ru.fix.commons.profiler;
 
 import java.util.regex.Pattern;
 import java.util.List;
+import java.util.Optional;
 
 public interface ProfilerReporter extends AutoCloseable {
 
@@ -20,5 +21,5 @@ public interface ProfilerReporter extends AutoCloseable {
     int setNumberOfActiveCallsToKeepBetweenReports(int number);
 
     ProfilerReport buildReportAndReset();
-    ProfilerReport buildReportAndReset(List<Pattern> patterns);
+    ProfilerReport buildReportAndReset(Optional<List<Pattern>> patterns);
 }
