@@ -20,5 +20,9 @@ public interface ProfilerReporter extends AutoCloseable {
     int setNumberOfActiveCallsToKeepBetweenReports(int number);
 
     ProfilerReport buildReportAndReset();
+
+    /**
+     * @return empty report in case of empty patterns
+     */
     ProfilerReport buildReportAndReset(List<Pattern> patterns);
 }

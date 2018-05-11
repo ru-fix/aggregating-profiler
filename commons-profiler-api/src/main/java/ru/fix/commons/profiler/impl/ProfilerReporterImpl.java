@@ -84,9 +84,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
         return buildReportAndReset(Optional.empty());
     }
 
-    /**
-     * in case of empty list empty report will return;
-     */
+
     @Override
     public ProfilerReport buildReportAndReset(List<Pattern> patterns) {
         return buildReportAndReset(Optional.ofNullable(patterns));
