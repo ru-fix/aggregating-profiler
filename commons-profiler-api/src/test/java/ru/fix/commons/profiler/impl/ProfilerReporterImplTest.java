@@ -10,7 +10,6 @@ import ru.fix.commons.profiler.ProfilerReport;
 import java.util.regex.Pattern;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -72,8 +71,7 @@ public class ProfilerReporterImplTest {
         List<Pattern> reList = new ArrayList<Pattern>();
         reList.add(Pattern.compile(".*RE"));
         ProfilerCallReport report = getCallReport(
-            reporter.buildReportAndReset(
-                Optional.of(reList)));
+            reporter.buildReportAndReset(reList));
 
         assertEquals(1, report.getCallsCount());
         assertEquals(30, report.getPayloadTotal());
@@ -88,8 +86,7 @@ public class ProfilerReporterImplTest {
 
         List<Pattern> reList = new ArrayList<Pattern>();
         reList.add(Pattern.compile(".*RE"));
-        ProfilerReport profilerReport = reporter.buildReportAndReset(
-            Optional.of(reList));
+        ProfilerReport profilerReport = reporter.buildReportAndReset(reList);
         assertNotNull(profilerReport.getProfilerCallReports());
         assertEquals(profilerReport.getProfilerCallReports().size(), 0);
     }
