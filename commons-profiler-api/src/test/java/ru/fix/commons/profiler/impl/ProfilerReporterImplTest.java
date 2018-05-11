@@ -7,6 +7,10 @@ import ru.fix.commons.profiler.ProfiledCall;
 import ru.fix.commons.profiler.ProfilerCallReport;
 import ru.fix.commons.profiler.ProfilerReport;
 
+import java.util.regex.Pattern;
+import java.util.List;
+import java.util.ArrayList;
+
 import static org.junit.Assert.*;
 
 
@@ -55,6 +59,36 @@ public class ProfilerReporterImplTest {
 
         assertEquals(1, report.getCallsCount());
         assertEquals(30, report.getPayloadTotal());
+    }
+
+    @Test
+    public void buildReportWithRegexp() {
+        ProfiledCall call = profiler.profiledCall("TestRE");
+        call.start();
+        //someMethod()
+        call.stop(30);
+
+        List<Pattern> reList = new ArrayList<Pattern>();
+        reList.add(Pattern.compile(".*RE"));
+        ProfilerCallReport report = getCallReport(
+            reporter.buildReportAndReset(reList));
+
+        assertEquals(1, report.getCallsCount());
+        assertEquals(30, report.getPayloadTotal());
+    }
+
+    @Test
+    public void buildReportWithRegexpFail() {
+        ProfiledCall call = profiler.profiledCall("TestR_E");
+        call.start();
+        //someMethod()
+        call.stop(30);
+
+        List<Pattern> reList = new ArrayList<Pattern>();
+        reList.add(Pattern.compile(".*RE"));
+        ProfilerReport profilerReport = reporter.buildReportAndReset(reList);
+        assertNotNull(profilerReport.getProfilerCallReports());
+        assertEquals(profilerReport.getProfilerCallReports().size(), 0);
     }
 
     private ProfilerCallReport getCallReport(ProfilerReport profilerReport) {

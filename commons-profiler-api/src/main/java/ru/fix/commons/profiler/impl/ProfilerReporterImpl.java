@@ -7,6 +7,7 @@ import ru.fix.commons.profiler.ProfilerReport;
 import ru.fix.commons.profiler.ProfilerReporter;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -80,6 +81,18 @@ class ProfilerReporterImpl implements ProfilerReporter {
 
     @Override
     public ProfilerReport buildReportAndReset() {
+        return buildReportAndReset(Optional.empty());
+    }
+
+    /**
+     * in case of empty list empty report will return;
+     */
+    @Override
+    public ProfilerReport buildReportAndReset(List<Pattern> patterns) {
+        return buildReportAndReset(Optional.ofNullable(patterns));
+    }
+
+    private ProfilerReport buildReportAndReset(Optional<List<Pattern>> patterns) {
         long timestamp = System.currentTimeMillis();
         long spentTime = timestamp - lastReportTimestamp.getAndSet(timestamp);
 
@@ -87,6 +100,9 @@ class ProfilerReporterImpl implements ProfilerReporter {
         report.setIndicators(profiler.getIndicators()
                 .entrySet()
                 .stream()
+                .filter(entry -> ! patterns.isPresent() || patterns.get()
+                        .stream()
+                        .anyMatch(p -> p.matcher(entry.getKey()).matches()))
                 .collect(Collectors.toMap(Map.Entry::getKey,
                         e -> {
                             try {
@@ -104,6 +120,11 @@ class ProfilerReporterImpl implements ProfilerReporter {
             for (Iterator<Map.Entry<String, SharedCounters>> iterator = sharedCounters.entrySet().iterator();
                  iterator.hasNext(); ) {
                 Map.Entry<String, SharedCounters> entry = iterator.next();
+                if( patterns.isPresent() && ! patterns.get()
+                   .stream()
+                   .anyMatch(p -> p.matcher(entry.getKey()).matches())) {
+                    continue;
+                }
                 ProfilerCallReport counterReport = buildReportAndReset(entry.getKey(), entry.getValue(), spentTime);
 
                 // skip and remove empty counter

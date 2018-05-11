@@ -1,5 +1,8 @@
 package ru.fix.commons.profiler;
 
+import java.util.regex.Pattern;
+import java.util.List;
+
 public interface ProfilerReporter extends AutoCloseable {
 
     /**
@@ -17,4 +20,5 @@ public interface ProfilerReporter extends AutoCloseable {
     int setNumberOfActiveCallsToKeepBetweenReports(int number);
 
     ProfilerReport buildReportAndReset();
+    ProfilerReport buildReportAndReset(List<Pattern> patterns);
 }
