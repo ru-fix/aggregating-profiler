@@ -5,11 +5,6 @@ plugins {
     java
 }
 
-apply {
-    plugin("java")
-}
-
-
 dependencies {
     /**
      * Runtime

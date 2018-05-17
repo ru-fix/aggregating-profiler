@@ -45,21 +45,13 @@ apply {
 }
 
 
-val repositoryUser by project
-val repositoryPassword by project
-val repositoryUrl by project
+val repositoryUser: String by project
+val repositoryPassword: String by project
+val repositoryUrl: String by project
 
 
 subprojects {
     group = "ru.fix"
-
-    plugins {
-        maven
-        signing
-        kotlin("jvm") version "${Vers.kotlin}"
-        id("org.jetbrains.dokka") version "${Vers.dokkav}"
-    }
-
 
     apply {
         plugin("maven")
