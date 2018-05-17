@@ -1,5 +1,5 @@
 object Vers {
-    val kotlin = "1.2.30"
+    val kotlin = "1.2.41"
     val sl4j = "1.7.25"
     val junit_gradle_plugin = "1.1.0"
     val dokkav = "0.9.14"
