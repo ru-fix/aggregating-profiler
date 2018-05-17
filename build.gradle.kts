@@ -44,10 +44,22 @@ apply {
     plugin("release")
 }
 
+fun fromEnv(key: String) = project.property(key) as? String ?: System.getenv(key)
 
-val repositoryUser: String? by project
-val repositoryPassword: String? by project
-val repositoryUrl: String? by project
+val repositoryUser = fromEnv("repositoryUrl")
+val repositoryPassword = fromEnv("repositoryPassword")
+val repositoryUrl = fromEnv("repositoryUrl")
+
+
+fun envToProp(key: String) =
+        if (ext.properties[key] == null) {
+            ext.properties.put(key, fromEnv(key))
+        } else {
+        }
+
+envToProp("signing.keyId")
+envToProp("signing.password")
+envToProp("signing.secretKeyRingFile")
 
 /*
 Travis env:
