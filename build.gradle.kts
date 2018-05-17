@@ -49,6 +49,17 @@ val repositoryUser: String? by project
 val repositoryPassword: String? by project
 val repositoryUrl: String? by project
 
+/*
+Travis env:
+repositoryUrl
+repositoryUser
+repositoryPassword
+signing.keyId
+signing.password
+signing.secretKeyRingFile
+deployGpgKeyEncryptionPassword
+*/
+
 
 subprojects {
     group = "ru.fix"
