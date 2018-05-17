@@ -44,7 +44,12 @@ apply {
     plugin("release")
 }
 
-fun fromEnv(key: String) = project.property(key) as? String ?: System.getenv(key)
+fun fromEnv(key: String) =
+        if (project.hasProperty(key)) {
+            project.property(key)
+        } else {
+            System.getenv(key)
+        }
 
 val repositoryUser = fromEnv("repositoryUrl")
 val repositoryPassword = fromEnv("repositoryPassword")
