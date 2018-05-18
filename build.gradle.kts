@@ -12,6 +12,8 @@ import org.gradle.internal.authentication.DefaultBasicAuthentication
 import org.gradle.kotlin.dsl.repositories
 import org.gradle.kotlin.dsl.version
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
 
 val groupId = "ru.fix"
 
@@ -26,6 +28,9 @@ buildscript {
     dependencies {
         classpath(Libs.gradleReleasePlugin)
         classpath("org.jetbrains.dokka:dokka-gradle-plugin:${Vers.dokkav}")
+        classpath(Libs.kotlin_stdlib)
+        classpath(Libs.kotlin_jre8)
+        classpath(Libs.kotlin_reflect)
     }
 }
 
@@ -44,38 +49,24 @@ apply {
     plugin("release")
 }
 
-fun fromEnv(key: String) =
-        if (project.hasProperty(key)) {
-            project.property(key)
-        } else {
-            System.getenv(key)
-        }
 
-val repositoryUser = fromEnv("repositoryUrl")
-val repositoryPassword = fromEnv("repositoryPassword")
-val repositoryUrl = fromEnv("repositoryUrl")
+val envConfig = EnvConfig {
+    if (ext.has(it)) {
+        ext[it] as? String
+    } else {
+        System.getenv(it)
+    }
+}
 
-
-fun envToProp(key: String) =
-        if (ext.properties[key] == null) {
-            ext.properties.put(key, fromEnv(key))
-        } else {
-        }
-
-envToProp("signing.keyId")
-envToProp("signing.password")
-envToProp("signing.secretKeyRingFile")
-
-/*
-Travis env:
-repositoryUrl
-repositoryUser
-repositoryPassword
-signing.keyId
-signing.password
-signing.secretKeyRingFile
-deployGpgKeyEncryptionPassword
-*/
+/**
+ * Project configuration
+ */
+val repositoryUser by envConfig
+val repositoryPassword by envConfig
+val repositoryUrl by envConfig
+val signingKeyId by envConfig
+val signingPassword by envConfig
+val signingSecretKeyRingFile by envConfig
 
 
 subprojects {
@@ -112,6 +103,17 @@ subprojects {
     }
 
     configure<SigningExtension> {
+
+        if (signingKeyId != null) {
+            ext["signing.keyId"] = signingKeyId
+            ext["signing.password"] = signingPassword
+            ext["signing.secretKeyRingFile"] = signingSecretKeyRingFile
+            isRequired = true
+        } else {
+            logger.warn("Signing keys not provided. Disable signing.")
+            isRequired = false
+        }
+
         sign(configurations.archives)
     }
 
