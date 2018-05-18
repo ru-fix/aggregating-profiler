@@ -94,8 +94,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
         long timestamp = System.currentTimeMillis();
         long spentTime = timestamp - lastReportTimestamp.getAndSet(timestamp);
 
-        ProfilerReport report = new ProfilerReport();
-        report.setIndicators(profiler.getIndicators()
+        Map<String, Long> indicators = profiler.getIndicators()
                 .entrySet()
                 .stream()
                 .filter(entry -> ! patterns.isPresent() || patterns.get()
@@ -109,7 +108,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
                                 log.error(ex.getMessage(), ex);
                             }
                             return null;
-                        })));
+                        }));
 
         List<ProfilerCallReport> collect = new ArrayList<>();
 
@@ -138,8 +137,8 @@ class ProfilerReporterImpl implements ProfilerReporter {
         }
 
         collect.sort(Comparator.comparing(ProfilerCallReport::getName));
-        report.setProfilerCallReports(collect);
-        return report;
+
+        return new ProfilerReport(indicators, collect);
     }
 
     private ProfilerCallReport buildReportAndReset(String name, SharedCounters counters, long elapsed) {
@@ -221,7 +220,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
         return Optional.ofNullable(longest[0]);
     }
 
-    private void cleanCounters(SharedCounters counters) {
+    private static void cleanCounters(SharedCounters counters) {
         counters.getCallsCount().reset();
 
         counters.getLatencyMax().set(0);
