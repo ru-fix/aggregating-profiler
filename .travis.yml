@@ -4,8 +4,9 @@ jdk:
 cache:
   directories:
   - "$HOME/.gradle"
-before_install:
-  - openssl aes-256-cbc -pass pass:$secretKeyRingFileEncryptionPassword -in $DEPLOY_DIR/secring.gpg.enc -out $DEPLOY_DIR/secring.gpg -d
+install: true
+before_script:
+  - openssl aes-256-cbc -pass pass:signingSecretKeyRingFile -in $DEPLOY_DIR/secring.gpg.enc -out $DEPLOY_DIR/secring.gpg -d
 script:
   - "./gradlew clean build"
 env:
