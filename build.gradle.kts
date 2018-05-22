@@ -37,14 +37,13 @@ buildscript {
 /**
  * Project configuration by properties and environment
  */
-fun envConfig() = object : ReadOnlyProperty<Any?, String> {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): String {
-        if (ext.has(property.name)) {
-            ext[property.name] as? String
-        } else {
-            System.getenv(property.name)
-        }
-    }
+fun envConfig() = object : ReadOnlyProperty<Any?, String?> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): String? =
+            if (ext.has(property.name)) {
+                ext[property.name] as? String
+            } else {
+                System.getenv(property.name)
+            }
 }
 
 val repositoryUser by envConfig()
@@ -53,7 +52,6 @@ val repositoryUrl by envConfig()
 val signingKeyId by envConfig()
 val signingPassword by envConfig()
 val signingSecretKeyRingFile by envConfig()
-
 
 repositories {
     jcenter()
@@ -105,13 +103,13 @@ subprojects {
 
     configure<SigningExtension> {
 
-        if (signingKeyId != null) {
+        if (!signingKeyId.isNullOrEmpty()) {
             ext["signing.keyId"] = signingKeyId
             ext["signing.password"] = signingPassword
             ext["signing.secretKeyRingFile"] = signingSecretKeyRingFile
             isRequired = true
         } else {
-            logger.warn("Signing keys not provided. Disable signing.")
+            logger.warn("${project.name}: Signing key not provided. Disable signing.")
             isRequired = false
         }
 
