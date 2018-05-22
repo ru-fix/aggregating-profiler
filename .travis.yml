@@ -17,7 +17,7 @@ jobs:
     - stage: deploy
       install: skip
       if: tag =~ ^\d+\.\d+\.\d+$
-      script: ./gradlew test
+      script: ./gradlew uploadArchives
 env:
   global:
   - signingSecretKeyRingFile="`pwd`/secring.gpg"
