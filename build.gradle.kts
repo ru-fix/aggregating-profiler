@@ -12,27 +12,48 @@ import org.gradle.internal.authentication.DefaultBasicAuthentication
 import org.gradle.kotlin.dsl.repositories
 import org.gradle.kotlin.dsl.version
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import kotlin.properties.Delegates
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 val groupId = "ru.fix"
 
 buildscript {
-
     repositories {
         jcenter()
         gradlePluginPortal()
         mavenCentral()
     }
-
     dependencies {
         classpath(Libs.gradleReleasePlugin)
-        classpath("org.jetbrains.dokka:dokka-gradle-plugin:${Vers.dokkav}")
+        classpath(Libs.dokkaGradlePlugin)
         classpath(Libs.kotlin_stdlib)
         classpath(Libs.kotlin_jre8)
         classpath(Libs.kotlin_reflect)
     }
 }
+
+
+/**
+ * Project configuration by properties and environment
+ */
+fun envConfig() = object : ReadOnlyProperty<Any?, String> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): String {
+        if (ext.has(property.name)) {
+            ext[property.name] as? String
+        } else {
+            System.getenv(property.name)
+        }
+    }
+}
+
+val repositoryUser by envConfig()
+val repositoryPassword by envConfig()
+val repositoryUrl by envConfig()
+val signingKeyId by envConfig()
+val signingPassword by envConfig()
+val signingSecretKeyRingFile by envConfig()
+
 
 repositories {
     jcenter()
@@ -48,26 +69,6 @@ plugins {
 apply {
     plugin("release")
 }
-
-
-val envConfig = EnvConfig {
-    if (ext.has(it)) {
-        ext[it] as? String
-    } else {
-        System.getenv(it)
-    }
-}
-
-/**
- * Project configuration
- */
-val repositoryUser by envConfig
-val repositoryPassword by envConfig
-val repositoryUrl by envConfig
-val signingKeyId by envConfig
-val signingPassword by envConfig
-val signingSecretKeyRingFile by envConfig
-
 
 subprojects {
     group = "ru.fix"
