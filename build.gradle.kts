@@ -94,6 +94,8 @@ subprojects {
 
         val javadoc = tasks.getByPath("javadoc") as Javadoc
         from(javadoc.destinationDir)
+
+        dependsOn(tasks.getByName("javadoc"))
     }
 
     artifacts {
