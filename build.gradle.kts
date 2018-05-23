@@ -66,7 +66,7 @@ plugins {
 }
 
 apply {
-    plugin("ru.fix.release")
+    plugin("ru.fix.gradle.release")
 }
 
 subprojects {
