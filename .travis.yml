@@ -6,18 +6,17 @@ cache:
   - "$HOME/.gradle"
 jobs:
   include:
-    - stage: signature-key
-      install: skip
-      script: openssl aes-256-cbc -K $encrypted_25e25e985c51_key -iv $encrypted_25e25e985c51_iv -in secring.gpg.enc -out secring.gpg -d
-
     - stage: build
+      if: tag IS blank
       install: skip
+      before_script: openssl aes-256-cbc -K $encrypted_25e25e985c51_key -iv $encrypted_25e25e985c51_iv -in secring.gpg.enc -out secring.gpg -d
       script: ./gradlew clean build
 
     - stage: deploy
-      install: skip
       if: tag =~ ^\d+\.\d+\.\d+$
-      script: ./gradlew uploadArchives
+      install: skip
+      before_script: openssl aes-256-cbc -K $encrypted_25e25e985c51_key -iv $encrypted_25e25e985c51_iv -in secring.gpg.enc -out secring.gpg -d
+      script: ./gradlew clean build uploadArchives
 env:
   global:
   - signingSecretKeyRingFile="`pwd`/secring.gpg"
