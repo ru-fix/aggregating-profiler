@@ -3,14 +3,17 @@ object Vers {
     val sl4j = "1.7.25"
     val junit_gradle_plugin = "1.1.0"
     val dokkav = "0.9.14"
+    val gradleReleasePlugin = "1.2-SNAPSHOT"
+//    val gradleReleasePlugin = "1.2.17"
 }
+
 
 object Libs {
     val kotlin_stdlib = "org.jetbrains.kotlin:kotlin-stdlib:${Vers.kotlin}"
     val kotlin_jre8 = "org.jetbrains.kotlin:kotlin-stdlib-jre8:${Vers.kotlin}"
     val kotlin_reflect = "org.jetbrains.kotlin:kotlin-reflect:${Vers.kotlin}"
 
-    val gradleReleasePlugin = "ru.fix:gradle-release-plugin:1.2.17"
+    val gradleReleasePlugin = "ru.fix:gradle-release-plugin:${Vers.gradleReleasePlugin}"
     val dokkaGradlePlugin =  "org.jetbrains.dokka:dokka-gradle-plugin:${Vers.dokkav}"
 
     val slf4j_api = "org.slf4j:slf4j-api:${Vers.sl4j}"

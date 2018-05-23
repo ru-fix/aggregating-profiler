@@ -2,7 +2,7 @@ import org.gradle.kotlin.dsl.kotlin
 import org.gradle.kotlin.dsl.maven
 import org.gradle.kotlin.dsl.repositories
 import java.net.URI
-import ru.fix.gradle.release.plugin.release.ReleaseExtension
+import ru.fix.gradle.release.plugin.ReleaseExtension
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.artifacts.dsl.*
@@ -20,6 +20,7 @@ val groupId = "ru.fix"
 
 buildscript {
     repositories {
+        mavenLocal()
         jcenter()
         gradlePluginPortal()
         mavenCentral()
@@ -65,7 +66,7 @@ plugins {
 }
 
 apply {
-    plugin("release")
+    plugin("ru.fix.gradle.release")
 }
 
 subprojects {
