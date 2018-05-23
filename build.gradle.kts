@@ -20,7 +20,6 @@ val groupId = "ru.fix"
 
 buildscript {
     repositories {
-        mavenLocal()
         jcenter()
         gradlePluginPortal()
         mavenCentral()
