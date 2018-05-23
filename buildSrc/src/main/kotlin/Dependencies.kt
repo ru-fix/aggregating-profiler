@@ -3,7 +3,7 @@ object Vers {
     val sl4j = "1.7.25"
     val junit_gradle_plugin = "1.1.0"
     val dokkav = "0.9.14"
-    val gradleReleasePlugin = "1.2-SNAPSHOT"
+    val gradleReleasePlugin = "1.2.18"
 }
 
 object Libs {
