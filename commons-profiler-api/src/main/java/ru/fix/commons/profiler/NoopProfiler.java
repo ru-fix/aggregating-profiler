@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class NoopProfiler implements Profiler {
 
-    public class NoopProfiledCall implements ProfiledCall{
+    public static class NoopProfiledCall implements ProfiledCall{
         AtomicBoolean isStopped = new AtomicBoolean();
         @Override
         public void call() {
