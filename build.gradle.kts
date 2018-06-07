@@ -73,6 +73,7 @@ subprojects {
 
     apply {
         plugin("maven")
+        plugin("maven-publish")
         plugin("signing")
         plugin("java")
     }

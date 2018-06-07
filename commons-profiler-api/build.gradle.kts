@@ -18,6 +18,7 @@ dependencies {
     testCompile(Libs.mockito)
     testCompile(Libs.slf4j_simple)
     testCompile(Libs.guava)
+    testCompile(Libs.hamcrest)
 }
 
 

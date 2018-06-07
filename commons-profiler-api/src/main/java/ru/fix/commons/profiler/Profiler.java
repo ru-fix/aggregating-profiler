@@ -1,5 +1,8 @@
 package ru.fix.commons.profiler;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
+
 /**
  * @author Kamil Asfandiyarov
  */
@@ -12,10 +15,23 @@ public interface Profiler {
     ProfiledCall profiledCall(String name);
 
     /**
+     * Creates and starts profiled call
+     */
+    default ProfiledCall startProfiledCall(String name) {
+        return profiledCall(name).start();
+    }
+
+    <T> CompletableFuture<T> profiledCall(String name, Supplier<CompletableFuture<T>> cfSupplier);
+
+    default void makeCall(String name) {
+        profiledCall(name).call();
+    }
+
+    /**
      * Add named indicator to profiler.
      *
-     * @param name Name of indicator
-     *             Indicator name could be separated by dot '.'
+     * @param name               Name of indicator
+     *                           Indicator name could be separated by dot '.'
      * @param indicationProvider Indicator value provider. Must be thread-safe.
      */
     void attachIndicator(String name, IndicationProvider indicationProvider);

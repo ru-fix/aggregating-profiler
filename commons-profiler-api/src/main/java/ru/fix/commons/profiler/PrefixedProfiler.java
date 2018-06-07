@@ -1,7 +1,11 @@
 package ru.fix.commons.profiler;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
+
 /**
  * Attach fixed prefix to profiled calls and indicator names
+ *
  * @author Kamil Asfandiyarov
  */
 public class PrefixedProfiler implements Profiler {
@@ -16,6 +20,18 @@ public class PrefixedProfiler implements Profiler {
     @Override
     public ProfiledCall profiledCall(String name) {
         return profiler.profiledCall(profilerPrefix + name);
+    }
+
+    @Override
+    public <T> CompletableFuture<T> profiledCall(String name, Supplier<CompletableFuture<T>> cfSupplier) {
+        ProfiledCall call = startProfiledCall(name);
+        try {
+            return cfSupplier.get()
+                    .whenComplete((res, thr) -> call.stop());
+        } catch (Exception e) {
+            call.cancel();
+            throw e;
+        }
     }
 
     @Override

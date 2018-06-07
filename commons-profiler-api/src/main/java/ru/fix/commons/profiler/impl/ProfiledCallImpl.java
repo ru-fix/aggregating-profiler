@@ -103,6 +103,11 @@ class ProfiledCallImpl implements ProfiledCall {
     }
 
     @Override
+    public void close() {
+        stop(1);
+    }
+
+    @Override
     public boolean isStopped() {
         return !started.get();
     }

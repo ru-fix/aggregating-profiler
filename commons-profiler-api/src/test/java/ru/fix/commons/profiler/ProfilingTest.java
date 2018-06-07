@@ -13,8 +13,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 
 /**
@@ -71,7 +71,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertTrue(report.callsThroughput < 60);
+            assertThat(report.callsThroughput, lessThan(60L));
         }
     }
 
@@ -96,7 +96,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertEquals(true, report.minLatency >= 90);
+            assertThat(report.minLatency, greaterThanOrEqualTo(90L));
         }
     }
 
@@ -127,7 +127,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertEquals(true, report.callsThroughput <= 110);
+            assertThat(report.callsThroughput, lessThanOrEqualTo(110L));
         }
     }
 
@@ -156,7 +156,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertEquals(true, report.minLatency >= 30);
+            assertThat(report.minLatency, greaterThanOrEqualTo(30L));
         }
     }
 
@@ -217,7 +217,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertEquals(true, report.minLatency >= 250);
+            assertThat(report.minLatency, greaterThanOrEqualTo(250L));
         }
     }
 
@@ -293,7 +293,7 @@ public class ProfilingTest {
         call2.stop();
 
         ProfilerReport report = reporter.buildReportAndReset();
-        assertEquals(true, report.getIndicators().isEmpty());
+        assertTrue(report.getIndicators().isEmpty());
         assertEquals(2, report.getProfilerCallReports().size());
         assertEquals(2L, report.getProfilerCallReports().get(0).getCallsCount());
         assertEquals("call_1", report.getProfilerCallReports().get(0).getName());
@@ -308,7 +308,7 @@ public class ProfilingTest {
         call2.stop();
 
         report = reporter.buildReportAndReset();
-        assertEquals(true, report.getIndicators().isEmpty());
+        assertTrue(report.getIndicators().isEmpty());
         assertEquals(1, report.getProfilerCallReports().size());
         assertEquals(3L, report.getProfilerCallReports().get(0).getCallsCount());
         assertEquals("call_2", report.getProfilerCallReports().get(0).getName());
@@ -330,8 +330,7 @@ public class ProfilingTest {
         for (int i = 0; i < writers; i++) {
             executorService.execute(() -> {
                 while (isRunning.get()) {
-                    ProfiledCall profiledCall = profiler.profiledCall(Thread.currentThread().getName());
-                    profiledCall.start();
+                    ProfiledCall profiledCall = profiler.startProfiledCall(Thread.currentThread().getName());
                     profiledCall.stop();
 
                     callCount.increment();
