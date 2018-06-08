@@ -28,7 +28,7 @@ buildscript {
         classpath(Libs.gradleReleasePlugin)
         classpath(Libs.dokkaGradlePlugin)
         classpath(Libs.kotlin_stdlib)
-        classpath(Libs.kotlin_jre8)
+        classpath(Libs.kotlin_jdk8)
         classpath(Libs.kotlin_reflect)
     }
 }

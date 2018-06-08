@@ -111,4 +111,9 @@ class ProfiledCallImpl implements ProfiledCall {
     public boolean isStopped() {
         return !started.get();
     }
+
+    @Override
+    public String toString() {
+        return profiledCallName;
+    }
 }

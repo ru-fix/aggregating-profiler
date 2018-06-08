@@ -1,7 +1,6 @@
 package ru.fix.commons.profiler.impl;
 
 import com.google.common.util.concurrent.RateLimiter;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,8 +10,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -88,9 +91,9 @@ public class MaxThroughputCalculatorTest {
 
         int approximately = (int) (perInSec * 0.10);
         assertTrue(
-                "Throughput is not correct. " + mess,
-                maxThrp > (perInSec - approximately) && maxThrp < (perInSec + approximately)
-                );
+                maxThrp > (perInSec - approximately) && maxThrp < (perInSec + approximately),
+                "Throughput is not correct. " + mess
+        );
     }
 
 

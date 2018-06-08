@@ -1,8 +1,8 @@
 package ru.fix.commons.profiler.impl;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import ru.fix.commons.profiler.ProfiledCall;
 import ru.fix.commons.profiler.ProfilerCallReport;
 import ru.fix.commons.profiler.ProfilerReport;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -23,13 +23,13 @@ public class ProfilerReporterImplTest {
     private SimpleProfiler profiler;
     private ProfilerReporterImpl reporter;
 
-    @Before
+    @BeforeEach
     public void setup() {
         profiler = new SimpleProfiler();
         reporter = new ProfilerReporterImpl(profiler);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         reporter.close();
     }
@@ -44,7 +44,7 @@ public class ProfilerReporterImplTest {
 
         assertEquals(1, report.getCallsCount());
         assertEquals(1, report.getPayloadTotal());
-        assertTrue("report time is not correct: " + report, report.getReportingTime() < 1000);
+        assertTrue(report.getReportingTime() < 1000, "report time is not correct: " + report);
     }
 
     @Test
