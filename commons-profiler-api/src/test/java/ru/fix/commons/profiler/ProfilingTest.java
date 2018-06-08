@@ -332,7 +332,7 @@ public class ProfilingTest {
         for (int i = 0; i < writers; i++) {
             executorService.execute(() -> {
                 while (isRunning.get()) {
-                    ProfiledCall profiledCall = profiler.startProfiledCall(Thread.currentThread().getName());
+                    ProfiledCall profiledCall = profiler.start(Thread.currentThread().getName());
                     profiledCall.stop();
 
                     callCount.increment();

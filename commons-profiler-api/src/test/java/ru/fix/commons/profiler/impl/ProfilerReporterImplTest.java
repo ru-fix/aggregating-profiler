@@ -36,7 +36,7 @@ public class ProfilerReporterImplTest {
 
     @Test
     public void callStopWithoutParams() {
-        ProfiledCall call = profiler.startProfiledCall("Test");
+        ProfiledCall call = profiler.start("Test");
         //someMethod()
         call.stop();
 
@@ -49,7 +49,7 @@ public class ProfilerReporterImplTest {
 
     @Test
     public void callStopWithParams() {
-        ProfiledCall call = profiler.startProfiledCall("Test");
+        ProfiledCall call = profiler.start("Test");
         //someMethod()
         call.stop(30);
 
@@ -61,7 +61,7 @@ public class ProfilerReporterImplTest {
 
     @Test
     public void buildReportWithRegexp() {
-        ProfiledCall call = profiler.startProfiledCall("TestRE");
+        ProfiledCall call = profiler.start("TestRE");
         //someMethod()
         call.stop(30);
 
@@ -76,7 +76,7 @@ public class ProfilerReporterImplTest {
 
     @Test
     public void buildReportWithRegexpFail() {
-        ProfiledCall call = profiler.startProfiledCall("TestR_E");
+        ProfiledCall call = profiler.start("TestR_E");
         //someMethod()
         call.stop(30);
 

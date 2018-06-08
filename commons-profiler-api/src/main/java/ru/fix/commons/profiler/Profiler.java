@@ -18,7 +18,7 @@ public interface Profiler {
      * Creates and starts profiled call
      * shortcut of {@code profiledCall(<name>).start()}
      */
-    default ProfiledCall startProfiledCall(String name) {
+    default ProfiledCall start(String name) {
         return profiledCall(name).start();
     }
 
@@ -28,23 +28,43 @@ public interface Profiler {
      * @param name       name of profiling call
      * @param cfSupplier CompletableFuture provider
      */
-    default <T> CompletableFuture<T> profiledCall(String name, Supplier<CompletableFuture<T>> cfSupplier) {
-        ProfiledCall call = startProfiledCall(name);
-        CompletableFuture<T> future;
+    default <R> CompletableFuture<R> profileFuture(String name, Supplier<CompletableFuture<R>> cfSupplier) {
+        ProfiledCall call = start(name);
+        CompletableFuture<R> future;
         try {
             future = cfSupplier.get();
         } catch (Exception e) {
-            call.cancel();
+            call.close();
             throw e;
         }
-        return future.whenComplete((res, thr) -> call.stop());
+
+        return future.whenComplete((res, thr) -> {
+            if (thr != null) {
+                // drop the call
+                call.close();
+            } else {
+                call.stop();
+            }
+        });
+    }
+
+    default <R> R profile(String name, Supplier<R> block) {
+        ProfiledCall call = start(name);
+        try {
+            R r = block.get();
+            call.stop();
+            return r;
+        } finally {
+            // drop
+            call.close();
+        }
     }
 
     /**
      * Creates and calls profiled call,
      * shortcut of {@code profiledCall(<name>).call()}
      */
-    default void makeCall(String name) {
+    default void call(String name) {
         profiledCall(name).call();
     }
 

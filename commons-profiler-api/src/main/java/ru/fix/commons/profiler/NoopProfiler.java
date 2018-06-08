@@ -1,7 +1,6 @@
 package ru.fix.commons.profiler;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -10,10 +9,13 @@ import java.util.function.Supplier;
 public class NoopProfiler implements Profiler {
 
     public static class NoopProfiledCall implements ProfiledCall {
-        AtomicBoolean isStopped = new AtomicBoolean();
-
         @Override
         public void call() {
+        }
+
+        @Override
+        public void call(long payload) {
+
         }
 
         @Override
@@ -22,16 +24,7 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
-        public void stop() {
-            isStopped.set(true);
-        }
-
-        @Override
         public void stop(long payload) {
-        }
-
-        @Override
-        public void cancel() {
         }
 
         @Override
@@ -39,19 +32,23 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
-        public boolean isStopped() {
-            return isStopped.get();
+        public void stopIfRunning(long payload) {
+        }
+
+        @Override
+        public <R> CompletableFuture<R> profileFuture(Supplier<CompletableFuture<R>> cfSupplier) {
+            return cfSupplier.get();
+        }
+
+        @Override
+        public <R> R profile(Supplier<R> block) {
+            return block.get();
         }
     }
 
     @Override
     public ProfiledCall profiledCall(String name) {
         return new NoopProfiledCall();
-    }
-
-    @Override
-    public <T> CompletableFuture<T> profiledCall(String name, Supplier<CompletableFuture<T>> cfSupplier) {
-        return cfSupplier.get();
     }
 
     @Override
