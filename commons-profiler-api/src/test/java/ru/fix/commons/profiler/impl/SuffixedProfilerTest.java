@@ -1,7 +1,7 @@
 package ru.fix.commons.profiler.impl;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import ru.fix.commons.profiler.PrefixedProfiler;
 import ru.fix.commons.profiler.Profiler;
 
@@ -14,7 +14,7 @@ public class SuffixedProfilerTest {
         Profiler root = new SuffixedProfiler(sp, "root");
         Profiler node1 = new SuffixedProfiler(root, "node1");
 
-        Assert.assertEquals("root.node1.some_metric", node1.profiledCall("some_metric").toString());
+        assertEquals("root.node1.some_metric", node1.profiledCall("some_metric").toString());
     }
 
     @Test
@@ -24,7 +24,7 @@ public class SuffixedProfilerTest {
         Profiler root = new SuffixedProfiler(sp, "root.");
         Profiler node1 = new SuffixedProfiler(root, ".node1.");
 
-        Assert.assertEquals("root.node1.some_metric", node1.profiledCall("some_metric").toString());
+        assertEquals("root.node1.some_metric", node1.profiledCall("some_metric").toString());
     }
 
     @Test
@@ -34,7 +34,7 @@ public class SuffixedProfilerTest {
         Profiler root = new SuffixedProfiler(srv1, "root");
         Profiler node1 = new SuffixedProfiler(root, "node1");
 
-        Assert.assertEquals("srv1.root.node1.some_metric", node1.profiledCall("some_metric").toString());
+        assertEquals("srv1.root.node1.some_metric", node1.profiledCall("some_metric").toString());
 
     }
 

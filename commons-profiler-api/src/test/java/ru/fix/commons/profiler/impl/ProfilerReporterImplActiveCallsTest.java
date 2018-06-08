@@ -1,8 +1,10 @@
 package ru.fix.commons.profiler.impl;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.*;
+
 import ru.fix.commons.profiler.ProfiledCall;
 import ru.fix.commons.profiler.ProfilerCallReport;
 import ru.fix.commons.profiler.ProfilerReport;
@@ -10,7 +12,6 @@ import ru.fix.commons.profiler.ProfilerReport;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import static org.junit.Assert.*;
 
 /**
  * @author Tim Urmancheev
@@ -22,7 +23,7 @@ public class ProfilerReporterImplActiveCallsTest {
 
     private final int numberOfActiveCallsToKeepBetweenReports = 20;
 
-    @Before
+    @BeforeEach
     public void setup() {
         profiler = new SimpleProfiler();
         reporter = new ProfilerReporterImpl(
@@ -32,7 +33,7 @@ public class ProfilerReporterImplActiveCallsTest {
         );
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         reporter.close();
     }
