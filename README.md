@@ -1,4 +1,6 @@
 # commons-profiler
+[![Maven Central](https://img.shields.io/maven-central/v/ru.fix/commons-profiler-api.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22ru.fix%22)
+
 Commons Profiler provide basic API for application metrics measurement.  
 Profiler consist of two parts: metric recording API to trace events and metric reporting API 
 to export metrics to external storage system or in simple case into stdout.  

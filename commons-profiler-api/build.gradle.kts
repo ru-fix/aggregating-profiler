@@ -14,7 +14,14 @@ dependencies {
     /**
      * Tests
      */
-    testCompile(Libs.junit)
+
+    testImplementation(Libs.junit_api)
+    testRuntimeOnly(Libs.junit_engine)
+
+    testCompile(Libs.kotlin_jdk8)
+    testCompile(Libs.kotlin_stdlib)
+    testCompile(Libs.kotlin_reflect)
+
     testCompile(Libs.mockito)
     testCompile(Libs.slf4j_simple)
     testCompile(Libs.guava)
