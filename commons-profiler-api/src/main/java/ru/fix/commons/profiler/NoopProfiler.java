@@ -51,7 +51,7 @@ public class NoopProfiler implements Profiler {
 
     @Override
     public <T> CompletableFuture<T> profiledCall(String name, Supplier<CompletableFuture<T>> cfSupplier) {
-        return null;
+        return cfSupplier.get();
     }
 
     @Override

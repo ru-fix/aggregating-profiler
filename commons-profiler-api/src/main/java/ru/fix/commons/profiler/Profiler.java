@@ -21,7 +21,17 @@ public interface Profiler {
         return profiledCall(name).start();
     }
 
-    <T> CompletableFuture<T> profiledCall(String name, Supplier<CompletableFuture<T>> cfSupplier);
+    default <T> CompletableFuture<T> profiledCall(String name, Supplier<CompletableFuture<T>> cfSupplier) {
+        ProfiledCall call = startProfiledCall(name);
+        CompletableFuture<T> future;
+        try {
+            future = cfSupplier.get();
+        } catch (Exception e) {
+            call.cancel();
+            throw e;
+        }
+        return future.whenComplete((res, thr) -> call.stop());
+    }
 
     default void makeCall(String name) {
         profiledCall(name).call();

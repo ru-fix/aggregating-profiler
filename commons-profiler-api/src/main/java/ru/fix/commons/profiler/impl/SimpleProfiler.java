@@ -6,11 +6,9 @@ import ru.fix.commons.profiler.Profiler;
 import ru.fix.commons.profiler.ProfilerReporter;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 
 /**
@@ -24,20 +22,6 @@ public class SimpleProfiler implements Profiler {
     @Override
     public ProfiledCall profiledCall(String name) {
         return new ProfiledCallImpl(this, name);
-    }
-
-    @Override
-    public <T> CompletableFuture<T> profiledCall(String name, Supplier<CompletableFuture<T>> cfSupplier) {
-        ProfiledCall call = startProfiledCall(name);
-        CompletableFuture<T> future;
-        try {
-            future = cfSupplier.get();
-        } catch (Exception e) {
-            call.cancel();
-            throw e;
-        }
-
-        return future.whenComplete((res, thr) -> call.stop());
     }
 
     public SimpleProfiler registerReporter(ProfilerReporterImpl reporter) {
