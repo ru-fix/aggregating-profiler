@@ -16,11 +16,18 @@ public interface Profiler {
 
     /**
      * Creates and starts profiled call
+     * shortcut of {@code profiledCall(<name>).start()}
      */
     default ProfiledCall startProfiledCall(String name) {
         return profiledCall(name).start();
     }
 
+    /**
+     * Measure provided feature execution
+     *
+     * @param name       name of profiling call
+     * @param cfSupplier CompletableFuture provider
+     */
     default <T> CompletableFuture<T> profiledCall(String name, Supplier<CompletableFuture<T>> cfSupplier) {
         ProfiledCall call = startProfiledCall(name);
         CompletableFuture<T> future;
@@ -33,6 +40,10 @@ public interface Profiler {
         return future.whenComplete((res, thr) -> call.stop());
     }
 
+    /**
+     * Creates and calls profiled call,
+     * shortcut of {@code profiledCall(<name>).call()}
+     */
     default void makeCall(String name) {
         profiledCall(name).call();
     }
