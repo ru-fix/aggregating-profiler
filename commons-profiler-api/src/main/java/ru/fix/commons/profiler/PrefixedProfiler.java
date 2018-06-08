@@ -25,13 +25,14 @@ public class PrefixedProfiler implements Profiler {
     @Override
     public <T> CompletableFuture<T> profiledCall(String name, Supplier<CompletableFuture<T>> cfSupplier) {
         ProfiledCall call = startProfiledCall(name);
+        CompletableFuture<T> future;
         try {
-            return cfSupplier.get()
-                    .whenComplete((res, thr) -> call.stop());
+            future = cfSupplier.get();
         } catch (Exception e) {
             call.cancel();
             throw e;
         }
+        return future.whenComplete((res, thr) -> call.stop());
     }
 
     @Override
