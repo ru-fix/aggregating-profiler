@@ -25,10 +25,8 @@ object Libs {
     val guava = "com.google.guava:guava:21.0"
     val mockito = "org.mockito:mockito-all:1.10.19"
     val mockito_kotiln = "com.nhaarman:mockito-kotlin-kt1.1:1.5.0"
-    val kotlin_logging = "io.github.microutils:kotlin-logging:1.4.9"
+    val kotlin_logging = "io.github.microutils:kotlin-logging:${Vers.kotlin_logging}"
     val hamcrest = "org.hamcrest:hamcrest-all:1.3"
-
-    val junit_gradle_plugin = "org.junit.platform:junit-platform-gradle-plugin:${Vers.junit_gradle_plugin}"
 }
 
 
