@@ -11,12 +11,11 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class MaxThroughputCalculator {
     private static final Logger log = LoggerFactory.getLogger(MaxThroughputCalculator.class);
+    private static final long ONE_SECOND_MS = 1_000;
 
     private final AtomicLong maxCallCountPerSecond = new AtomicLong();
     private final AtomicLong callCount = new AtomicLong();
     private final AtomicLong timeBeginningOfSecond = new AtomicLong();
-    private static final long ONE_SECOND_MS = 1_000;
-
 
     public void call() {
         call(1);
