@@ -22,6 +22,14 @@ public interface Profiler {
         return profiledCall(name).start();
     }
 
+    default <R> R profile(String name, Supplier<R> block) {
+        return start(name).profile(block);
+    }
+
+    default void profile(String name, Runnable block) {
+        start(name).profile(block);
+    }
+
     /**
      * Measure provided feature execution
      *
@@ -29,35 +37,12 @@ public interface Profiler {
      * @param cfSupplier CompletableFuture provider
      */
     default <R> CompletableFuture<R> profileFuture(String name, Supplier<CompletableFuture<R>> cfSupplier) {
-        ProfiledCall call = start(name);
-        CompletableFuture<R> future;
-        try {
-            future = cfSupplier.get();
-        } catch (Exception e) {
-            call.close();
-            throw e;
-        }
-
-        return future.whenComplete((res, thr) -> {
-            if (thr != null) {
-                // drop the call
-                call.close();
-            } else {
-                call.stop();
-            }
-        });
+        return start(name).profileFuture(cfSupplier);
     }
 
-    default <R> R profile(String name, Supplier<R> block) {
-        ProfiledCall call = start(name);
-        try {
-            R r = block.get();
-            call.stop();
-            return r;
-        } finally {
-            // drop
-            call.close();
-        }
+    default <R, T extends Throwable> CompletableFuture<R> profileFuture(String name,
+                                                                        ThrowableSupplier<R, T> throwableSupplier) throws T {
+        return start(name).profileFuture(throwableSupplier);
     }
 
     /**

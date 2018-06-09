@@ -36,13 +36,23 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
+        public <R> R profile(Supplier<R> block) {
+            return block.get();
+        }
+
+        @Override
+        public void profile(Runnable block) {
+            block.run();
+        }
+
+        @Override
         public <R> CompletableFuture<R> profileFuture(Supplier<CompletableFuture<R>> cfSupplier) {
             return cfSupplier.get();
         }
 
         @Override
-        public <R> R profile(Supplier<R> block) {
-            return block.get();
+        public <R, T extends Throwable> CompletableFuture<R> profileFuture(ThrowableSupplier<R, T> throwableSupplier) throws T {
+            return throwableSupplier.get(this);
         }
     }
 

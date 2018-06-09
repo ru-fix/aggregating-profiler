@@ -3,6 +3,7 @@ package ru.fix.commons.profiler.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.fix.commons.profiler.ProfiledCall;
+import ru.fix.commons.profiler.ThrowableSupplier;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -116,6 +117,27 @@ class ProfiledCallImpl implements ProfiledCall {
     }
 
     @Override
+    public <R> R profile(Supplier<R> block) {
+        try {
+            R r = block.get();
+            stop();
+            return r;
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public void profile(Runnable block) {
+        try {
+            block.run();
+            stop();
+        } finally {
+            close();
+        }
+    }
+
+    @Override
     public <R> CompletableFuture<R> profileFuture(Supplier<CompletableFuture<R>> cfSupplier) {
         CompletableFuture<R> future;
         try {
@@ -135,14 +157,22 @@ class ProfiledCallImpl implements ProfiledCall {
     }
 
     @Override
-    public <R> R profile(Supplier<R> block) {
+    public <R, T extends Throwable> CompletableFuture<R> profileFuture(ThrowableSupplier<R, T> cfSupplier) throws T {
+        CompletableFuture<R> future;
         try {
-            R r = block.get();
-            stop();
-            return r;
-        } finally {
+            future = cfSupplier.get(this);
+        } catch (Throwable e) {
             close();
+            throw e;
         }
+
+        return future.whenComplete((res, thr) -> {
+            if (thr != null) {
+                close();
+            } else {
+                stop();
+            }
+        });
     }
 
     @Override
