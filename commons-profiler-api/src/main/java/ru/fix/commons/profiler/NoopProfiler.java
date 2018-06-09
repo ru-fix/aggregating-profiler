@@ -15,7 +15,6 @@ public class NoopProfiler implements Profiler {
 
         @Override
         public void call(long payload) {
-
         }
 
         @Override

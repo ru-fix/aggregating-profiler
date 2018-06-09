@@ -52,10 +52,13 @@ public interface ProfiledCall extends AutoCloseable {
     void stopIfRunning(long payload);
 
     /**
-     * Profile provided block of code
+     * Profile provided block of code which returns some result
      */
     <R> R profile(Supplier<R> block);
 
+    /**
+     * Profile provided block of code without result
+     */
     void profile(Runnable block);
 
     /**
@@ -63,6 +66,9 @@ public interface ProfiledCall extends AutoCloseable {
      */
     <R> CompletableFuture<R> profileFuture(Supplier<CompletableFuture<R>> cfSupplier);
 
+    /**
+     * Profile future where supplier throws checked exceptions
+     */
     <R, T extends Throwable> CompletableFuture<R> profileFuture(ThrowableSupplier<R, T> throwableSupplier) throws T;
 
     /**
