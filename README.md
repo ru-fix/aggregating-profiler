@@ -1,9 +1,19 @@
 # commons-profiler
 [![Maven Central](https://img.shields.io/maven-central/v/ru.fix/commons-profiler-api.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22ru.fix%22)
 
-Commons Profiler provide basic API for application metrics measurement.  
-Profiler consist of two parts: metric recording API to trace events and metric reporting API 
-to export metrics to external storage system or in simple case into stdout.  
+Aggregating Profiler provide basic API for application metrics measurement.
+
+Profiler records metrics and accumulates them in memory. 
+Then profiler flushes aggregated values to external store. 
+It could be timeseries databse like Graphite, OpenTSDB, InfluxDB or Prometheus or relation database like PostgreSql.
+You can tune time span for aggregation and flushing rate.
+
+This approach with pre-aggregation metrics in memory allows profiler to record huge amount of measurements 
+and do not depend on storage performance.     
+
+Profiler consist of two parts: 
+* Metric recording API to trace events 
+* Metric reporting API to flush metrics aggregates to external storage system
 
 ## Metric recording
 
