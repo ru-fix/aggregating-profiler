@@ -4,6 +4,7 @@ import ru.fix.commons.profiler.util.NameNormalizer;
 
 /**
  * Attach fixed prefix to profiled calls and indicator names
+ *
  * @author Kamil Asfandiyarov
  */
 public class PrefixedProfiler implements Profiler {

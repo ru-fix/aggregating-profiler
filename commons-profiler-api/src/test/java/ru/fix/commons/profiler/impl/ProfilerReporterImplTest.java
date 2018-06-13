@@ -1,17 +1,17 @@
 package ru.fix.commons.profiler.impl;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import ru.fix.commons.profiler.ProfiledCall;
 import ru.fix.commons.profiler.ProfilerCallReport;
 import ru.fix.commons.profiler.ProfilerReport;
 
-import java.util.regex.Pattern;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -23,21 +23,20 @@ public class ProfilerReporterImplTest {
     private SimpleProfiler profiler;
     private ProfilerReporterImpl reporter;
 
-    @Before
+    @BeforeEach
     public void setup() {
         profiler = new SimpleProfiler();
         reporter = new ProfilerReporterImpl(profiler);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         reporter.close();
     }
 
     @Test
     public void callStopWithoutParams() {
-        ProfiledCall call = profiler.profiledCall("Test");
-        call.start();
+        ProfiledCall call = profiler.start("Test");
         //someMethod()
         call.stop();
 
@@ -45,13 +44,12 @@ public class ProfilerReporterImplTest {
 
         assertEquals(1, report.getCallsCount());
         assertEquals(1, report.getPayloadTotal());
-        assertTrue("report time is not correct: " + report, report.getReportingTime() < 1000);
+        assertTrue(report.getReportingTime() < 1000, "report time is not correct: " + report);
     }
 
     @Test
     public void callStopWithParams() {
-        ProfiledCall call = profiler.profiledCall("Test");
-        call.start();
+        ProfiledCall call = profiler.start("Test");
         //someMethod()
         call.stop(30);
 
@@ -63,15 +61,14 @@ public class ProfilerReporterImplTest {
 
     @Test
     public void buildReportWithRegexp() {
-        ProfiledCall call = profiler.profiledCall("TestRE");
-        call.start();
+        ProfiledCall call = profiler.start("TestRE");
         //someMethod()
         call.stop(30);
 
         List<Pattern> reList = new ArrayList<Pattern>();
         reList.add(Pattern.compile(".*RE"));
         ProfilerCallReport report = getCallReport(
-            reporter.buildReportAndReset(reList));
+                reporter.buildReportAndReset(reList));
 
         assertEquals(1, report.getCallsCount());
         assertEquals(30, report.getPayloadTotal());
@@ -79,8 +76,7 @@ public class ProfilerReporterImplTest {
 
     @Test
     public void buildReportWithRegexpFail() {
-        ProfiledCall call = profiler.profiledCall("TestR_E");
-        call.start();
+        ProfiledCall call = profiler.start("TestR_E");
         //someMethod()
         call.stop(30);
 

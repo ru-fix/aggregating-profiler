@@ -14,7 +14,7 @@ object Libs {
     val kotlin_reflect = "org.jetbrains.kotlin:kotlin-reflect:${Vers.kotlin}"
 
     val gradleReleasePlugin = "ru.fix:gradle-release-plugin:${Vers.gradleReleasePlugin}"
-    val dokkaGradlePlugin =  "org.jetbrains.dokka:dokka-gradle-plugin:${Vers.dokkav}"
+    val dokkaGradlePlugin = "org.jetbrains.dokka:dokka-gradle-plugin:${Vers.dokkav}"
 
     val slf4j_api = "org.slf4j:slf4j-api:${Vers.sl4j}"
     val slf4j_simple = "org.slf4j:slf4j-simple:${Vers.sl4j}"
@@ -26,6 +26,7 @@ object Libs {
     val mockito = "org.mockito:mockito-all:1.10.19"
     val mockito_kotiln = "com.nhaarman:mockito-kotlin-kt1.1:1.5.0"
     val kotlin_logging = "io.github.microutils:kotlin-logging:${Vers.kotlin_logging}"
+    val hamcrest = "org.hamcrest:hamcrest-all:1.3"
 }
 
 

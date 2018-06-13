@@ -1,16 +1,20 @@
 package ru.fix.commons.profiler;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 /**
  * Test purpose stub
  */
 public class NoopProfiler implements Profiler {
 
-    public static class NoopProfiledCall implements ProfiledCall{
-        AtomicBoolean isStopped = new AtomicBoolean();
+    public static class NoopProfiledCall implements ProfiledCall {
         @Override
         public void call() {
+        }
+
+        @Override
+        public void call(long payload) {
         }
 
         @Override
@@ -19,21 +23,35 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
-        public void stop() {
-            isStopped.set(true);
-        }
-
-        @Override
         public void stop(long payload) {
         }
 
         @Override
-        public void cancel() {
+        public void close() {
         }
 
         @Override
-        public boolean isStopped() {
-            return isStopped.get();
+        public void stopIfRunning(long payload) {
+        }
+
+        @Override
+        public <R> R profile(Supplier<R> block) {
+            return block.get();
+        }
+
+        @Override
+        public void profile(Runnable block) {
+            block.run();
+        }
+
+        @Override
+        public <R> CompletableFuture<R> profileFuture(Supplier<CompletableFuture<R>> cfSupplier) {
+            return cfSupplier.get();
+        }
+
+        @Override
+        public <R, T extends Throwable> CompletableFuture<R> profileFuture(ThrowableSupplier<R, T> futureSupplier) throws T {
+            return futureSupplier.get(this);
         }
     }
 

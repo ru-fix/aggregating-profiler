@@ -13,7 +13,7 @@ public class NameNormalizer {
         }
 
         if (s.endsWith(".")) {
-            s = s.substring(0, s.length()-1);
+            s = s.substring(0, s.length() - 1);
         }
 
         return s;
