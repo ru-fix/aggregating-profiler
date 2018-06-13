@@ -157,10 +157,10 @@ class ProfiledCallImpl implements ProfiledCall {
     }
 
     @Override
-    public <R, T extends Throwable> CompletableFuture<R> profileFuture(ThrowableSupplier<R, T> cfSupplier) throws T {
+    public <R, T extends Throwable> CompletableFuture<R> profileFuture(ThrowableSupplier<R, T> futureSupplier) throws T {
         CompletableFuture<R> future;
         try {
-            future = cfSupplier.get(this);
+            future = futureSupplier.get(this);
         } catch (Throwable e) {
             close();
             throw e;
@@ -178,7 +178,7 @@ class ProfiledCallImpl implements ProfiledCall {
     @Override
     public void close() {
         if (!started.compareAndSet(true, false)) {
-            log.debug("close method called on profiler call that currently is not running: {}", profiledCallName);
+            // do nothing, if not started or stopped already
             return;
         }
         profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
