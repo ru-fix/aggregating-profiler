@@ -17,21 +17,14 @@ Profiler consist of two parts:
 
 ## Metric recording
 
-Suppose that we want to trace how much time it takes for SmartService to compute and return result.  
-We can  measure several metrics: 
- - latency - time between two points: when method invoked and when method completed);
- - throughput - how often method was invoked (invocation per second)
- - max throughput - we made measurement  during 2 minutes and want to find point in time 
- where throughput reached its maximum
- - callsCount - how many time method was invoked 
- 
-Here is and example how we can record such metrics with profiler.  
-In real life application you can use custom aspect to wrap method invocation, etc.  
- 
-Sync example: 
+### ProfiledCall
+Suppose that we want to trace how much time it takes for SmartService to compute and return result. 
+
+Sync service measurement: 
 ```java
 // Init single profiler instance per application 
 Profiler profiler = new SimpleProfiler();
+...
 
 // Create profiled call each time you want to make measurement 
 ProfiledCall call = profiler.profiledCall("smart.service");
@@ -41,43 +34,94 @@ SmartResult result = smartService.doSmartComputation();
 
 call.stop();
 ```
+or short version
 
-Async example: 
 ```java
-// Init single profiler instance per application
-Profiler profiler = new SimpleProfiler();
+ProfiledCall call = profiler.start("smart.service");
 
-// Create profiled call each time you want to make measurement
-// Profiled call could be started and closed in different threads
-ProfiledCall call = profiler.profiledCall("smart.service");
-call.start();
+SmartResult result = smartService.doSmartComputation();
+
+call.stop();
+```
+or even shorter
+```java
+SmartResult result = profiler.profile(
+        "smart.service",
+        () -> smartService.doSmartComputation());
+```
+
+Async service measurement: 
+```java
+ProfiledCall call = profiler.start("smart.service");
 
 CompletableFuture<SmartResult> result = smartService.doSmartComputation();
 
-result.thenRun(){ 
+result.whenComplete((exc, result)->{ 
     call.stop();
-}
-
+});
 ```
-
-Some times method invocation is not sufficient and you need to record information about payload 
-of the method. Profiler API provide a way to register integer value of custom payload: 
-
+or short version
 ```java
 
-long argumentForComputation = ...
-
-Profiler profiler = new SimpleProfiler();
-
-ProfiledCall call = profiler.profiledCall("smart.service,with.payload");
-call.start();
-
-Long paylaod = smartService.doAnotherSmartComputation(argumentForComputation);
-
-call.stop(argumentForComputation);
+CompletableFuture<SmartResult> result = profiler.profileFuture(
+        "smart.service",
+         () -> smartService.doSmartComputation());
 ```
 
+In real life application you can use custom aspect to wrap method invocation, etc.
+
+### ProfiledCall with payload
+Some times method invocation is not sufficient and you need to record information about payload 
+of the method. Profiler API provide a way to register integer value of custom method payload: 
+
+```java
+ProfiledCall call = profiler.start("batching.consumer");
+
+Entry[] processedData = consumer.processData();
+
+call.stop(processedData.size);
+```
+
+### Indicators
+Suppose you want to measure current state of the system, like how many pending request are in you buffer.
+In such cases `indicator` tracing could be very handy.
+```java
+//During service initialization
+profiler.attachIndicator("buffer.size", () -> buffer.size());
+
+//During service destruction
+profiler.dettachIndicator("buffer.size");
+```
+When you are attaching indicator you are saving lambda within profiler. 
+Each time profiler builds report and flushing it into external storage 
+such lambdas will be used to gather indicators values.
+
+
+### ProfiledCall metrics  
+Here is list of metrics that Profiler will accumulate and flush to external storage for each ProfiledCall:
+ 
+ProfiledCalls:
+* latency 
+* 
+*
+ - latency - time between two points: when method invoked and when method completed);
+ - throughput - how often method was invoked (invocation per second)
+ - max throughput - we made measurement  during 2 minutes and want to find point in time 
+ where throughput reached its maximum
+ - callsCount - how many time method was invoked 
+
+### Indicator metrics  
+Here is list of metrics that Profiler will request and flush to external storage for each Indicator:
+
+Indicators:
+* value
+* 
+* 
+
+
+
 ## Metric reporting
+How to register Profiler Reporter and start to record metrics to external storage.
 
 ## How to build this project
 ```
