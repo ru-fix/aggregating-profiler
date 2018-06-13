@@ -7,7 +7,6 @@ import ru.fix.commons.profiler.ProfilerReport;
 import ru.fix.commons.profiler.ProfilerReporter;
 
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,6 +15,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 class ProfilerReporterImpl implements ProfilerReporter {
@@ -84,7 +84,6 @@ class ProfilerReporterImpl implements ProfilerReporter {
         return buildReportAndReset(Optional.empty());
     }
 
-
     @Override
     public ProfilerReport buildReportAndReset(List<Pattern> patterns) {
         return buildReportAndReset(Optional.ofNullable(patterns));
@@ -97,7 +96,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
         Map<String, Long> indicators = profiler.getIndicators()
                 .entrySet()
                 .stream()
-                .filter(entry -> ! patterns.isPresent() || patterns.get()
+                .filter(entry -> !patterns.isPresent() || patterns.get()
                         .stream()
                         .anyMatch(p -> p.matcher(entry.getKey()).matches()))
                 .collect(Collectors.toMap(Map.Entry::getKey,
@@ -117,9 +116,9 @@ class ProfilerReporterImpl implements ProfilerReporter {
             for (Iterator<Map.Entry<String, SharedCounters>> iterator = sharedCounters.entrySet().iterator();
                  iterator.hasNext(); ) {
                 Map.Entry<String, SharedCounters> entry = iterator.next();
-                if( patterns.isPresent() && ! patterns.get()
-                   .stream()
-                   .anyMatch(p -> p.matcher(entry.getKey()).matches())) {
+                if (patterns.isPresent() && !patterns.get()
+                        .stream()
+                        .anyMatch(p -> p.matcher(entry.getKey()).matches())) {
                     continue;
                 }
                 ProfilerCallReport counterReport = buildReportAndReset(entry.getKey(), entry.getValue(), spentTime);

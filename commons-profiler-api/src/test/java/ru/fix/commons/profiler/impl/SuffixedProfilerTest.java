@@ -1,9 +1,10 @@
 package ru.fix.commons.profiler.impl;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 import ru.fix.commons.profiler.PrefixedProfiler;
 import ru.fix.commons.profiler.Profiler;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SuffixedProfilerTest {
 

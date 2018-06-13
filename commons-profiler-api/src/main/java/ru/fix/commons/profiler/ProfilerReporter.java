@@ -1,7 +1,7 @@
 package ru.fix.commons.profiler;
 
-import java.util.regex.Pattern;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public interface ProfilerReporter extends AutoCloseable {
 

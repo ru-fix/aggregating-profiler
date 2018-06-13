@@ -3,9 +3,12 @@ package ru.fix.commons.profiler.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.fix.commons.profiler.ProfiledCall;
+import ru.fix.commons.profiler.ThrowableSupplier;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 /**
  * @author Kamil Asfandiyarov
@@ -35,6 +38,19 @@ class ProfiledCallImpl implements ProfiledCall {
     }
 
     @Override
+    public void call(long payload) {
+        profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
+            sharedCounters.getCallsCount().increment();
+            sharedCounters.getMaxThroughput().call();
+
+            sharedCounters.getPayloadMin().accumulateAndGet(payload, Math::min);
+            sharedCounters.getPayloadMax().accumulateAndGet(payload, Math::max);
+            sharedCounters.getPayloadSum().add(payload);
+            sharedCounters.getMaxPayloadThroughput().call(payload);
+        });
+    }
+
+    @Override
     public ProfiledCall start() {
         if (!started.compareAndSet(false, true)) {
             throw new IllegalArgumentException("Start method was already called.");
@@ -50,17 +66,16 @@ class ProfiledCallImpl implements ProfiledCall {
     }
 
     @Override
-    public void stop() {
-        stop(1);
-    }
-
-    @Override
     public void stop(long payload) {
         if (!started.compareAndSet(true, false)) {
-            log.debug("Stop method called on profiler call that currently is not running: {}", profiledCallName);
+            log.warn("Stop method called on profiler call that currently is not running: {}", profiledCallName);
             return;
         }
 
+        internalStop(payload);
+    }
+
+    private void internalStop(long payload) {
         long latencyValue = timeFromCallStartInMs();
 
         profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
@@ -91,20 +106,85 @@ class ProfiledCallImpl implements ProfiledCall {
     }
 
     @Override
-    public void cancel() {
+    public void stopIfRunning(long payload) {
         if (!started.compareAndSet(true, false)) {
-            log.debug("Cancel method called on profiler call that currently is not running: {}", profiledCallName);
+            log.debug("stopIfRunning method called on profiler call that currently is not running: {}",
+                    profiledCallName);
+            return;
+        }
+
+        internalStop(payload);
+    }
+
+    @Override
+    public <R> R profile(Supplier<R> block) {
+        try {
+            R r = block.get();
+            stop();
+            return r;
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public void profile(Runnable block) {
+        try {
+            block.run();
+            stop();
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public <R> CompletableFuture<R> profileFuture(Supplier<CompletableFuture<R>> cfSupplier) {
+        CompletableFuture<R> future;
+        try {
+            future = cfSupplier.get();
+        } catch (Exception e) {
+            close();
+            throw e;
+        }
+
+        return future.whenComplete((res, thr) -> {
+            if (thr != null) {
+                close();
+            } else {
+                stop();
+            }
+        });
+    }
+
+    @Override
+    public <R, T extends Throwable> CompletableFuture<R> profileFuture(ThrowableSupplier<R, T> futureSupplier) throws T {
+        CompletableFuture<R> future;
+        try {
+            future = futureSupplier.get(this);
+        } catch (Throwable e) {
+            close();
+            throw e;
+        }
+
+        return future.whenComplete((res, thr) -> {
+            if (thr != null) {
+                close();
+            } else {
+                stop();
+            }
+        });
+    }
+
+    @Override
+    public void close() {
+        if (!started.compareAndSet(true, false)) {
+            // do nothing, if not started or stopped already
             return;
         }
         profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
             sharedCounters.getActiveCalls().remove(this);
             sharedCounters.getActiveCallsCounter().decrement();
         });
-    }
-
-    @Override
-    public boolean isStopped() {
-        return !started.get();
     }
 
     @Override

@@ -1,10 +1,8 @@
 package ru.fix.commons.profiler.impl;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
-import static org.junit.jupiter.api.Assertions.*;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import ru.fix.commons.profiler.ProfiledCall;
 import ru.fix.commons.profiler.ProfilerCallReport;
 import ru.fix.commons.profiler.ProfilerReport;
@@ -12,16 +10,16 @@ import ru.fix.commons.profiler.ProfilerReport;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Tim Urmancheev
  */
 public class ProfilerReporterImplActiveCallsTest {
 
+    private static final int numberOfActiveCallsToKeepBetweenReports = 20;
     private SimpleProfiler profiler;
     private ProfilerReporterImpl reporter;
-
-    private final int numberOfActiveCallsToKeepBetweenReports = 20;
 
     @BeforeEach
     public void setup() {
@@ -55,8 +53,8 @@ public class ProfilerReporterImplActiveCallsTest {
 
     @Test
     public void allCallsEnded_reports0activeCallsMaxLatency() {
-        profiler.profiledCall("Test").start().stop();
-        profiler.profiledCall("Test").start().cancel();
+        profiler.start("Test").stop();
+        profiler.start("Test").close();
 
         ProfilerCallReport report = getCallReport(reporter.buildReportAndReset());
 
@@ -65,11 +63,11 @@ public class ProfilerReporterImplActiveCallsTest {
 
     @Test
     public void hasActiveAndEndedCalls_usesCorrectCallForActiveCallsMaxLatency() throws InterruptedException {
-        ProfiledCallImpl call1 = (ProfiledCallImpl) profiler.profiledCall("Test").start();
+        ProfiledCallImpl call1 = (ProfiledCallImpl) profiler.start("Test");
         Thread.sleep(100);
-        ProfiledCallImpl call2 = (ProfiledCallImpl) profiler.profiledCall("Test").start();
+        ProfiledCallImpl call2 = (ProfiledCallImpl) profiler.start("Test");
         Thread.sleep(100);
-        ProfiledCallImpl call3 = (ProfiledCallImpl) profiler.profiledCall("Test").start();
+        ProfiledCallImpl call3 = (ProfiledCallImpl) profiler.start("Test");
 
         call1.stop();
 
@@ -93,11 +91,11 @@ public class ProfilerReporterImplActiveCallsTest {
     public void hasEndedCalls_resetsActiveCallsToLimit() {
         Collection<ProfiledCall> longestCalls = new LinkedList<>();
         for (int i = 0; i < numberOfActiveCallsToKeepBetweenReports; i++) {
-            longestCalls.add(profiler.profiledCall("Test").start());
+            longestCalls.add(profiler.start("Test"));
         }
-        profiler.profiledCall("Test").start();
-        profiler.profiledCall("Test").start();
-        profiler.profiledCall("Test").start().stop();
+        profiler.start("Test");
+        profiler.start("Test");
+        profiler.start("Test").stop();
 
         reporter.buildReportAndReset();
 
@@ -111,10 +109,10 @@ public class ProfilerReporterImplActiveCallsTest {
     public void noCallsEnded_resetsActiveCallsToLimit() {
         Collection<ProfiledCall> longestCalls = new LinkedList<>();
         for (int i = 0; i < numberOfActiveCallsToKeepBetweenReports; i++) {
-            longestCalls.add(profiler.profiledCall("Test").start());
+            longestCalls.add(profiler.start("Test"));
         }
-        profiler.profiledCall("Test").start();
-        profiler.profiledCall("Test").start();
+        profiler.start("Test");
+        profiler.start("Test");
 
         reporter.buildReportAndReset();
 
@@ -126,8 +124,8 @@ public class ProfilerReporterImplActiveCallsTest {
 
     @Test
     public void disableActiveCallsMaxLatency_afterCallsWereStarted_removesCallsFromActiveOnNextReport() {
-        profiler.profiledCall("Test").start();
-        profiler.profiledCall("Test").start();
+        profiler.start("Test");
+        profiler.start("Test");
 
         reporter.setEnableActiveCallsMaxLatency(false);
         reporter.buildReportAndReset();

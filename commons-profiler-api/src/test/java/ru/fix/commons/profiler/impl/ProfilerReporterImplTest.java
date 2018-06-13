@@ -7,9 +7,9 @@ import ru.fix.commons.profiler.ProfiledCall;
 import ru.fix.commons.profiler.ProfilerCallReport;
 import ru.fix.commons.profiler.ProfilerReport;
 
-import java.util.regex.Pattern;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,8 +36,7 @@ public class ProfilerReporterImplTest {
 
     @Test
     public void callStopWithoutParams() {
-        ProfiledCall call = profiler.profiledCall("Test");
-        call.start();
+        ProfiledCall call = profiler.start("Test");
         //someMethod()
         call.stop();
 
@@ -50,8 +49,7 @@ public class ProfilerReporterImplTest {
 
     @Test
     public void callStopWithParams() {
-        ProfiledCall call = profiler.profiledCall("Test");
-        call.start();
+        ProfiledCall call = profiler.start("Test");
         //someMethod()
         call.stop(30);
 
@@ -63,15 +61,14 @@ public class ProfilerReporterImplTest {
 
     @Test
     public void buildReportWithRegexp() {
-        ProfiledCall call = profiler.profiledCall("TestRE");
-        call.start();
+        ProfiledCall call = profiler.start("TestRE");
         //someMethod()
         call.stop(30);
 
         List<Pattern> reList = new ArrayList<Pattern>();
         reList.add(Pattern.compile(".*RE"));
         ProfilerCallReport report = getCallReport(
-            reporter.buildReportAndReset(reList));
+                reporter.buildReportAndReset(reList));
 
         assertEquals(1, report.getCallsCount());
         assertEquals(30, report.getPayloadTotal());
@@ -79,8 +76,7 @@ public class ProfilerReporterImplTest {
 
     @Test
     public void buildReportWithRegexpFail() {
-        ProfiledCall call = profiler.profiledCall("TestR_E");
-        call.start();
+        ProfiledCall call = profiler.start("TestR_E");
         //someMethod()
         call.stop(30);
 

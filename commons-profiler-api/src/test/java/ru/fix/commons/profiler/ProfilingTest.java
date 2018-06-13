@@ -6,13 +6,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.fix.commons.profiler.impl.SimpleProfiler;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -70,7 +72,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertTrue(report.callsThroughput < 60);
+            assertThat(report.callsThroughput, lessThan(60L));
         }
     }
 
@@ -95,7 +97,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertEquals(true, report.minLatency >= 90);
+            assertThat(report.minLatency, greaterThanOrEqualTo(90L));
         }
     }
 
@@ -126,7 +128,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertEquals(true, report.callsThroughput <= 110);
+            assertThat(report.callsThroughput, lessThanOrEqualTo(110L));
         }
     }
 
@@ -155,7 +157,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertEquals(true, report.minLatency >= 30);
+            assertThat(report.minLatency, greaterThanOrEqualTo(30L));
         }
     }
 
@@ -216,7 +218,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertEquals(true, report.minLatency >= 250);
+            assertThat(report.minLatency, greaterThanOrEqualTo(250L));
         }
     }
 
@@ -292,7 +294,7 @@ public class ProfilingTest {
         call2.stop();
 
         ProfilerReport report = reporter.buildReportAndReset();
-        assertEquals(true, report.getIndicators().isEmpty());
+        assertTrue(report.getIndicators().isEmpty());
         assertEquals(2, report.getProfilerCallReports().size());
         assertEquals(2L, report.getProfilerCallReports().get(0).getCallsCount());
         assertEquals("call_1", report.getProfilerCallReports().get(0).getName());
@@ -307,7 +309,7 @@ public class ProfilingTest {
         call2.stop();
 
         report = reporter.buildReportAndReset();
-        assertEquals(true, report.getIndicators().isEmpty());
+        assertTrue(report.getIndicators().isEmpty());
         assertEquals(1, report.getProfilerCallReports().size());
         assertEquals(3L, report.getProfilerCallReports().get(0).getCallsCount());
         assertEquals("call_2", report.getProfilerCallReports().get(0).getName());
@@ -329,8 +331,7 @@ public class ProfilingTest {
         for (int i = 0; i < writers; i++) {
             executorService.execute(() -> {
                 while (isRunning.get()) {
-                    ProfiledCall profiledCall = profiler.profiledCall(Thread.currentThread().getName());
-                    profiledCall.start();
+                    ProfiledCall profiledCall = profiler.start(Thread.currentThread().getName());
                     profiledCall.stop();
 
                     callCount.increment();
@@ -360,4 +361,449 @@ public class ProfilingTest {
         assertEquals(callCount.sum(), callCountFromReports);
     }
 
+    @Test
+    void profile_not_explicitly_stopped() throws Exception {
+        SimpleProfiler profiler = new SimpleProfiler();
+        ProfilerReporter reporter = profiler.createReporter(true, 10);
+
+        profiler.call("call");
+        // try-with-resources
+        try (ProfiledCall call = profiler.start("profile")) {
+            // some work
+            // without call.stop() profiledCall will be dropped
+        }
+
+        ProfilerReport profilerReport = reporter.buildReportAndReset();
+
+        assertNotNull(profilerReport);
+        List<ProfilerCallReport> reports = profilerReport.getProfilerCallReports();
+        assertNotNull(reports);
+        assertEquals(1, reports.size());
+        ProfilerCallReport report = reports.get(0);
+        assertEquals("call", report.name);
+        assertEquals(0L, report.activeCallsCount);
+    }
+
+    @Test
+    void profile_explicitly_stopped() throws Exception {
+        SimpleProfiler profiler = new SimpleProfiler();
+        ProfilerReporter reporter = profiler.createReporter(true, 10);
+
+        profiler.call("call");
+        // try-with-resources
+        try (ProfiledCall call = profiler.start("profile")) {
+            // some work
+            call.stop();
+        }
+
+        ProfilerReport profilerReport;
+        List<ProfilerCallReport> reports;
+
+        profilerReport = reporter.buildReportAndReset();
+
+        assertNotNull(profilerReport);
+        reports = profilerReport.getProfilerCallReports();
+        assertNotNull(reports);
+        assertEquals(2, reports.size());
+        for (ProfilerCallReport report : reports) {
+            assertEquals(0L, report.getActiveCallsCount());
+        }
+
+        profiler.call("call");
+        // runnable (w/o result)
+        profiler.profile("profile", () -> {
+        });
+
+        profilerReport = reporter.buildReportAndReset();
+        assertNotNull(profilerReport);
+        reports = profilerReport.getProfilerCallReports();
+        assertNotNull(reports);
+        assertEquals(2, reports.size());
+        for (ProfilerCallReport report : reports) {
+            assertEquals(0L, report.getActiveCallsCount());
+        }
+
+        profiler.call("call");
+        // supplier (w result)
+        String result = profiler.profile("profile", () -> "qwe");
+
+        assertEquals("qwe", result);
+
+        profilerReport = reporter.buildReportAndReset();
+        assertNotNull(profilerReport);
+        reports = profilerReport.getProfilerCallReports();
+        assertNotNull(reports);
+        assertEquals(2, reports.size());
+        for (ProfilerCallReport report : reports) {
+            assertEquals(0L, report.getActiveCallsCount());
+        }
+    }
+
+    @Test
+    void profile_unchecked_future() throws Exception {
+        SimpleProfiler profiler = new SimpleProfiler();
+        ProfilerReporter reporter = profiler.createReporter(true, 10);
+
+        profiler.call("call");
+
+        CompletableFuture<String> future = profiler.profileFuture(
+                "profile",
+                () -> CompletableFuture.completedFuture(resThrowableUnchecked())
+        );
+
+        String res = future.get(1, TimeUnit.SECONDS);
+        assertEquals("unchecked", res);
+
+        ProfilerReport profilerReport;
+        List<ProfilerCallReport> reports;
+
+        profilerReport = reporter.buildReportAndReset();
+        assertNotNull(profilerReport);
+        reports = profilerReport.getProfilerCallReports();
+        assertNotNull(reports);
+        assertEquals(2, reports.size());
+        for (ProfilerCallReport report : reports) {
+            assertEquals(0L, report.getActiveCallsCount());
+        }
+    }
+
+    @Test
+    void profile_checked_future() throws Exception {
+        SimpleProfiler profiler = new SimpleProfiler();
+        ProfilerReporter reporter = profiler.createReporter(true, 10);
+
+        profiler.call("call");
+
+        CompletableFuture<String> future = profiler.profileFuture(
+                "profile",
+                profiledCall -> CompletableFuture.completedFuture(resThrowableChecked())
+        );
+
+        String res = future.get(1, TimeUnit.SECONDS);
+        assertEquals("checked", res);
+
+        ProfilerReport profilerReport;
+        List<ProfilerCallReport> reports;
+
+        profilerReport = reporter.buildReportAndReset();
+        assertNotNull(profilerReport);
+        reports = profilerReport.getProfilerCallReports();
+        assertNotNull(reports);
+        assertEquals(2, reports.size());
+        for (ProfilerCallReport report : reports) {
+            assertEquals(0L, report.getActiveCallsCount());
+        }
+    }
+
+    @Test
+    void try_with_resource() throws Exception {
+        SimpleProfiler profiler = new SimpleProfiler();
+        ProfilerReporter reporter = profiler.createReporter(true, 10);
+
+        // try-with-resources
+        try (ProfiledCall call = profiler.start("profile.1")) {
+            // some work
+            resThrowableUnchecked();
+            call.stop();
+        } catch (Exception ignore) {
+            fail("unexpected exception");
+        }
+        try (ProfiledCall call = profiler.start("profile.2")) {
+            // some work
+            resThrowableChecked();
+            call.stop();
+        } catch (Exception ignore) {
+            fail("unexpected exception");
+        }
+        try (ProfiledCall call = profiler.start("profile.3")) {
+            // some work
+            resThrowsUnchecked();
+            fail("exception was excepted");
+        } catch (IllegalArgumentException ignore) {
+            // expected exception
+        } catch (Exception ignore) {
+            fail("unexpected exception");
+        }
+        try (ProfiledCall call = profiler.start("profile.4")) {
+            // some work
+            resThrowsChecked();
+            fail("exception was excepted");
+        } catch (InterruptedException ignore) {
+            // expected exception
+        } catch (Exception ignore) {
+            fail("unexpected exception");
+        }
+        try (ProfiledCall call = profiler.start("profile.5")) {
+            // some work
+            voidThrowableUnchecked();
+            call.stop();
+        } catch (IllegalArgumentException ignore) {
+            // expected exception
+        } catch (Exception ignore) {
+            fail("unexpected exception");
+        }
+        try (ProfiledCall call = profiler.start("profile.6")) {
+            // some work
+            voidThrowableChecked();
+            call.stop();
+        } catch (IllegalArgumentException ignore) {
+            // expected exception
+        } catch (Exception ignore) {
+            fail("unexpected exception");
+        }
+        try (ProfiledCall call = profiler.start("profile.7")) {
+            // some work
+            voidThrowsUnchecked();
+            fail("exception was excepted");
+        } catch (Exception ignore) {
+        }
+        try (ProfiledCall call = profiler.start("profile.8")) {
+            // some work
+            voidThrowsChecked();
+            fail("exception was excepted");
+        } catch (InterruptedException ignore) {
+            // expected exception
+        } catch (Exception ignore) {
+            fail("unexpected exception");
+        }
+
+        ProfilerReport profilerReport;
+        List<ProfilerCallReport> reports;
+
+        profilerReport = reporter.buildReportAndReset();
+        assertNotNull(profilerReport);
+        reports = profilerReport.getProfilerCallReports();
+        assertNotNull(reports);
+        assertEquals(4, reports.size());
+        Set<String> names = reports.stream()
+                .map(ProfilerCallReport::getName)
+                .collect(Collectors.toSet());
+        assertEquals(
+                new HashSet<>(Arrays.asList("profile.1", "profile.2", "profile.5", "profile.6")),
+                names
+        );
+    }
+
+    @Test
+    void blocks() throws Exception {
+        SimpleProfiler profiler = new SimpleProfiler();
+        ProfilerReporter reporter = profiler.createReporter(true, 10);
+
+        profiler.profile("profile.1", ProfilingTest::resThrowableUnchecked);
+        //profiler.profile("profile.2", ProfilingTest::resThrowableChecked); // not supported yet
+        try {
+            profiler.profile("profile.3", ProfilingTest::resThrowsUnchecked);
+            fail("exception was excepted");
+        } catch (IllegalArgumentException ignore) {
+            // expected exception
+        } catch (Exception e) {
+            fail("unexpected exception");
+        }
+//        profiler.profile("profile.4", ProfilingTest::resThrowsChecked); // not supported yet
+        profiler.profile("profile.5", ProfilingTest::voidThrowableUnchecked);
+//        profiler.profile("profile.6", ProfilingTest::voidThrowableChecked); // not supported yet
+        try {
+            profiler.profile("profile.7", ProfilingTest::voidThrowsUnchecked);
+            fail("exception was excepted");
+        } catch (IllegalArgumentException ignore) {
+            // expected exception
+        } catch (Exception e) {
+            fail("unexpected exception");
+        }
+//        profiler.profile("profile.8", ProfilingTest::voidThrowsChecked); // not supported yet
+
+        ProfilerReport profilerReport;
+        List<ProfilerCallReport> reports;
+
+        profilerReport = reporter.buildReportAndReset();
+        assertNotNull(profilerReport);
+        reports = profilerReport.getProfilerCallReports();
+        assertNotNull(reports);
+        assertEquals(2, reports.size());
+        Set<String> names = reports.stream()
+                .map(ProfilerCallReport::getName)
+                .collect(Collectors.toSet());
+        assertEquals(
+                new HashSet<>(Arrays.asList("profile.1", "profile.5")),
+                names
+        );
+    }
+
+    @Test
+    void profile_futures() throws Exception {
+        SimpleProfiler profiler = new SimpleProfiler();
+        ProfilerReporter reporter = profiler.createReporter(true, 10);
+
+        CompletableFuture<String> future;
+        String s;
+
+        future = profiler.profileFuture(
+                "profile.1",
+                () -> cfSupplierThrowableUncheckedSuccess()
+        );
+        s = future.get();
+        assertEquals("unchecked", s);
+
+        future = profiler.profileFuture(
+                "profile.2",
+                () -> cfSupplierThrowableUncheckedExc()
+        );
+        try {
+            future.get();
+            fail("exception was excepted");
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof NumberFormatException) {
+                // expected exception
+            } else {
+                fail("unexpected exception");
+            }
+        } catch (Exception e) {
+            fail("unexpected exception");
+        }
+
+        try {
+            future = profiler.profileFuture(
+                    "profile.3",
+                    () -> cfSupplierThrowsUnchecked()
+            );
+            fail("exception was excepted");
+        } catch (IllegalArgumentException ignore) {
+            // expected exception
+        } catch (Exception e) {
+            fail("unexpected exception");
+        }
+
+        try {
+            future = profiler.profileFuture(
+                    "profile.4",
+                    profiledCall -> cfSupplierThrowsUnchecked()
+            );
+            fail("exception was excepted");
+        } catch (IllegalArgumentException ignore) {
+            // expected exception
+        } catch (Exception ignore) {
+            fail("unexpected exception");
+        }
+
+        try {
+            future = profiler.profileFuture(
+                    "profile.5",
+                    profilerCall -> cfSupplierThrowableCheckedSuccess()
+            );
+        } catch (InterruptedException ignore) {
+            // expected exception
+        } catch (Exception e) {
+            fail("unexpected exception");
+        }
+        s = future.get();
+        assertEquals("checked", s);
+
+        try {
+            future = profiler.profileFuture(
+                    "profile.6",
+                    profilerCall -> cfSupplierThrowableCheckedExc()
+            );
+        } catch (Exception e) {
+            fail("unexpected exception");
+        }
+        try {
+            future.get();
+            fail("exception was excepted");
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof NumberFormatException) {
+                // expected exception
+            } else {
+                fail("unexpected exception");
+            }
+        } catch (Exception e) {
+            fail("unexpected exception");
+        }
+
+        try {
+            future = profiler.profileFuture(
+                    "profile.7",
+                    profilerCall -> cfSupplierThrowsChecked()
+            );
+        } catch (InterruptedException ignore) {
+            // expected exception
+        } catch (Exception e) {
+            fail("unexpected exception");
+        }
+
+        ProfilerReport profilerReport;
+        List<ProfilerCallReport> reports;
+
+        profilerReport = reporter.buildReportAndReset();
+        assertNotNull(profilerReport);
+        reports = profilerReport.getProfilerCallReports();
+        assertNotNull(reports);
+        assertEquals(2, reports.size());
+        Set<String> names = reports.stream()
+                .map(ProfilerCallReport::getName)
+                .collect(Collectors.toSet());
+        assertEquals(
+                new HashSet<>(Arrays.asList("profile.1", "profile.5")),
+                names
+        );
+    }
+
+    private static String resThrowableUnchecked() throws IllegalArgumentException {
+        return "unchecked";
+    }
+
+    private static String resThrowableChecked() throws InterruptedException {
+        return "checked";
+    }
+
+    private static String resThrowsUnchecked() throws IllegalArgumentException {
+        throw new IllegalArgumentException();
+    }
+
+    private static String resThrowsChecked() throws InterruptedException {
+        throw new InterruptedException();
+    }
+
+    private static void voidThrowableUnchecked() throws IllegalArgumentException {
+    }
+
+    private static void voidThrowableChecked() throws InterruptedException {
+    }
+
+    private static void voidThrowsUnchecked() throws IllegalArgumentException {
+        throw new IllegalArgumentException();
+    }
+
+    private static void voidThrowsChecked() throws InterruptedException {
+        throw new InterruptedException();
+    }
+
+    private static CompletableFuture<String> cfSupplierThrowableUncheckedSuccess() throws IllegalArgumentException {
+        return CompletableFuture.completedFuture("unchecked");
+    }
+
+    private static CompletableFuture<String> cfSupplierThrowableUncheckedExc() throws IllegalArgumentException {
+        CompletableFuture<String> future = new CompletableFuture<>();
+        future.completeExceptionally(new NumberFormatException());
+        return future;
+    }
+
+    private static CompletableFuture<String> cfSupplierThrowsUnchecked() throws IllegalArgumentException {
+        throw new IllegalArgumentException();
+    }
+
+    private static CompletableFuture<String> cfSupplierThrowableCheckedSuccess() throws InterruptedException {
+        return CompletableFuture.completedFuture("checked");
+    }
+
+    private static CompletableFuture<String> cfSupplierThrowableCheckedExc() throws InterruptedException {
+        CompletableFuture<String> future = new CompletableFuture<>();
+        future.completeExceptionally(new NumberFormatException());
+        return future;
+    }
+
+    private static CompletableFuture<String> cfSupplierThrowsChecked() throws InterruptedException {
+        throw new InterruptedException();
+    }
 }
