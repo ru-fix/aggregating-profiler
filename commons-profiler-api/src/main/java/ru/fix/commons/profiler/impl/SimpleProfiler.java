@@ -15,6 +15,9 @@ import java.util.function.Consumer;
  * @author Kamil Asfandiyarov
  */
 public class SimpleProfiler implements Profiler {
+
+    private static final String INDICATOR_SUFFIX = ".indicatorMax";
+
     private final CopyOnWriteArrayList<ProfilerReporterImpl> profilerReporters = new CopyOnWriteArrayList<>();
 
     private final Map<String, IndicationProvider> indicators = new ConcurrentHashMap<>();
@@ -37,12 +40,19 @@ public class SimpleProfiler implements Profiler {
 
     @Override
     public void attachIndicator(String name, IndicationProvider indicationProvider) {
-        indicators.put(name, indicationProvider);
+        indicators.put(normalizeIndicatorName(name), indicationProvider);
     }
 
     @Override
     public void detachIndicator(String name) {
-        indicators.remove(name);
+        indicators.remove(normalizeIndicatorName(name));
+    }
+
+    private static String normalizeIndicatorName(String name) {
+        if (!name.endsWith(INDICATOR_SUFFIX)) {
+            name = name.concat(INDICATOR_SUFFIX);
+        }
+        return name;
     }
 
     void applyToSharedCounters(String profiledCallName, Consumer<SharedCounters> consumer) {

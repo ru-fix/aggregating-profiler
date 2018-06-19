@@ -42,9 +42,9 @@ public class ProfilerReporterImplTest {
 
         ProfilerCallReport report = getCallReport(reporter.buildReportAndReset());
 
-        assertEquals(1, report.getCallsCount());
-        assertEquals(1, report.getPayloadTotal());
-        assertTrue(report.getReportingTime() < 1000, "report time is not correct: " + report);
+        assertEquals(1, report.getCallsCountSum());
+        assertEquals(1, report.getPayloadSum());
+        assertTrue(report.getReportingTimeAvg() < 1000, "report time is not correct: " + report);
     }
 
     @Test
@@ -55,8 +55,8 @@ public class ProfilerReporterImplTest {
 
         ProfilerCallReport report = getCallReport(reporter.buildReportAndReset());
 
-        assertEquals(1, report.getCallsCount());
-        assertEquals(30, report.getPayloadTotal());
+        assertEquals(1, report.getCallsCountSum());
+        assertEquals(30, report.getPayloadSum());
     }
 
     @Test
@@ -70,8 +70,8 @@ public class ProfilerReporterImplTest {
         ProfilerCallReport report = getCallReport(
                 reporter.buildReportAndReset(reList));
 
-        assertEquals(1, report.getCallsCount());
-        assertEquals(30, report.getPayloadTotal());
+        assertEquals(1, report.getCallsCountSum());
+        assertEquals(30, report.getPayloadSum());
     }
 
     @Test

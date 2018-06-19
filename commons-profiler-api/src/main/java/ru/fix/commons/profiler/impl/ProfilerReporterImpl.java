@@ -124,7 +124,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
                 ProfilerCallReport counterReport = buildReportAndReset(entry.getKey(), entry.getValue(), spentTime);
 
                 // skip and remove empty counter
-                if (counterReport.getCallsCount() == 0 && counterReport.getActiveCallsCount() == 0) {
+                if (counterReport.getCallsCountSum() == 0 && counterReport.getActiveCallsCountMax() == 0) {
                     iterator.remove();
                     continue;
                 }
@@ -148,36 +148,36 @@ class ProfilerReporterImpl implements ProfilerReporter {
         if (callsCount == 0) {
             cleanCounters(counters);
             return new ProfilerCallReport(name)
-                    .setStartedCallsCount(startedCallsCount)
-                    .setActiveCallsCount(counters.getActiveCallsCounter().sum())
-                    .setActiveCallsMaxLatency(activeCallsMaxLatencyAndResetActiveCalls(counters));
+                    .setStartedCallsCountSum(startedCallsCount)
+                    .setActiveCallsCountMax(counters.getActiveCallsCounter().sum())
+                    .setActiveCallsLatencyMax(activeCallsMaxLatencyAndResetActiveCalls(counters));
         }
 
         long payloadTotal = counters.getPayloadSum().sumThenReset();
 
         return new ProfilerCallReport(name)
-                .setMinLatency(counters.getLatencyMin().getAndSet(Long.MAX_VALUE))
-                .setMaxLatency(counters.getLatencyMax().getAndSet(0))
-                .setAvgLatency(sumStartStopLatency / callsCount)
+                .setLatencyMin(counters.getLatencyMin().getAndSet(Long.MAX_VALUE))
+                .setLatencyMax(counters.getLatencyMax().getAndSet(0))
+                .setLatencyAvg(sumStartStopLatency / callsCount)
 
-                .setCallsThroughput(elapsed != 0 ? callsCount * 1000 / elapsed : 0)
+                .setCallsThroughputAvg(elapsed != 0 ? callsCount * 1000 / elapsed : 0)
 
-                .setCallsCount(callsCount)
-                .setStartedCallsCount(startedCallsCount)
+                .setCallsCountSum(callsCount)
+                .setStartedCallsCountSum(startedCallsCount)
 
                 .setPayloadMin(counters.getPayloadMin().getAndSet(Long.MAX_VALUE))
                 .setPayloadMax(counters.getPayloadMax().getAndSet(0))
-                .setPayloadTotal(payloadTotal)
+                .setPayloadSum(payloadTotal)
                 .setPayloadAvg(payloadTotal / callsCount)
-                .setPayloadThroughput(elapsed != 0 ? payloadTotal * 1000 / elapsed : 0)
+                .setPayloadThroughputAvg(elapsed != 0 ? payloadTotal * 1000 / elapsed : 0)
 
-                .setReportingTime(elapsed)
+                .setReportingTimeAvg(elapsed)
 
-                .setMaxThroughputPerSecond(counters.getMaxThroughput().getMaxAndReset())
-                .setMaxPayloadThroughputPerSecond(counters.getMaxPayloadThroughput().getMaxAndReset())
+                .setThroughputPerSecondMax(counters.getMaxThroughput().getMaxAndReset())
+                .setPayloadThroughputPerSecondMax(counters.getMaxPayloadThroughput().getMaxAndReset())
 
-                .setActiveCallsCount(counters.getActiveCallsCounter().sum())
-                .setActiveCallsMaxLatency(activeCallsMaxLatencyAndResetActiveCalls(counters));
+                .setActiveCallsCountMax(counters.getActiveCallsCounter().sum())
+                .setActiveCallsLatencyMax(activeCallsMaxLatencyAndResetActiveCalls(counters));
     }
 
     private long activeCallsMaxLatencyAndResetActiveCalls(SharedCounters counters) {
