@@ -72,7 +72,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertThat(report.callsThroughput, lessThan(60L));
+            assertThat(report.callsThroughputAvg, lessThan(60L));
         }
     }
 
@@ -97,7 +97,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertThat(report.minLatency, greaterThanOrEqualTo(90L));
+            assertThat(report.latencyMin, greaterThanOrEqualTo(90L));
         }
     }
 
@@ -128,7 +128,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertThat(report.callsThroughput, lessThanOrEqualTo(110L));
+            assertThat(report.callsThroughputAvg, lessThanOrEqualTo(110L));
         }
     }
 
@@ -157,7 +157,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertThat(report.minLatency, greaterThanOrEqualTo(30L));
+            assertThat(report.latencyMin, greaterThanOrEqualTo(30L));
         }
     }
 
@@ -218,7 +218,7 @@ public class ProfilingTest {
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertThat(report.minLatency, greaterThanOrEqualTo(250L));
+            assertThat(report.latencyMin, greaterThanOrEqualTo(250L));
         }
     }
 
@@ -244,7 +244,7 @@ public class ProfilingTest {
 
         log.info("Report: {}", report);
 
-        assertEquals(0, report.getProfilerCallReports().get(0).payloadTotal);
+        assertEquals(0, report.getProfilerCallReports().get(0).payloadSum);
 
     }
 
@@ -274,7 +274,7 @@ public class ProfilingTest {
         ProfilerCallReport callReport = report.getProfilerCallReports().get(0);
         assertEquals(1, callReport.payloadMin);
         assertEquals(12, callReport.payloadMax);
-        assertEquals(1 + 12 + 6, callReport.payloadTotal);
+        assertEquals(1 + 12 + 6, callReport.payloadSum);
     }
 
     @Test
@@ -296,9 +296,9 @@ public class ProfilingTest {
         ProfilerReport report = reporter.buildReportAndReset();
         assertTrue(report.getIndicators().isEmpty());
         assertEquals(2, report.getProfilerCallReports().size());
-        assertEquals(2L, report.getProfilerCallReports().get(0).getCallsCount());
+        assertEquals(2L, report.getProfilerCallReports().get(0).getCallsCountSum());
         assertEquals("call_1", report.getProfilerCallReports().get(0).getName());
-        assertEquals(1L, report.getProfilerCallReports().get(1).getCallsCount());
+        assertEquals(1L, report.getProfilerCallReports().get(1).getCallsCountSum());
         assertEquals("call_2", report.getProfilerCallReports().get(1).getName());
 
         call2.start();
@@ -311,7 +311,7 @@ public class ProfilingTest {
         report = reporter.buildReportAndReset();
         assertTrue(report.getIndicators().isEmpty());
         assertEquals(1, report.getProfilerCallReports().size());
-        assertEquals(3L, report.getProfilerCallReports().get(0).getCallsCount());
+        assertEquals(3L, report.getProfilerCallReports().get(0).getCallsCountSum());
         assertEquals("call_2", report.getProfilerCallReports().get(0).getName());
     }
 
@@ -355,7 +355,7 @@ public class ProfilingTest {
 
         long callCountFromReports = reports.stream()
                 .flatMap(profilerReport -> profilerReport.getProfilerCallReports().stream())
-                .map(ProfilerCallReport::getCallsCount)
+                .map(ProfilerCallReport::getCallsCountSum)
                 .reduce(0L, Long::sum);
 
         assertEquals(callCount.sum(), callCountFromReports);
@@ -381,7 +381,7 @@ public class ProfilingTest {
         assertEquals(1, reports.size());
         ProfilerCallReport report = reports.get(0);
         assertEquals("call", report.name);
-        assertEquals(0L, report.activeCallsCount);
+        assertEquals(0L, report.activeCallsCountMax);
     }
 
     @Test
@@ -406,7 +406,7 @@ public class ProfilingTest {
         assertNotNull(reports);
         assertEquals(2, reports.size());
         for (ProfilerCallReport report : reports) {
-            assertEquals(0L, report.getActiveCallsCount());
+            assertEquals(0L, report.getActiveCallsCountMax());
         }
 
         profiler.call("call");
@@ -420,7 +420,7 @@ public class ProfilingTest {
         assertNotNull(reports);
         assertEquals(2, reports.size());
         for (ProfilerCallReport report : reports) {
-            assertEquals(0L, report.getActiveCallsCount());
+            assertEquals(0L, report.getActiveCallsCountMax());
         }
 
         profiler.call("call");
@@ -435,7 +435,7 @@ public class ProfilingTest {
         assertNotNull(reports);
         assertEquals(2, reports.size());
         for (ProfilerCallReport report : reports) {
-            assertEquals(0L, report.getActiveCallsCount());
+            assertEquals(0L, report.getActiveCallsCountMax());
         }
     }
 
@@ -463,7 +463,7 @@ public class ProfilingTest {
         assertNotNull(reports);
         assertEquals(2, reports.size());
         for (ProfilerCallReport report : reports) {
-            assertEquals(0L, report.getActiveCallsCount());
+            assertEquals(0L, report.getActiveCallsCountMax());
         }
     }
 
@@ -491,7 +491,7 @@ public class ProfilingTest {
         assertNotNull(reports);
         assertEquals(2, reports.size());
         for (ProfilerCallReport report : reports) {
-            assertEquals(0L, report.getActiveCallsCount());
+            assertEquals(0L, report.getActiveCallsCountMax());
         }
     }
 
