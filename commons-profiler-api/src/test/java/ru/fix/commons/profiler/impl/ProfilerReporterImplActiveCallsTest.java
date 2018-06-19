@@ -48,7 +48,7 @@ public class ProfilerReporterImplActiveCallsTest {
 
         ProfilerCallReport report = getCallReport(reporter.buildReportAndReset());
 
-        assertEquals(0, report.getActiveCallsMaxLatency());
+        assertEquals(0, report.getActiveCallsLatencyMax());
     }
 
     @Test
@@ -58,7 +58,7 @@ public class ProfilerReporterImplActiveCallsTest {
 
         ProfilerCallReport report = getCallReport(reporter.buildReportAndReset());
 
-        assertEquals(0, report.getActiveCallsMaxLatency());
+        assertEquals(0, report.getActiveCallsLatencyMax());
     }
 
     @Test
@@ -79,11 +79,11 @@ public class ProfilerReporterImplActiveCallsTest {
 
         long call2AfterReportTime = call2.timeFromCallStartInMs();
 
-        assertTrue(call3Time < report.getActiveCallsMaxLatency() &&
-                report.getActiveCallsMaxLatency() < call1Time
+        assertTrue(call3Time < report.getActiveCallsLatencyMax() &&
+                report.getActiveCallsLatencyMax() < call1Time
         );
-        assertTrue(call2Time <= report.getActiveCallsMaxLatency() &&
-                report.getActiveCallsMaxLatency() <= call2AfterReportTime
+        assertTrue(call2Time <= report.getActiveCallsLatencyMax() &&
+                report.getActiveCallsLatencyMax() <= call2AfterReportTime
         );
     }
 
