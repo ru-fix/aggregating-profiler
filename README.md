@@ -123,6 +123,12 @@ Indicators:
 ## Metric reporting
 How to register Profiler Reporter and start to record metrics to external storage.
 
+## How to mock profiler in Tests
+`NoopProfiler` is a stub that you can use as a dependency in tests. This stub does not do anything.
+```kotlin
+val service = MyService(NoopProfiler() )
+
+```
 ## How to build this project
 ```
 gradle clean build
