@@ -25,6 +25,15 @@ public interface ProfiledCall extends AutoCloseable {
      */
     ProfiledCall start();
 
+
+    /**
+     * if you want to know some metrics then you should start and stop profiled call
+     * @param startNanoTime time of metric starts
+     *
+     * @throws IllegalStateException if method start called twice
+     */
+    ProfiledCall start(long startNanoTime);
+
     /**
      * Same as stop(1)
      *

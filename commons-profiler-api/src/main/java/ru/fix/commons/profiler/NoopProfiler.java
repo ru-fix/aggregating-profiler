@@ -23,6 +23,11 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
+        public ProfiledCall start(long startNanoTime) {
+            return this;
+        }
+
+        @Override
         public void stop(long payload) {
         }
 

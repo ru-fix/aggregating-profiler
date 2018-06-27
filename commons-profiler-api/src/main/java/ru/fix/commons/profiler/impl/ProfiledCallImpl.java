@@ -51,11 +51,11 @@ class ProfiledCallImpl implements ProfiledCall {
     }
 
     @Override
-    public ProfiledCall start() {
+    public ProfiledCall start(long nanoTime) {
         if (!started.compareAndSet(false, true)) {
             throw new IllegalArgumentException("Start method was already called.");
         }
-        startTime.set(System.nanoTime());
+        startTime.set(nanoTime);
         profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
             sharedCounters.getStartedCallsCount().increment();
 
@@ -63,6 +63,10 @@ class ProfiledCallImpl implements ProfiledCall {
             sharedCounters.getActiveCallsCounter().increment();
         });
         return this;
+    }
+    @Override
+    public ProfiledCall start() {
+        return start(System.nanoTime());
     }
 
     @Override
