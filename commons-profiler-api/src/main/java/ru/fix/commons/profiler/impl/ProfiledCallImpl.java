@@ -38,6 +38,29 @@ class ProfiledCallImpl implements ProfiledCall {
     }
 
     @Override
+    public void call(long startTime, long endTime, long payload) {
+        long latencyValue = endTime - startTime;
+        profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
+            sharedCounters.getCallsCount().increment();
+
+            sharedCounters.getSumStartStopLatency().add(latencyValue);
+            sharedCounters.getLatencyMin().accumulateAndGet(latencyValue, Math::min);
+            sharedCounters.getLatencyMax().accumulateAndGet(latencyValue, Math::max);
+
+            sharedCounters.getPayloadMin().accumulateAndGet(payload, Math::min);
+            sharedCounters.getPayloadMax().accumulateAndGet(payload, Math::max);
+            sharedCounters.getPayloadSum().add(payload);
+            sharedCounters.getMaxThroughput().call();
+            sharedCounters.getMaxPayloadThroughput().call(payload);
+        });
+    }
+
+    @Override
+    public void call(long startTime, long endTime) {
+        call(startTime, endTime, 1);
+    }
+
+    @Override
     public void call(long payload) {
         profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
             sharedCounters.getCallsCount().increment();
@@ -51,11 +74,11 @@ class ProfiledCallImpl implements ProfiledCall {
     }
 
     @Override
-    public ProfiledCall start(long nanoTime) {
+    public ProfiledCall start() {
         if (!started.compareAndSet(false, true)) {
             throw new IllegalArgumentException("Start method was already called.");
         }
-        startTime.set(nanoTime);
+        startTime.set(System.nanoTime());
         profiler.applyToSharedCounters(profiledCallName, sharedCounters -> {
             sharedCounters.getStartedCallsCount().increment();
 
@@ -63,10 +86,6 @@ class ProfiledCallImpl implements ProfiledCall {
             sharedCounters.getActiveCallsCounter().increment();
         });
         return this;
-    }
-    @Override
-    public ProfiledCall start() {
-        return start(System.nanoTime());
     }
 
     @Override

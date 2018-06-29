@@ -114,15 +114,17 @@ public class ProfilingTest {
 
 
             for (int i = 0; i < 50; i++) {
-                long nanoTime = System.nanoTime();
+                long currentTime = System.currentTimeMillis();
                 doSomething(100);
-                call.start(nanoTime).stop();
+                call.call(currentTime, System.currentTimeMillis(), i);
             }
 
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
             assertThat(report.latencyMin, greaterThanOrEqualTo(90L));
+            assertThat(report.payloadMax, equalTo(49L));
+            assertThat(report.payloadMin, equalTo(0L));
         }
     }
 
