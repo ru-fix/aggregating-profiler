@@ -102,6 +102,33 @@ public class ProfilingTest {
     }
 
     @Test
+    public void single_thread_fixed_latency_start_nanotime() throws Exception {
+
+        Profiler profiler = new SimpleProfiler();
+
+
+        ProfiledCall call = profiler.profiledCall("single_thread_fixed_latency");
+        try (ProfilerReporter reporter = profiler.createReporter()) {
+
+            reporter.buildReportAndReset();
+
+
+            for (int i = 0; i < 50; i++) {
+                long currentTime = System.currentTimeMillis();
+                doSomething(100);
+                call.call(currentTime, System.currentTimeMillis(), i);
+            }
+
+            ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
+            log.info(report.toString());
+
+            assertThat(report.latencyMin, greaterThanOrEqualTo(90L));
+            assertThat(report.payloadMax, equalTo(49L));
+            assertThat(report.payloadMin, equalTo(0L));
+        }
+    }
+
+    @Test
     public void parallel_threads_fixed_throughput() throws Exception {
 
         Profiler profiler = new SimpleProfiler();

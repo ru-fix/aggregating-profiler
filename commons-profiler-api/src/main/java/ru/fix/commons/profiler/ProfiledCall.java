@@ -14,6 +14,16 @@ public interface ProfiledCall extends AutoCloseable {
     void call();
 
     /**
+     * Call with payload ( = 1) and start-stop time
+     */
+    void call(long startTime, long endTime);
+
+    /**
+     * Call with payload and start-stop time
+     */
+    void call(long startTime, long endTime, long payload);
+
+    /**
      * Call with payload
      */
     void call(long payload);
