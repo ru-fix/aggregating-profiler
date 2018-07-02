@@ -13,7 +13,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
@@ -96,6 +100,33 @@ public class ProfilingTest {
             log.info(report.toString());
 
             assertEquals(true, report.minLatency >= 90);
+        }
+    }
+
+    @Test
+    public void single_thread_fixed_latency_start_nanotime() throws Exception {
+
+        Profiler profiler = new SimpleProfiler();
+
+
+        ProfiledCall call = profiler.profiledCall("single_thread_fixed_latency");
+        try (ProfilerReporter reporter = profiler.createReporter()) {
+
+            reporter.buildReportAndReset();
+
+
+            for (int i = 0; i < 50; i++) {
+                long currentTime = System.currentTimeMillis();
+                doSomething(100);
+                call.call(currentTime, System.currentTimeMillis(), i);
+            }
+
+            ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
+            log.info(report.toString());
+
+            assertThat(report.minLatency, greaterThanOrEqualTo(90L));
+            assertThat(report.payloadMax, equalTo(49L));
+            assertThat(report.payloadMin, equalTo(0L));
         }
     }
 

@@ -11,6 +11,16 @@ public interface ProfiledCall {
     void call();
 
     /**
+     * Call with payload ( = 1) and start-stop time
+     */
+    void call(long startTime, long endTime);
+
+    /**
+     * Call with payload and start-stop time
+     */
+    void call(long startTime, long endTime, long payload);
+
+    /**
      * if you want to know some metrics then you should start and stop profiled call
      *
      * @throws IllegalStateException if method start called twice
