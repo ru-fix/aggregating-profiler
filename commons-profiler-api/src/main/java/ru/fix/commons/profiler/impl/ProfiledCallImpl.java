@@ -193,7 +193,9 @@ class ProfiledCallImpl implements ProfiledCall {
             if (thr != null) {
                 close();
             } else {
-                stop();
+                // ThrowableSupplier uses this profiledCall
+                // and it's ok that the profiledCall stopped explicitly
+                stopIfRunning();
             }
         });
     }
