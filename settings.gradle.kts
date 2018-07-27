@@ -1,5 +1,5 @@
-rootProject.name = "commons-profiler"
-include("commons-profiler-api")
+rootProject.name = "aggregating-profiler"
+include("aggregating-profiler")
 
 pluginManagement {
     resolutionStrategy {
