@@ -181,7 +181,7 @@ public class AggregatingReporter implements ProfilerReporter {
         Set<AggregatingCall> top = new HashSet<>();
         counters.getActiveCalls()
                 .stream()
-                .sorted(Comparator.comparingLong(AggregatingCall::timeFromCallStart))
+                .sorted(Comparator.comparingLong(AggregatingCall::timeFromCallStart).reversed())
                 .limit(numberOfActiveCallsToTrackAndKeepBetweenReports.get())
                 .forEachOrdered(call -> {
                     if (top.isEmpty()) {

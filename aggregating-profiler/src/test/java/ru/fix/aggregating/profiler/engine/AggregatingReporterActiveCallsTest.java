@@ -88,11 +88,14 @@ public class AggregatingReporterActiveCallsTest {
     }
 
     @Test
-    public void hasEndedCalls_resetsActiveCallsToLimit() {
+    public void hasEndedCalls_resetsActiveCallsToLimit() throws Exception {
         Collection<ProfiledCall> longestCalls = new ArrayList<>();
-        for (int i = 0; i < profiler.getNumberOfActiveCallsToTrackAndKeepBetweenReports(); i++) {
+        for (int i = 0; i < numberOfActiveCallsToTrackAndKeepBetweenReports; i++) {
             longestCalls.add(profiler.start("Test"));
         }
+
+        Thread.sleep(100);
+
         profiler.start("Test");
         profiler.start("Test");
         profiler.start("Test").stop();
@@ -106,11 +109,14 @@ public class AggregatingReporterActiveCallsTest {
     }
 
     @Test
-    public void noCallsEnded_resetsActiveCallsToLimit() {
+    public void noCallsEnded_resetsActiveCallsToLimit() throws Exception{
         Collection<ProfiledCall> longestCalls = new ArrayList<>();
         for (int i = 0; i < numberOfActiveCallsToTrackAndKeepBetweenReports; i++) {
             longestCalls.add(profiler.start("Test"));
         }
+
+        Thread.sleep(100);
+
         profiler.start("Test");
         profiler.start("Test");
 
