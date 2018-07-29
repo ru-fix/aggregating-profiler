@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.fix.aggregating.profiler.engine.MaxThroughputPerSecondCalculator;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,13 +22,13 @@ import static org.mockito.Mockito.when;
  * @author Gleb Beliaev (gbeliaev@fix.ru)
  * Created 11.01.18.
  */
-public class MaxThroughputCalculatorTest {
-    private static final Logger log = LoggerFactory.getLogger(MaxThroughputCalculatorTest.class);
+public class MaxThroughputPerSecondCalculatorTest {
+    private static final Logger log = LoggerFactory.getLogger(MaxThroughputPerSecondCalculatorTest.class);
 
 
     @Test
     public void testCall() throws Exception {
-        MaxThroughputCalculator c = Mockito.spy(new MaxThroughputCalculator());
+        MaxThroughputPerSecondCalculator c = Mockito.spy(new MaxThroughputPerSecondCalculator());
 
         when(c.currentTimeMillis()).thenReturn(1000L, 1100L, 2000L);
         c.call();
@@ -61,7 +62,7 @@ public class MaxThroughputCalculatorTest {
 
         CompletableFuture[] threads = new CompletableFuture[threadCount];
         AtomicLong callCount = new AtomicLong();
-        MaxThroughputCalculator maxThroughput = new MaxThroughputCalculator();
+        MaxThroughputPerSecondCalculator maxThroughput = new MaxThroughputPerSecondCalculator();
 
         ExecutorService poolExecutor = Executors.newFixedThreadPool(threadCount);
 
@@ -106,7 +107,7 @@ public class MaxThroughputCalculatorTest {
 
         final int EXPECTED_MAX_THROUGHPUT = COUNT_OF_THREADS * 1000 / ACCURACY;
 
-        MaxThroughputCalculator calculator = new MaxThroughputCalculator();
+        MaxThroughputPerSecondCalculator calculator = new MaxThroughputPerSecondCalculator();
         ExecutorService pool = Executors.newFixedThreadPool(COUNT_OF_THREADS);
 
         AtomicBoolean shutdownFlag = new AtomicBoolean();

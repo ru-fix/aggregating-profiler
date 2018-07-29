@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.RateLimiter;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.fix.aggregating.profiler.impl.SimpleProfiler;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -35,7 +34,7 @@ public class ProfilingTest {
 
     @Test
     public void report_name() throws Exception {
-        Profiler profiler = new SimpleProfiler();
+        Profiler profiler = new AggregatingProfiler();
 
 
         try (ProfilerReporter reporter = profiler.createReporter()) {
@@ -53,7 +52,7 @@ public class ProfilingTest {
     @Test
     public void single_thread_fixed_throughput() throws Exception {
 
-        Profiler profiler = new SimpleProfiler();
+        Profiler profiler = new AggregatingProfiler();
         RateLimiter rateLimiter = RateLimiter.create(50);
 
 
@@ -79,7 +78,7 @@ public class ProfilingTest {
     @Test
     public void single_thread_fixed_latency() throws Exception {
 
-        Profiler profiler = new SimpleProfiler();
+        Profiler profiler = new AggregatingProfiler();
 
 
         ProfiledCall call = profiler.profiledCall("single_thread_fixed_latency");
@@ -104,7 +103,7 @@ public class ProfilingTest {
     @Test
     public void single_thread_fixed_latency_start_nanotime() throws Exception {
 
-        Profiler profiler = new SimpleProfiler();
+        Profiler profiler = new AggregatingProfiler();
 
 
         ProfiledCall call = profiler.profiledCall("single_thread_fixed_latency");
@@ -131,7 +130,7 @@ public class ProfilingTest {
     @Test
     public void parallel_threads_fixed_throughput() throws Exception {
 
-        Profiler profiler = new SimpleProfiler();
+        Profiler profiler = new AggregatingProfiler();
         RateLimiter rateLimiter = RateLimiter.create(100);
 
         ExecutorService pool = Executors.newCachedThreadPool();
@@ -162,7 +161,7 @@ public class ProfilingTest {
     @Test
     public void parallel_threads_fixed_latency() throws Exception {
 
-        Profiler profiler = new SimpleProfiler();
+        Profiler profiler = new AggregatingProfiler();
         try (ProfilerReporter reporter = profiler.createReporter()) {
             ExecutorService pool = Executors.newCachedThreadPool();
 
@@ -191,7 +190,7 @@ public class ProfilingTest {
     @Test
     public void between_thread_call_fixed_latency() throws Exception {
 
-        Profiler profiler = new SimpleProfiler();
+        Profiler profiler = new AggregatingProfiler();
         try (ProfilerReporter reporter = profiler.createReporter()) {
             ExecutorService pool1 = Executors.newCachedThreadPool();
             ExecutorService pool2 = Executors.newCachedThreadPool();
@@ -255,7 +254,7 @@ public class ProfilingTest {
 
     @Test
     public void simple_start_stop_with_zero_payload() throws Exception {
-        Profiler profiler = new SimpleProfiler();
+        Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         ProfiledCall call = profiler.profiledCall("simple_start_stop_with_zero_payload");
@@ -278,7 +277,7 @@ public class ProfilingTest {
     @Test
     public void payload_min_max_total() throws Exception {
 
-        Profiler profiler = new SimpleProfiler();
+        Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         ProfiledCall call = profiler.profiledCall("payload_min_max_total");
@@ -306,7 +305,7 @@ public class ProfilingTest {
 
     @Test
     public void skip_empty_metrics() throws Exception {
-        Profiler profiler = new SimpleProfiler();
+        Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         ProfiledCall call = profiler.profiledCall("call_1");
@@ -344,7 +343,7 @@ public class ProfilingTest {
 
     @Test
     public void reportBuildAndReset() throws Exception {
-        Profiler profiler = new SimpleProfiler();
+        Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         AtomicInteger threadIdx = new AtomicInteger();
@@ -390,7 +389,7 @@ public class ProfilingTest {
 
     @Test
     void profile_not_explicitly_stopped() throws Exception {
-        SimpleProfiler profiler = new SimpleProfiler();
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter(true, 10);
 
         profiler.call("call");
@@ -413,7 +412,7 @@ public class ProfilingTest {
 
     @Test
     void profile_explicitly_stopped() throws Exception {
-        SimpleProfiler profiler = new SimpleProfiler();
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter(true, 10);
 
         profiler.call("call");
@@ -468,7 +467,7 @@ public class ProfilingTest {
 
     @Test
     void profile_unchecked_future() throws Exception {
-        SimpleProfiler profiler = new SimpleProfiler();
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter(true, 10);
 
         profiler.call("call");
@@ -496,7 +495,7 @@ public class ProfilingTest {
 
     @Test
     void profile_checked_future() throws Exception {
-        SimpleProfiler profiler = new SimpleProfiler();
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter(true, 10);
 
         profiler.call("call");
@@ -524,7 +523,7 @@ public class ProfilingTest {
 
     @Test
     void try_with_resource() throws Exception {
-        SimpleProfiler profiler = new SimpleProfiler();
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter(true, 10);
 
         // try-with-resources
@@ -613,7 +612,7 @@ public class ProfilingTest {
 
     @Test
     void blocks() throws Exception {
-        SimpleProfiler profiler = new SimpleProfiler();
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter(true, 10);
 
         profiler.profile("profile.1", ProfilingTest::resThrowableUnchecked);
@@ -658,7 +657,7 @@ public class ProfilingTest {
 
     @Test
     void profile_futures() throws Exception {
-        SimpleProfiler profiler = new SimpleProfiler();
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter(true, 10);
 
         CompletableFuture<String> future;

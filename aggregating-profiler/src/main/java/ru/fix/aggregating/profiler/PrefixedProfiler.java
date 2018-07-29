@@ -1,6 +1,6 @@
 package ru.fix.aggregating.profiler;
 
-import ru.fix.aggregating.profiler.util.NameNormalizer;
+import ru.fix.aggregating.profiler.engine.NameNormalizer;
 
 /**
  * Attach fixed prefix to profiled calls and indicator names

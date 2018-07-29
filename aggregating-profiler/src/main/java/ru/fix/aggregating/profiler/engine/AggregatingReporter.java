@@ -1,14 +1,14 @@
-package ru.fix.aggregating.profiler.impl;
+package ru.fix.aggregating.profiler.engine;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.fix.aggregating.profiler.ProfilerReporter;
+import ru.fix.aggregating.profiler.AggregatingProfiler;
 import ru.fix.aggregating.profiler.ProfilerCallReport;
 import ru.fix.aggregating.profiler.ProfilerReport;
+import ru.fix.aggregating.profiler.ProfilerReporter;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
@@ -18,8 +18,8 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-class ProfilerReporterImpl implements ProfilerReporter {
-    private static final Logger log = LoggerFactory.getLogger(ProfilerReporterImpl.class);
+public class AggregatingReporter implements ProfilerReporter {
+    private static final Logger log = LoggerFactory.getLogger(AggregatingReporter.class);
 
     private final Map<String, SharedCounters> sharedCounters = new ConcurrentHashMap<>();
 
@@ -30,50 +30,30 @@ class ProfilerReporterImpl implements ProfilerReporter {
     // create report and then reset counters lock
     private final Lock writeLock = readWriteLock.writeLock();
 
-    private final SimpleProfiler profiler;
+    private final AggregatingProfiler profiler;
 
     private final AtomicLong lastReportTimestamp;
 
-    private final AtomicBoolean enableActiveCallsMaxLatency;
-    private final AtomicInteger numberOfActiveCallsToKeepBetweenReports;
+    private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
+    private final ClosingCallback closingCallback;
 
-    public ProfilerReporterImpl(SimpleProfiler profiler) {
-        this(profiler, false, 20);
-    }
 
-    public ProfilerReporterImpl(SimpleProfiler profiler,
-                                boolean enableActiveCallsMaxLatency,
-                                int numberOfActiveCallsToKeepBetweenReports) {
+    public AggregatingReporter(AggregatingProfiler profiler,
+                               AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
+                               ClosingCallback closingCallback) {
         this.profiler = profiler;
-        this.enableActiveCallsMaxLatency = new AtomicBoolean(enableActiveCallsMaxLatency);
-        this.numberOfActiveCallsToKeepBetweenReports = new AtomicInteger(numberOfActiveCallsToKeepBetweenReports);
+        this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
+        this.closingCallback = closingCallback;
         lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
-
-        this.profiler.registerReporter(this);
     }
 
-    @Override
-    public boolean setEnableActiveCallsMaxLatency(boolean enable) {
-        boolean prevValue = this.enableActiveCallsMaxLatency.getAndSet(enable);
-
-        sharedCounters.values().forEach((counters) ->
-                counters.setRecordActiveCalls(enable)
-        );
-
-        return prevValue;
-    }
-
-    @Override
-    public int setNumberOfActiveCallsToKeepBetweenReports(int number) {
-        return this.numberOfActiveCallsToKeepBetweenReports.getAndSet(number);
-    }
-
-    public void applyToSharedCounters(String profiledCallName, Consumer<SharedCounters> consumer) {
+    public void updateCounters(String profiledCallName, Consumer<SharedCounters> updateAction) {
         readLock.lock();
         try {
-            consumer.accept(sharedCounters.computeIfAbsent(profiledCallName, key ->
-                    new SharedCounters(enableActiveCallsMaxLatency.get())
-            ));
+            updateAction.accept(
+                    sharedCounters.computeIfAbsent(profiledCallName, key ->
+                            new SharedCounters(numberOfActiveCallsToTrackAndKeepBetweenReports)
+                    ));
         } finally {
             readLock.unlock();
         }
@@ -181,26 +161,28 @@ class ProfilerReporterImpl implements ProfilerReporter {
     }
 
     private long activeCallsMaxLatencyAndResetActiveCalls(SharedCounters counters) {
-        Optional<ProfiledCallImpl> longestCall = resetActiveCallsAndGetLongest(counters);
+        Optional<AggregatingCall> longestCall = resetActiveCallsAndGetLongest(counters);
         return longestCall
-                .map(ProfiledCallImpl::timeFromCallStartInMs)
+                .map(AggregatingCall::timeFromCallStart)
                 .orElse(0L);
 
     }
 
-    private Optional<ProfiledCallImpl> resetActiveCallsAndGetLongest(SharedCounters counters) {
-        if (!enableActiveCallsMaxLatency.get() && !counters.getActiveCalls().isEmpty()) {
-            counters.getActiveCalls().reset();
+    private Optional<AggregatingCall> resetActiveCallsAndGetLongest(SharedCounters counters) {
+        if (numberOfActiveCallsToTrackAndKeepBetweenReports.get() == 0) {
+            if(!counters.getActiveCalls().isEmpty()) {
+                counters.getActiveCalls().reset();
+            }
             return Optional.empty();
         }
 
-        ProfiledCallImpl[] longest = new ProfiledCallImpl[1];
+        AggregatingCall[] longest = new AggregatingCall[1];
 
-        Set<ProfiledCallImpl> top = new HashSet<>();
+        Set<AggregatingCall> top = new HashSet<>();
         counters.getActiveCalls()
                 .stream()
-                .sorted(Comparator.comparingLong(ProfiledCallImpl::startTime))
-                .limit(numberOfActiveCallsToKeepBetweenReports.get())
+                .sorted(Comparator.comparingLong(AggregatingCall::timeFromCallStart))
+                .limit(numberOfActiveCallsToTrackAndKeepBetweenReports.get())
                 .forEachOrdered(call -> {
                     if (top.isEmpty()) {
                         longest[0] = call;
@@ -208,9 +190,9 @@ class ProfilerReporterImpl implements ProfilerReporter {
                     top.add(call);
                 });
 
-        Iterator<ProfiledCallImpl> calls = counters.getActiveCalls().iterator();
+        Iterator<AggregatingCall> calls = counters.getActiveCalls().iterator();
         while (calls.hasNext()) {
-            ProfiledCallImpl call = calls.next();
+            AggregatingCall call = calls.next();
             if (!top.contains(call)) {
                 calls.remove();
             }
@@ -235,6 +217,6 @@ class ProfilerReporterImpl implements ProfilerReporter {
 
     @Override
     public void close() {
-        profiler.unregisterReporter(this);
+        closingCallback.closed();
     }
 }

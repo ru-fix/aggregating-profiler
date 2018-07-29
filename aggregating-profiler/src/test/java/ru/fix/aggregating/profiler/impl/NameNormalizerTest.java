@@ -1,7 +1,7 @@
 package ru.fix.aggregating.profiler.impl;
 
 import org.junit.jupiter.api.Test;
-import ru.fix.aggregating.profiler.util.NameNormalizer;
+import ru.fix.aggregating.profiler.engine.NameNormalizer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -1,16 +1,12 @@
-package ru.fix.aggregating.profiler.impl;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package ru.fix.aggregating.profiler.engine;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * @author Gleb Beliaev (gbeliaev@fix.ru)
+ * @author Gleb Beliaev
  * Created 11.01.18.
  */
-public class MaxThroughputCalculator {
-    private static final Logger log = LoggerFactory.getLogger(MaxThroughputCalculator.class);
+public class MaxThroughputPerSecondCalculator {
     private static final long ONE_SECOND_MS = 1_000;
 
     private final AtomicLong maxCallCountPerSecond = new AtomicLong();
@@ -23,21 +19,18 @@ public class MaxThroughputCalculator {
 
     public void call(long eventCount) {
         long count = callCount.getAndAdd(eventCount);
-        long time = timeBeginningOfSecond.get();
+        long start = timeBeginningOfSecond.get();
         long now = currentTimeMillis();
 
-        log.trace("begin time {}, count {}, now {}", time, count, now);
-
-        if (time + ONE_SECOND_MS <= now) {
-            if (timeBeginningOfSecond.compareAndSet(time, now)) {
+        if (start + ONE_SECOND_MS <= now) {
+            if (timeBeginningOfSecond.compareAndSet(start, now)) {
                 callCount.addAndGet(-count);
 
-                boolean doWhile;
+                boolean maxUpdateSucceed;
                 do {
-                    long max = maxCallCountPerSecond.get();
-                    log.trace("update max, count {}, max {}", count, max);
-                    doWhile = count > max && !maxCallCountPerSecond.compareAndSet(max, count);
-                } while (doWhile);
+                    long currentMax = maxCallCountPerSecond.get();
+                    maxUpdateSucceed = count > currentMax && !maxCallCountPerSecond.compareAndSet(currentMax, count);
+                } while (maxUpdateSucceed);
             }
         }
     }
@@ -50,7 +43,6 @@ public class MaxThroughputCalculator {
         /*
           update current max in case there was no calls involved before building report
          */
-        log.trace("reset");
         call(0);
         return maxCallCountPerSecond.getAndSet(0);
     }

@@ -51,17 +51,6 @@ public interface Profiler {
     }
 
     /**
-     * Measure provided feature execution (supporting supplier which throws checked exception)
-     *
-     * @param name              name of profiling call
-     * @param throwableSupplier CompletableFuture provider
-     */
-    default <R, T extends Throwable> CompletableFuture<R> profileFuture(String name,
-                                                                        ThrowableSupplier<R, T> throwableSupplier) throws T {
-        return start(name).profileFuture(throwableSupplier);
-    }
-
-    /**
      * Creates and calls profiled call,
      * shortcut of {@code profiledCall(<name>).call()}
      */
@@ -90,13 +79,4 @@ public interface Profiler {
      * Reporter is closable resource
      */
     ProfilerReporter createReporter();
-
-    /**
-     * Create new instance of reporter.
-     * Reporter is closable resource.
-     *
-     * @param enableActiveCallsMaxLatency     see {@link ProfilerReporter#setEnableActiveCallsMaxLatency(boolean)}
-     * @param activeCallsToKeepBetweenReports see {@link ProfilerReporter#setNumberOfActiveCallsToKeepBetweenReports(int)}
-     */
-    ProfilerReporter createReporter(boolean enableActiveCallsMaxLatency, int activeCallsToKeepBetweenReports);
 }

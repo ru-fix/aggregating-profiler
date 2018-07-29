@@ -1,10 +1,6 @@
-package ru.fix.aggregating.profiler.impl;
+package ru.fix.aggregating.profiler;
 
-import ru.fix.aggregating.profiler.IndicationProvider;
-import ru.fix.aggregating.profiler.ProfiledCall;
-import ru.fix.aggregating.profiler.Profiler;
-import ru.fix.aggregating.profiler.ProfilerReporter;
-import ru.fix.aggregating.profiler.util.NameNormalizer;
+import ru.fix.aggregating.profiler.engine.NameNormalizer;
 
 public class SuffixedProfiler implements Profiler {
 

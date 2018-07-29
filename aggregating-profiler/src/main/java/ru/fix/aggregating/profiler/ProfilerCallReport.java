@@ -38,7 +38,7 @@ public class ProfilerCallReport {
         return String.format("%s: LatMin: %d, LatMax: %d, LatAvg: %d," +
                         " CallsCnt: %d, CallsThrpt: %d, StCallsCnt: %d, RepTime: %d," +
                         " PldMin %d, PldMax %d, PldAvg %d," +
-                        " PldTot: %d, PldThrpt: %d," +
+                        " PldSum: %d, PldThrpt: %d," +
                         " MaxThrpt: %d, MaxPldThrpt: %d," +
                         " ActCallsCnt: %d, ActCallsLatMax: %d",
                 getName(),

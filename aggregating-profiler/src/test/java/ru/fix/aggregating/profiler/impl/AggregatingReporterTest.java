@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import ru.fix.aggregating.profiler.ProfiledCall;
 import ru.fix.aggregating.profiler.ProfilerCallReport;
 import ru.fix.aggregating.profiler.ProfilerReport;
+import ru.fix.aggregating.profiler.AggregatingProfiler;
+import ru.fix.aggregating.profiler.engine.ProfilerReporterImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,14 +20,14 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Gleb Beliaev (gbeliaev@fix.ru)
  * Created 26.12.17.
  */
-public class ProfilerReporterImplTest {
+public class AggregatingReporterTest {
 
-    private SimpleProfiler profiler;
+    private AggregatingProfiler profiler;
     private ProfilerReporterImpl reporter;
 
     @BeforeEach
     public void setup() {
-        profiler = new SimpleProfiler();
+        profiler = new AggregatingProfiler();
         reporter = new ProfilerReporterImpl(profiler);
     }
 

@@ -1,7 +1,9 @@
-# commons-profiler
-[![Maven Central](https://img.shields.io/maven-central/v/ru.fix/commons-profiler-api.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22ru.fix%22)
+# aggregating-profiler
+[![Maven Central](https://img.shields.io/maven-central/v/ru.fix/aggregating-profiler.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22ru.fix%22)
 
 Aggregating Profiler provide basic API for application metrics measurement.
+
+## Motivation 
 
 Profiler records metrics and accumulates them in memory. 
 Then profiler flushes aggregated values to external store. 

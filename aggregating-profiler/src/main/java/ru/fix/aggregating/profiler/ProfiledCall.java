@@ -74,12 +74,7 @@ public interface ProfiledCall extends AutoCloseable {
     /**
      * Profile provided future
      */
-    <R> CompletableFuture<R> profileFuture(Supplier<CompletableFuture<R>> cfSupplier);
-
-    /**
-     * Profile future where supplier throws checked exceptions
-     */
-    <R, T extends Throwable> CompletableFuture<R> profileFuture(ThrowableSupplier<R, T> futureSupplier) throws T;
+    <R> CompletableFuture<R> profileFuture(Supplier<CompletableFuture<R>> asyncInvocation);
 
     /**
      * Call if profiled code didn't execute normally and it's measurements must be discarded.

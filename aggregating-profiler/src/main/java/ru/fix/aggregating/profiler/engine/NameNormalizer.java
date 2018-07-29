@@ -1,4 +1,4 @@
-package ru.fix.aggregating.profiler.util;
+package ru.fix.aggregating.profiler.engine;
 
 public class NameNormalizer {
 

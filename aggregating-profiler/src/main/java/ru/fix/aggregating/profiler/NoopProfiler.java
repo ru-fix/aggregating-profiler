@@ -56,11 +56,6 @@ public class NoopProfiler implements Profiler {
         public <R> CompletableFuture<R> profileFuture(Supplier<CompletableFuture<R>> cfSupplier) {
             return cfSupplier.get();
         }
-
-        @Override
-        public <R, T extends Throwable> CompletableFuture<R> profileFuture(ThrowableSupplier<R, T> futureSupplier) throws T {
-            return futureSupplier.get(this);
-        }
     }
 
     @Override
@@ -78,11 +73,6 @@ public class NoopProfiler implements Profiler {
 
     @Override
     public ProfilerReporter createReporter() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ProfilerReporter createReporter(boolean enableActiveCallsMaxLatency, int activeCallsToKeepBetweenReports) {
         throw new UnsupportedOperationException();
     }
 }

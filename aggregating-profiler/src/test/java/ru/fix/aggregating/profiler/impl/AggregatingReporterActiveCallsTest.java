@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import ru.fix.aggregating.profiler.ProfiledCall;
 import ru.fix.aggregating.profiler.ProfilerCallReport;
 import ru.fix.aggregating.profiler.ProfilerReport;
+import ru.fix.aggregating.profiler.AggregatingProfiler;
+import ru.fix.aggregating.profiler.engine.ProfiledCallImpl;
+import ru.fix.aggregating.profiler.engine.ProfilerReporterImpl;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -15,15 +18,15 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author Tim Urmancheev
  */
-public class ProfilerReporterImplActiveCallsTest {
+public class AggregatingReporterActiveCallsTest {
 
     private static final int numberOfActiveCallsToKeepBetweenReports = 20;
-    private SimpleProfiler profiler;
+    private AggregatingProfiler profiler;
     private ProfilerReporterImpl reporter;
 
     @BeforeEach
     public void setup() {
-        profiler = new SimpleProfiler();
+        profiler = new AggregatingProfiler();
         reporter = new ProfilerReporterImpl(
                 profiler,
                 true,

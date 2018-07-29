@@ -1,9 +1,8 @@
-package ru.fix.aggregating.profiler.impl;
+package ru.fix.aggregating.profiler.engine;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
@@ -11,7 +10,7 @@ import java.util.stream.Stream;
 /**
  * @author Kamil Asfandiyarov
  */
-class SharedCounters {
+public class SharedCounters {
     private final LongAdder callsCount = new LongAdder();
     private final LongAdder startedCallsCount = new LongAdder();
     private final LongAdder sumStartStopLatency = new LongAdder();
@@ -23,20 +22,16 @@ class SharedCounters {
     private final AtomicLong payloadMax = new AtomicLong();
     private final LongAdder payloadSum = new LongAdder();
 
-    private final MaxThroughputCalculator maxThroughput = new MaxThroughputCalculator();
-    private final MaxThroughputCalculator maxPayloadThroughput = new MaxThroughputCalculator();
+    private final MaxThroughputPerSecondCalculator maxThroughput = new MaxThroughputPerSecondCalculator();
+    private final MaxThroughputPerSecondCalculator maxPayloadThroughput = new MaxThroughputPerSecondCalculator();
 
     private final LongAdder activeCallsCounter = new LongAdder();
     private final ActiveCallsSet activeCalls = new ActiveCallsSet();
 
-    private final AtomicBoolean recordActiveCalls = new AtomicBoolean();
+    private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
 
-    public SharedCounters(boolean recordActiveCalls) {
-        this.recordActiveCalls.set(recordActiveCalls);
-    }
-
-    void setRecordActiveCalls(boolean recordActiveCalls) {
-        this.recordActiveCalls.set(recordActiveCalls);
+    public SharedCounters(AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports) {
+        this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
     }
 
     public LongAdder getCallsCount() {
@@ -71,11 +66,11 @@ class SharedCounters {
         return payloadSum;
     }
 
-    public MaxThroughputCalculator getMaxThroughput() {
+    public MaxThroughputPerSecondCalculator getMaxThroughput() {
         return maxThroughput;
     }
 
-    public MaxThroughputCalculator getMaxPayloadThroughput() {
+    public MaxThroughputPerSecondCalculator getMaxPayloadThroughput() {
         return maxPayloadThroughput;
     }
 
@@ -87,16 +82,16 @@ class SharedCounters {
         return activeCalls;
     }
 
-    public class ActiveCallsSet implements Iterable<ProfiledCallImpl> {
-        private ConcurrentHashMap<ProfiledCallImpl, Boolean> activeCalls = new ConcurrentHashMap<>();
+    public class ActiveCallsSet implements Iterable<AggregatingCall> {
+        private ConcurrentHashMap<AggregatingCall, Boolean> activeCalls = new ConcurrentHashMap<>();
 
-        public void add(ProfiledCallImpl call) {
-            if (recordActiveCalls.get()) {
+        public void add(AggregatingCall call) {
+            if (numberOfActiveCallsToTrackAndKeepBetweenReports.get() > 0) {
                 activeCalls.put(call, true);
             }
         }
 
-        public void remove(ProfiledCallImpl call) {
+        public void remove(AggregatingCall call) {
             activeCalls.remove(call);
         }
 
@@ -104,20 +99,12 @@ class SharedCounters {
             return activeCalls.isEmpty();
         }
 
-        public int size() {
-            return activeCalls.size();
-        }
-
-        public boolean containsAll(Collection<?> collection) {
-            return activeCalls.keySet().containsAll(collection);
-        }
-
         @Override
-        public Iterator<ProfiledCallImpl> iterator() {
+        public Iterator<AggregatingCall> iterator() {
             return activeCalls.keySet().iterator();
         }
 
-        public Stream<ProfiledCallImpl> stream() {
+        public Stream<AggregatingCall> stream() {
             return activeCalls.keySet().stream();
         }
 
