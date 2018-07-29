@@ -28,7 +28,7 @@ public interface Profiler {
      * @see ProfiledCall#profile(java.util.function.Supplier)
      */
     default <R> R profile(String name, Supplier<R> block) {
-        return start(name).profile(block);
+        return profiledCall(name).profile(block);
     }
 
     /**
@@ -37,17 +37,23 @@ public interface Profiler {
      * @see ProfiledCall#profile(java.lang.Runnable)
      */
     default void profile(String name, Runnable block) {
-        start(name).profile(block);
+        profiledCall(name).profile(block);
     }
 
     /**
      * Measure provided feature execution
      *
      * @param name       name of profiling call
-     * @param cfSupplier CompletableFuture provider
+     * @param asyncInvocation CompletableFuture provider
      */
-    default <R> CompletableFuture<R> profileFuture(String name, Supplier<CompletableFuture<R>> cfSupplier) {
-        return start(name).profileFuture(cfSupplier);
+    default <R> CompletableFuture<R> profileFuture(String name, Supplier<CompletableFuture<R>> asyncInvocation) {
+        return profiledCall(name).profileFuture(asyncInvocation);
+    }
+
+    default <R, T extends Throwable> CompletableFuture<R> profileFutureThrowable(
+            String name,
+            ThrowableSupplier<CompletableFuture<R>, T> asyncInvocation) throws T {
+        return profiledCall(name).profileFutureThrowable(asyncInvocation);
     }
 
     /**

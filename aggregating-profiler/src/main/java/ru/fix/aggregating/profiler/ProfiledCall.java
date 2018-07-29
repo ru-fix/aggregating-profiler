@@ -77,6 +77,12 @@ public interface ProfiledCall extends AutoCloseable {
     <R> CompletableFuture<R> profileFuture(Supplier<CompletableFuture<R>> asyncInvocation);
 
     /**
+     * Profile provided future
+     */
+    <R, T extends Throwable> CompletableFuture<R> profileFutureThrowable(
+            ThrowableSupplier<CompletableFuture<R>, T> asyncInvocation) throws T;
+
+    /**
      * Call if profiled code didn't execute normally and it's measurements must be discarded.
      * Useful if profiled code failed fast and must not be displayed in latency metrics because it will throw it off.
      */

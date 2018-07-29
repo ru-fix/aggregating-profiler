@@ -3,6 +3,7 @@ package ru.fix.aggregating.profiler.engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.fix.aggregating.profiler.ProfiledCall;
+import ru.fix.aggregating.profiler.ThrowableSupplier;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -76,7 +77,7 @@ public class AggregatingCall implements ProfiledCall {
     public ProfiledCall start() {
         if (!started.compareAndSet(false, true)) {
             throw new IllegalArgumentException("Start method was already called." +
-                    " Profiler: " + profiledCallName);
+                    " Profiled call: " + profiledCallName);
         }
         startTime.set(System.nanoTime());
         mutator.updateCounters(profiledCallName, sharedCounters -> {
@@ -120,7 +121,7 @@ public class AggregatingCall implements ProfiledCall {
         });
     }
 
-    long timeFromCallStart() {
+    public long timeFromCallStart() {
         return (System.nanoTime() - startTime.get()) / 1000000;
     }
 
@@ -135,6 +136,7 @@ public class AggregatingCall implements ProfiledCall {
     @Override
     public <R> R profile(Supplier<R> block) {
         try {
+            start();
             R r = block.get();
             stop();
             return r;
@@ -146,6 +148,7 @@ public class AggregatingCall implements ProfiledCall {
     @Override
     public void profile(Runnable block) {
         try {
+            start();
             block.run();
             stop();
         } finally {
@@ -157,9 +160,11 @@ public class AggregatingCall implements ProfiledCall {
     public <R> CompletableFuture<R> profileFuture(Supplier<CompletableFuture<R>> asyncInvocation) {
         CompletableFuture<R> future;
         try {
+            start();
             future = asyncInvocation.get();
-        } finally {
+        } catch (Throwable exc){
             close();
+            throw exc;
         }
 
         return future.whenComplete((res, thr) -> {
@@ -171,6 +176,25 @@ public class AggregatingCall implements ProfiledCall {
         });
     }
 
+    @Override
+    public <R, T extends Throwable> CompletableFuture<R> profileFutureThrowable(ThrowableSupplier<CompletableFuture<R>, T> asyncInvocation) throws T {
+        CompletableFuture<R> future;
+        try {
+            start();
+            future = asyncInvocation.get();
+        } catch (Throwable exc){
+            close();
+            throw exc;
+        }
+
+        return future.whenComplete((res, thr) -> {
+            if (thr != null) {
+                close();
+            } else {
+                stop();
+            }
+        });
+    }
 
     @Override
     public void close() {

@@ -1,13 +1,9 @@
-package ru.fix.aggregating.profiler.impl;
+package ru.fix.aggregating.profiler.engine;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.fix.aggregating.profiler.ProfiledCall;
-import ru.fix.aggregating.profiler.ProfilerCallReport;
-import ru.fix.aggregating.profiler.ProfilerReport;
-import ru.fix.aggregating.profiler.AggregatingProfiler;
-import ru.fix.aggregating.profiler.engine.ProfilerReporterImpl;
+import ru.fix.aggregating.profiler.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,16 +19,16 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AggregatingReporterTest {
 
     private AggregatingProfiler profiler;
-    private ProfilerReporterImpl reporter;
+    private ProfilerReporter reporter;
 
     @BeforeEach
     public void setup() {
         profiler = new AggregatingProfiler();
-        reporter = new ProfilerReporterImpl(profiler);
+        reporter = profiler.createReporter();
     }
 
     @AfterEach
-    public void tearDown() {
+    public void tearDown() throws Exception {
         reporter.close();
     }
 

@@ -35,7 +35,7 @@ public class MaxThroughputPerSecondCalculator {
         }
     }
 
-    long currentTimeMillis() {
+    public long currentTimeMillis() {
         return System.currentTimeMillis();
     }
 

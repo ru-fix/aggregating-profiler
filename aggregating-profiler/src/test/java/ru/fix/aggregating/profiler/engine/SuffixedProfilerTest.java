@@ -1,4 +1,4 @@
-package ru.fix.aggregating.profiler.impl;
+package ru.fix.aggregating.profiler.engine;
 
 import org.junit.jupiter.api.Test;
 import ru.fix.aggregating.profiler.PrefixedProfiler;
@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SuffixedProfilerTest {
 
     @Test
-    public void whenCreatesProfiledCallThenProfiledCallContainsTrueNameChain() {
+    void whenCreatesProfiledCallThenProfiledCallContainsTrueNameChain() {
 
         Profiler sp = new AggregatingProfiler();
         Profiler root = new SuffixedProfiler(sp, "root");
@@ -21,7 +21,7 @@ public class SuffixedProfilerTest {
     }
 
     @Test
-    public void whenCreatesProfiledCallWithDotNameThenProfiledCallContainsTrueNameChain() {
+    void whenCreatesProfiledCallWithDotNameThenProfiledCallContainsTrueNameChain() {
 
         Profiler sp = new AggregatingProfiler();
         Profiler root = new SuffixedProfiler(sp, "root.");
@@ -31,7 +31,7 @@ public class SuffixedProfilerTest {
     }
 
     @Test
-    public void whenUsePrefixedProfilerThenProfiledCallContainsTrueNameChain() {
+    void whenUsePrefixedProfilerThenProfiledCallContainsTrueNameChain() {
 
         PrefixedProfiler srv1 = new PrefixedProfiler(new AggregatingProfiler(), "srv1.");
         Profiler root = new SuffixedProfiler(srv1, "root");

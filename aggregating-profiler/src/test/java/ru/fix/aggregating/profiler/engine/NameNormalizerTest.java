@@ -1,34 +1,33 @@
-package ru.fix.aggregating.profiler.impl;
+package ru.fix.aggregating.profiler.engine;
 
 import org.junit.jupiter.api.Test;
-import ru.fix.aggregating.profiler.engine.NameNormalizer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NameNormalizerTest {
 
     @Test
-    public void stringWithoutDotsDoesNotChanges() {
+    void stringWithoutDotsDoesNotChanges() {
         assertEquals("s", NameNormalizer.trimDots("s"));
     }
 
     @Test
-    public void ifStringEndsByDotThenDotRemove() {
+    void ifStringEndsByDotThenDotRemove() {
         assertEquals("s", NameNormalizer.trimDots("s."));
     }
 
     @Test
-    public void ifStringStartsByDotThenDotRemove() {
+    void ifStringStartsByDotThenDotRemove() {
         assertEquals("s", NameNormalizer.trimDots(".s"));
     }
 
     @Test
-    public void ifStringStartsByDotAndEndsByDotThenDotRemove() {
+    void ifStringStartsByDotAndEndsByDotThenDotRemove() {
         assertEquals("s", NameNormalizer.trimDots(".s."));
     }
 
     @Test
-    public void ifStringHasBlanksThenBlanksWillBeRemoved() {
+    void ifStringHasBlanksThenBlanksWillBeRemoved() {
         assertEquals("s", NameNormalizer.trimDots(" s "));
     }
 }

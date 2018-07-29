@@ -32,11 +32,4 @@ public class SuffixedProfiler implements Profiler {
     public ProfilerReporter createReporter() {
         return profiler.createReporter();
     }
-
-    @Override
-    public ProfilerReporter createReporter(boolean enableActiveCallsMaxLatency, int activeCallsToKeepBetweenReports) {
-        return profiler.createReporter(enableActiveCallsMaxLatency, activeCallsToKeepBetweenReports);
-    }
-
-
 }

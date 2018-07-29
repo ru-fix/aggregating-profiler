@@ -1,6 +1,5 @@
 package ru.fix.aggregating.profiler;
 
-import com.google.common.util.concurrent.RateLimiter;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,66 +19,62 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author Kamil Asfandiyarov
  */
-public class ProfilingTest {
-    private static final Logger log = LoggerFactory.getLogger(ProfilingTest.class);
+public class AggregatingProfilerTest {
+    private static final Logger log = LoggerFactory.getLogger(AggregatingProfilerTest.class);
 
-    private void doSomething(int delay) {
+    private void sleep(int delay) {
         try {
             Thread.sleep(delay);
-        } catch (InterruptedException e) {
-            log.error(e.getMessage(), e);
+        } catch (InterruptedException exc) {
+            log.error(exc.getMessage(), exc);
         }
     }
 
 
     @Test
-    public void report_name() throws Exception {
+    void report_name() throws Exception {
         Profiler profiler = new AggregatingProfiler();
-
 
         try (ProfilerReporter reporter = profiler.createReporter()) {
 
-            ProfiledCall call = profiler.profiledCall("report_name");
+            ProfiledCall call = profiler.profiledCall("call.name");
             call.start();
             call.stop();
 
             ProfilerReport report = reporter.buildReportAndReset();
             assertEquals(1, report.getProfilerCallReports().size());
-            assertEquals("report_name", report.getProfilerCallReports().get(0).getName());
+            assertEquals("call.name", report.getProfilerCallReports().get(0).getName());
         }
     }
 
     @Test
-    public void single_thread_fixed_throughput() throws Exception {
+    void single_thread_fixed_throughput() throws Exception {
 
         Profiler profiler = new AggregatingProfiler();
-        RateLimiter rateLimiter = RateLimiter.create(50);
-
 
         ProfiledCall call = profiler.profiledCall("single_thread_fixed_throughput");
         try (ProfilerReporter reporter = profiler.createReporter()) {
 
+            AtomicInteger counter = new AtomicInteger();
 
-            reporter.buildReportAndReset();
-
-            for (int i = 0; i < 100; i++) {
+            new FixedRateEventEmitter(50, () -> {
                 call.start();
-                rateLimiter.acquire();
                 call.stop();
-            }
+                return counter.incrementAndGet() < 100;
+            }).join();
 
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertThat(report.callsThroughputAvg, lessThan(60L));
+            assertThat(report.callsThroughputAvg, lessThanOrEqualTo(70L));
+            assertThat(report.callsThroughputAvg, greaterThanOrEqualTo(40L));
         }
     }
 
     @Test
-    public void single_thread_fixed_latency() throws Exception {
+    void single_thread_fixed_latency() throws Exception {
 
         Profiler profiler = new AggregatingProfiler();
-
 
         ProfiledCall call = profiler.profiledCall("single_thread_fixed_latency");
         try (ProfilerReporter reporter = profiler.createReporter()) {
@@ -89,7 +84,7 @@ public class ProfilingTest {
 
             for (int i = 0; i < 50; i++) {
                 call.start();
-                doSomething(100);
+                sleep(100);
                 call.stop();
             }
 
@@ -97,14 +92,13 @@ public class ProfilingTest {
             log.info(report.toString());
 
             assertThat(report.latencyMin, greaterThanOrEqualTo(90L));
+            assertThat(report.latencyMin, lessThanOrEqualTo(120L));
         }
     }
 
     @Test
-    public void single_thread_fixed_latency_start_nanotime() throws Exception {
-
+    void single_thread_fixed_latency_start_nanotime() throws Exception {
         Profiler profiler = new AggregatingProfiler();
-
 
         ProfiledCall call = profiler.profiledCall("single_thread_fixed_latency");
         try (ProfilerReporter reporter = profiler.createReporter()) {
@@ -113,53 +107,24 @@ public class ProfilingTest {
 
 
             for (int i = 0; i < 50; i++) {
-                long currentTime = System.currentTimeMillis();
-                doSomething(100);
-                call.call(currentTime, System.currentTimeMillis(), i);
+                long startTime = System.currentTimeMillis();
+                sleep(100);
+                call.call(startTime, System.currentTimeMillis(), i);
             }
 
             ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
             assertThat(report.latencyMin, greaterThanOrEqualTo(90L));
+            assertThat(report.latencyMin, lessThanOrEqualTo(120L));
             assertThat(report.payloadMax, equalTo(49L));
             assertThat(report.payloadMin, equalTo(0L));
         }
     }
 
-    @Test
-    public void parallel_threads_fixed_throughput() throws Exception {
-
-        Profiler profiler = new AggregatingProfiler();
-        RateLimiter rateLimiter = RateLimiter.create(100);
-
-        ExecutorService pool = Executors.newCachedThreadPool();
-
-        try (ProfilerReporter reporter = profiler.createReporter()) {
-            reporter.buildReportAndReset();
-
-            for (int thread = 0; thread < 10; thread++) {
-                pool.submit(() -> {
-                    ProfiledCall call = profiler.profiledCall("parallel_threads_fixed_throughput");
-                    for (int i = 0; i < 100; i++) {
-                        call.start();
-                        rateLimiter.acquire();
-                        call.stop();
-                    }
-                });
-            }
-            pool.shutdown();
-            pool.awaitTermination(3, TimeUnit.MINUTES);
-
-            ProfilerCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
-            log.info(report.toString());
-
-            assertThat(report.callsThroughputAvg, lessThanOrEqualTo(110L));
-        }
-    }
 
     @Test
-    public void parallel_threads_fixed_latency() throws Exception {
+    void parallel_threads_fixed_latency() throws Exception {
 
         Profiler profiler = new AggregatingProfiler();
         try (ProfilerReporter reporter = profiler.createReporter()) {
@@ -172,7 +137,7 @@ public class ProfilingTest {
                     ProfiledCall call = profiler.profiledCall("parallel_threads_fixed_latency");
                     for (int i = 0; i < 100; i++) {
                         call.start();
-                        doSomething(50);
+                        sleep(50);
                         call.stop();
                     }
                 });
@@ -184,11 +149,12 @@ public class ProfilingTest {
             log.info(report.toString());
 
             assertThat(report.latencyMin, greaterThanOrEqualTo(30L));
+            assertThat(report.latencyMin, lessThanOrEqualTo(70L));
         }
     }
 
     @Test
-    public void between_thread_call_fixed_latency() throws Exception {
+    void between_thread_call_fixed_latency() throws Exception {
 
         Profiler profiler = new AggregatingProfiler();
         try (ProfilerReporter reporter = profiler.createReporter()) {
@@ -217,13 +183,13 @@ public class ProfilingTest {
                 CompletableFuture<Void> future = CompletableFuture
                         .runAsync(() -> {
                             call.start();
-                            doSomething(getRandomInt(100, 200));
+                            sleep(getRandomInt(100, 200));
                         }, poolA)
 
-                        .thenRunAsync(() -> doSomething(getRandomInt(100, 200)), poolB)
+                        .thenRunAsync(() -> sleep(getRandomInt(100, 200)), poolB)
 
                         .thenRunAsync(() -> {
-                            doSomething(getRandomInt(100, 200));
+                            sleep(getRandomInt(100, 200));
                             call.stop();
                         }, poolA);
 
@@ -253,7 +219,7 @@ public class ProfilingTest {
     }
 
     @Test
-    public void simple_start_stop_with_zero_payload() throws Exception {
+    void simple_start_stop_with_zero_payload() throws Exception {
         Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
@@ -275,7 +241,7 @@ public class ProfilingTest {
     }
 
     @Test
-    public void payload_min_max_total() throws Exception {
+    void payload_min_max_total() throws Exception {
 
         Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
@@ -304,7 +270,7 @@ public class ProfilingTest {
     }
 
     @Test
-    public void skip_empty_metrics() throws Exception {
+    void skip_empty_metrics() throws Exception {
         Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
@@ -342,7 +308,7 @@ public class ProfilingTest {
     }
 
     @Test
-    public void reportBuildAndReset() throws Exception {
+    void reportBuildAndReset() throws Exception {
         Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
@@ -388,9 +354,9 @@ public class ProfilingTest {
     }
 
     @Test
-    void profile_not_explicitly_stopped() throws Exception {
+    void profile_not_explicitly_stopped() {
         AggregatingProfiler profiler = new AggregatingProfiler();
-        ProfilerReporter reporter = profiler.createReporter(true, 10);
+        ProfilerReporter reporter = profiler.createReporter();
 
         profiler.call("call");
         // try-with-resources
@@ -413,7 +379,7 @@ public class ProfilingTest {
     @Test
     void profile_explicitly_stopped() throws Exception {
         AggregatingProfiler profiler = new AggregatingProfiler();
-        ProfilerReporter reporter = profiler.createReporter(true, 10);
+        ProfilerReporter reporter = profiler.createReporter();
 
         profiler.call("call");
         // try-with-resources
@@ -468,7 +434,7 @@ public class ProfilingTest {
     @Test
     void profile_unchecked_future() throws Exception {
         AggregatingProfiler profiler = new AggregatingProfiler();
-        ProfilerReporter reporter = profiler.createReporter(true, 10);
+        ProfilerReporter reporter = profiler.createReporter();
 
         profiler.call("call");
 
@@ -484,6 +450,7 @@ public class ProfilingTest {
         List<ProfilerCallReport> reports;
 
         profilerReport = reporter.buildReportAndReset();
+
         assertNotNull(profilerReport);
         reports = profilerReport.getProfilerCallReports();
         assertNotNull(reports);
@@ -496,13 +463,13 @@ public class ProfilingTest {
     @Test
     void profile_checked_future() throws Exception {
         AggregatingProfiler profiler = new AggregatingProfiler();
-        ProfilerReporter reporter = profiler.createReporter(true, 10);
+        ProfilerReporter reporter = profiler.createReporter();
 
         profiler.call("call");
 
-        CompletableFuture<String> future = profiler.profileFuture(
+        CompletableFuture<String> future = profiler.profileFutureThrowable(
                 "profile",
-                profiledCall -> CompletableFuture.completedFuture(resThrowableChecked())
+                () -> CompletableFuture.completedFuture(resThrowableChecked())
         );
 
         String res = future.get(1, TimeUnit.SECONDS);
@@ -524,7 +491,7 @@ public class ProfilingTest {
     @Test
     void try_with_resource() throws Exception {
         AggregatingProfiler profiler = new AggregatingProfiler();
-        ProfilerReporter reporter = profiler.createReporter(true, 10);
+        ProfilerReporter reporter = profiler.createReporter();
 
         // try-with-resources
         try (ProfiledCall call = profiler.start("profile.1")) {
@@ -613,12 +580,12 @@ public class ProfilingTest {
     @Test
     void blocks() throws Exception {
         AggregatingProfiler profiler = new AggregatingProfiler();
-        ProfilerReporter reporter = profiler.createReporter(true, 10);
+        ProfilerReporter reporter = profiler.createReporter();
 
-        profiler.profile("profile.1", ProfilingTest::resThrowableUnchecked);
+        profiler.profile("profile.1", AggregatingProfilerTest::resThrowableUnchecked);
         //profiler.profile("profile.2", ProfilingTest::resThrowableChecked); // not supported yet
         try {
-            profiler.profile("profile.3", ProfilingTest::resThrowsUnchecked);
+            profiler.profile("profile.3", AggregatingProfilerTest::resThrowsUnchecked);
             fail("exception was excepted");
         } catch (IllegalArgumentException ignore) {
             // expected exception
@@ -626,10 +593,10 @@ public class ProfilingTest {
             fail("unexpected exception");
         }
 //        profiler.profile("profile.4", ProfilingTest::resThrowsChecked); // not supported yet
-        profiler.profile("profile.5", ProfilingTest::voidThrowableUnchecked);
+        profiler.profile("profile.5", AggregatingProfilerTest::voidThrowableUnchecked);
 //        profiler.profile("profile.6", ProfilingTest::voidThrowableChecked); // not supported yet
         try {
-            profiler.profile("profile.7", ProfilingTest::voidThrowsUnchecked);
+            profiler.profile("profile.7", AggregatingProfilerTest::voidThrowsUnchecked);
             fail("exception was excepted");
         } catch (IllegalArgumentException ignore) {
             // expected exception
@@ -658,7 +625,7 @@ public class ProfilingTest {
     @Test
     void profile_futures() throws Exception {
         AggregatingProfiler profiler = new AggregatingProfiler();
-        ProfilerReporter reporter = profiler.createReporter(true, 10);
+        ProfilerReporter reporter = profiler.createReporter();
 
         CompletableFuture<String> future;
         String s;
@@ -701,9 +668,9 @@ public class ProfilingTest {
         }
 
         try {
-            future = profiler.profileFuture(
+            future = profiler.profileFutureThrowable(
                     "profile.4",
-                    profiledCall -> cfSupplierThrowsUnchecked()
+                    () -> cfSupplierThrowsUnchecked()
             );
             fail("exception was excepted");
         } catch (IllegalArgumentException ignore) {
@@ -713,9 +680,9 @@ public class ProfilingTest {
         }
 
         try {
-            future = profiler.profileFuture(
+            future = profiler.profileFutureThrowable(
                     "profile.5",
-                    profilerCall -> cfSupplierThrowableCheckedSuccess()
+                    () -> cfSupplierThrowableCheckedSuccess()
             );
         } catch (InterruptedException ignore) {
             // expected exception
@@ -726,9 +693,9 @@ public class ProfilingTest {
         assertEquals("checked", s);
 
         try {
-            future = profiler.profileFuture(
+            future = profiler.profileFutureThrowable(
                     "profile.6",
-                    profilerCall -> cfSupplierThrowableCheckedExc()
+                    () -> cfSupplierThrowableCheckedExc()
             );
         } catch (Exception e) {
             fail("unexpected exception");
@@ -748,9 +715,9 @@ public class ProfilingTest {
         }
 
         try {
-            future = profiler.profileFuture(
+            future = profiler.profileFutureThrowable(
                     "profile.7",
-                    profilerCall -> cfSupplierThrowsChecked()
+                    () -> cfSupplierThrowsChecked()
             );
         } catch (InterruptedException ignore) {
             // expected exception

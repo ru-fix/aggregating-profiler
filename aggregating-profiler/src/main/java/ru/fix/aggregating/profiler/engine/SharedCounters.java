@@ -1,5 +1,6 @@
 package ru.fix.aggregating.profiler.engine;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -97,6 +98,14 @@ public class SharedCounters {
 
         public boolean isEmpty() {
             return activeCalls.isEmpty();
+        }
+
+        public int size() {
+            return activeCalls.size();
+        }
+
+        public boolean containsAll(Collection<?> collection) {
+            return activeCalls.keySet().containsAll(collection);
         }
 
         @Override

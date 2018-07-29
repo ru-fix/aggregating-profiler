@@ -77,4 +77,8 @@ public class AggregatingProfiler implements Profiler {
         this.numberOfActiveCallsToTrackAndKeepBetweenReports.set(numberOfActiveCallsToTrackAndKeepBetweenReports);
         return this;
     }
+
+    public int getNumberOfActiveCallsToTrackAndKeepBetweenReports(){
+        return numberOfActiveCallsToTrackAndKeepBetweenReports.get();
+    }
 }

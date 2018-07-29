@@ -1,17 +1,15 @@
-package ru.fix.aggregating.profiler.impl;
+package ru.fix.aggregating.profiler.engine;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.fix.aggregating.profiler.AggregatingProfiler;
 import ru.fix.aggregating.profiler.ProfiledCall;
 import ru.fix.aggregating.profiler.ProfilerCallReport;
 import ru.fix.aggregating.profiler.ProfilerReport;
-import ru.fix.aggregating.profiler.AggregatingProfiler;
-import ru.fix.aggregating.profiler.engine.ProfiledCallImpl;
-import ru.fix.aggregating.profiler.engine.ProfilerReporterImpl;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,22 +18,21 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class AggregatingReporterActiveCallsTest {
 
-    private static final int numberOfActiveCallsToKeepBetweenReports = 20;
     private AggregatingProfiler profiler;
-    private ProfilerReporterImpl reporter;
+    private AggregatingReporter reporter;
+
+    private final int numberOfActiveCallsToTrackAndKeepBetweenReports = 25;
 
     @BeforeEach
     public void setup() {
-        profiler = new AggregatingProfiler();
-        reporter = new ProfilerReporterImpl(
-                profiler,
-                true,
-                numberOfActiveCallsToKeepBetweenReports
-        );
+        profiler = new AggregatingProfiler()
+                        .setNumberOfActiveCallsToTrackAndKeepBetweenReports(25);
+        reporter = (AggregatingReporter) profiler.createReporter();
     }
 
+
     @AfterEach
-    public void tearDown() {
+    public void tearDown() throws Exception {
         reporter.close();
     }
 
@@ -66,21 +63,21 @@ public class AggregatingReporterActiveCallsTest {
 
     @Test
     public void hasActiveAndEndedCalls_usesCorrectCallForActiveCallsMaxLatency() throws InterruptedException {
-        ProfiledCallImpl call1 = (ProfiledCallImpl) profiler.start("Test");
+        AggregatingCall call1 = (AggregatingCall) profiler.start("Test");
         Thread.sleep(100);
-        ProfiledCallImpl call2 = (ProfiledCallImpl) profiler.start("Test");
+        AggregatingCall call2 = (AggregatingCall) profiler.start("Test");
         Thread.sleep(100);
-        ProfiledCallImpl call3 = (ProfiledCallImpl) profiler.start("Test");
+        AggregatingCall call3 = (AggregatingCall) profiler.start("Test");
 
         call1.stop();
 
-        long call1Time = call1.timeFromCallStartInMs();
-        long call2Time = call2.timeFromCallStartInMs();
-        long call3Time = call3.timeFromCallStartInMs();
+        long call1Time = call1.timeFromCallStart();
+        long call2Time = call2.timeFromCallStart();
+        long call3Time = call3.timeFromCallStart();
 
         ProfilerCallReport report = getCallReport(reporter.buildReportAndReset());
 
-        long call2AfterReportTime = call2.timeFromCallStartInMs();
+        long call2AfterReportTime = call2.timeFromCallStart();
 
         assertTrue(call3Time < report.getActiveCallsLatencyMax() &&
                 report.getActiveCallsLatencyMax() < call1Time
@@ -92,8 +89,8 @@ public class AggregatingReporterActiveCallsTest {
 
     @Test
     public void hasEndedCalls_resetsActiveCallsToLimit() {
-        Collection<ProfiledCall> longestCalls = new LinkedList<>();
-        for (int i = 0; i < numberOfActiveCallsToKeepBetweenReports; i++) {
+        Collection<ProfiledCall> longestCalls = new ArrayList<>();
+        for (int i = 0; i < profiler.getNumberOfActiveCallsToTrackAndKeepBetweenReports(); i++) {
             longestCalls.add(profiler.start("Test"));
         }
         profiler.start("Test");
@@ -102,16 +99,16 @@ public class AggregatingReporterActiveCallsTest {
 
         reporter.buildReportAndReset();
 
-        reporter.applyToSharedCounters("Test", counters -> {
-            assertEquals(numberOfActiveCallsToKeepBetweenReports, counters.getActiveCalls().size());
+        reporter.updateCounters("Test", counters -> {
+            assertEquals(numberOfActiveCallsToTrackAndKeepBetweenReports, counters.getActiveCalls().size());
             assertTrue(counters.getActiveCalls().containsAll(longestCalls));
         });
     }
 
     @Test
     public void noCallsEnded_resetsActiveCallsToLimit() {
-        Collection<ProfiledCall> longestCalls = new LinkedList<>();
-        for (int i = 0; i < numberOfActiveCallsToKeepBetweenReports; i++) {
+        Collection<ProfiledCall> longestCalls = new ArrayList<>();
+        for (int i = 0; i < numberOfActiveCallsToTrackAndKeepBetweenReports; i++) {
             longestCalls.add(profiler.start("Test"));
         }
         profiler.start("Test");
@@ -119,8 +116,8 @@ public class AggregatingReporterActiveCallsTest {
 
         reporter.buildReportAndReset();
 
-        reporter.applyToSharedCounters("Test", counters -> {
-            assertEquals(numberOfActiveCallsToKeepBetweenReports, counters.getActiveCalls().size());
+        reporter.updateCounters("Test", counters -> {
+            assertEquals(numberOfActiveCallsToTrackAndKeepBetweenReports, counters.getActiveCalls().size());
             assertTrue(counters.getActiveCalls().containsAll(longestCalls));
         });
     }
@@ -130,10 +127,12 @@ public class AggregatingReporterActiveCallsTest {
         profiler.start("Test");
         profiler.start("Test");
 
-        reporter.setEnableActiveCallsMaxLatency(false);
+        profiler.setNumberOfActiveCallsToTrackAndKeepBetweenReports(0);
+
         reporter.buildReportAndReset();
 
-        reporter.applyToSharedCounters("Test", counters ->
+
+        reporter.updateCounters("Test", counters ->
                 assertTrue(counters.getActiveCalls().isEmpty())
         );
     }
