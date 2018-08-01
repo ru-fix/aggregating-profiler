@@ -103,20 +103,37 @@ such lambdas will be used to gather indicators values.
 Here is list of metrics that Profiler will accumulate and flush to external storage for each ProfiledCall:
  
 ProfiledCalls:
- - latency - time between two points: when method invoked and when method completed);
- - throughput - how often method was invoked (invocation per second)
- - max throughput - we made measurement  during 2 minutes and want to find point in time 
- where throughput reached its maximum
- - callsCount - how many time method was invoked 
+ - name - dot separated metric name
+ - reportingTimeAvg - reporting interval in milliseconds
+ - latency - time in milliseconds between two points: profiledCall start and stop
+   - latencyMax maximum latency
+   - latencyMin minimum latency
+   - latencyAvg average latency
+ - callsCountSum - how many times profiledCall was invoked
+ - callsThroughputAvg - average rate of profiledCall invocation per second
+ - startedCallsCountSum - how many times profiledCall started
+ - payload - payload provided via stop method of profiledCall
+   - payloadMin - min value of payload
+   - payloadMax - max value of payload
+   - payloadAvg - avg value of payload
+   - payloadSum - total sum of payload provided within reporting interval
+   - payloadThroughputAvg - payload rate per second
+ - throughputPerSecondMax - maximum rate within second time interval that was achieved during reporting period
+ - activeCalls - calls that are still running at the end of reporting period
+   - activeCallsCountMax - count of active calls that still running at the end of reporting period  
+   - activeCallsLatencyMax - maximum latency of active call
 
 ### Indicator metrics  
 Here is list of metrics that Profiler will request and flush to external storage for each Indicator:
 
 Indicators:
-- value
-- 
-- 
-
+- name - dot separated metric name
+- indicatorMax - instant value of indicator that was reported during report building at the end of reporting period
+ 
+### Metric aggregation in metric store
+User can provide different storages for metrics: graphite, influx, prometheus, opentsdb. 
+All metrics names ends with suffixes: min, max, sum, avg. 
+This suffix could be used as a suggestion to specify how storage could compress cold data.   
 
 
 ## Metric reporting
