@@ -3,7 +3,7 @@ package ru.fix.aggregating.profiler;
 /**
  * @author Kamil Asfandiyarov
  */
-public class ProfilerCallReport {
+public class ProfiledCallReport {
 
     final String name;
 
@@ -29,7 +29,7 @@ public class ProfilerCallReport {
     long activeCallsCountMax;
     long activeCallsLatencyMax;
 
-    public ProfilerCallReport(String name) {
+    public ProfiledCallReport(String name) {
         this.name = name;
     }
 
@@ -86,23 +86,23 @@ public class ProfilerCallReport {
         return reportingTimeAvg;
     }
 
-    public ProfilerCallReport setLatencyMin(long latencyMin) {
+    public ProfiledCallReport setLatencyMin(long latencyMin) {
         this.latencyMin = latencyMin;
         return this;
     }
 
-    public ProfilerCallReport setLatencyMax(long latencyMax) {
+    public ProfiledCallReport setLatencyMax(long latencyMax) {
         this.latencyMax = latencyMax;
         return this;
     }
 
-    public ProfilerCallReport setLatencyAvg(long latencyAvg) {
+    public ProfiledCallReport setLatencyAvg(long latencyAvg) {
         this.latencyAvg = latencyAvg;
         return this;
     }
 
 
-    public ProfilerCallReport setReportingTimeAvg(long reportingTimeAvg) {
+    public ProfiledCallReport setReportingTimeAvg(long reportingTimeAvg) {
         this.reportingTimeAvg = reportingTimeAvg;
         return this;
     }
@@ -111,7 +111,7 @@ public class ProfilerCallReport {
         return payloadMin;
     }
 
-    public ProfilerCallReport setPayloadMin(long payloadMin) {
+    public ProfiledCallReport setPayloadMin(long payloadMin) {
         this.payloadMin = payloadMin;
         return this;
     }
@@ -120,7 +120,7 @@ public class ProfilerCallReport {
         return payloadMax;
     }
 
-    public ProfilerCallReport setPayloadMax(long payloadMax) {
+    public ProfiledCallReport setPayloadMax(long payloadMax) {
         this.payloadMax = payloadMax;
         return this;
     }
@@ -129,7 +129,7 @@ public class ProfilerCallReport {
         return payloadAvg;
     }
 
-    public ProfilerCallReport setPayloadAvg(long payloadAvg) {
+    public ProfiledCallReport setPayloadAvg(long payloadAvg) {
         this.payloadAvg = payloadAvg;
         return this;
     }
@@ -138,7 +138,7 @@ public class ProfilerCallReport {
         return payloadSum;
     }
 
-    public ProfilerCallReport setPayloadSum(long payloadSum) {
+    public ProfiledCallReport setPayloadSum(long payloadSum) {
         this.payloadSum = payloadSum;
         return this;
     }
@@ -147,7 +147,7 @@ public class ProfilerCallReport {
         return callsCountSum;
     }
 
-    public ProfilerCallReport setCallsCountSum(long callsCountSum) {
+    public ProfiledCallReport setCallsCountSum(long callsCountSum) {
         this.callsCountSum = callsCountSum;
         return this;
     }
@@ -156,7 +156,7 @@ public class ProfilerCallReport {
         return startedCallsCountSum;
     }
 
-    public ProfilerCallReport setStartedCallsCountSum(long startedCallsCountSum) {
+    public ProfiledCallReport setStartedCallsCountSum(long startedCallsCountSum) {
         this.startedCallsCountSum = startedCallsCountSum;
         return this;
     }
@@ -165,7 +165,7 @@ public class ProfilerCallReport {
         return callsThroughputAvg;
     }
 
-    public ProfilerCallReport setCallsThroughputAvg(long callsThroughputAvg) {
+    public ProfiledCallReport setCallsThroughputAvg(long callsThroughputAvg) {
         this.callsThroughputAvg = callsThroughputAvg;
         return this;
     }
@@ -174,7 +174,7 @@ public class ProfilerCallReport {
         return payloadThroughputAvg;
     }
 
-    public ProfilerCallReport setPayloadThroughputAvg(long payloadThroughputAvg) {
+    public ProfiledCallReport setPayloadThroughputAvg(long payloadThroughputAvg) {
         this.payloadThroughputAvg = payloadThroughputAvg;
         return this;
     }
@@ -183,7 +183,7 @@ public class ProfilerCallReport {
         return throughputPerSecondMax;
     }
 
-    public ProfilerCallReport setThroughputPerSecondMax(long throughputPerSecondMax) {
+    public ProfiledCallReport setThroughputPerSecondMax(long throughputPerSecondMax) {
         this.throughputPerSecondMax = throughputPerSecondMax;
         return this;
     }
@@ -192,7 +192,7 @@ public class ProfilerCallReport {
         return payloadThroughputPerSecondMax;
     }
 
-    public ProfilerCallReport setPayloadThroughputPerSecondMax(long payloadThroughputPerSecondMax) {
+    public ProfiledCallReport setPayloadThroughputPerSecondMax(long payloadThroughputPerSecondMax) {
         this.payloadThroughputPerSecondMax = payloadThroughputPerSecondMax;
         return this;
     }
@@ -201,7 +201,7 @@ public class ProfilerCallReport {
         return activeCallsCountMax;
     }
 
-    public ProfilerCallReport setActiveCallsCountMax(long activeCallsCountMax) {
+    public ProfiledCallReport setActiveCallsCountMax(long activeCallsCountMax) {
         this.activeCallsCountMax = activeCallsCountMax;
         return this;
     }
@@ -210,7 +210,7 @@ public class ProfilerCallReport {
         return activeCallsLatencyMax;
     }
 
-    public ProfilerCallReport setActiveCallsLatencyMax(long activeCallsLatencyMax) {
+    public ProfiledCallReport setActiveCallsLatencyMax(long activeCallsLatencyMax) {
         this.activeCallsLatencyMax = activeCallsLatencyMax;
         return this;
     }

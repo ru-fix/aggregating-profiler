@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.fix.aggregating.profiler.AggregatingProfiler;
 import ru.fix.aggregating.profiler.ProfiledCall;
-import ru.fix.aggregating.profiler.ProfilerCallReport;
+import ru.fix.aggregating.profiler.ProfiledCallReport;
 import ru.fix.aggregating.profiler.ProfilerReport;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class AggregatingReporterActiveCallsTest {
         profiler.profiledCall("Test").call();
         profiler.profiledCall("Test").call();
 
-        ProfilerCallReport report = getCallReport(reporter.buildReportAndReset());
+        ProfiledCallReport report = getCallReport(reporter.buildReportAndReset());
 
         assertEquals(0, report.getActiveCallsLatencyMax());
     }
@@ -56,7 +56,7 @@ public class AggregatingReporterActiveCallsTest {
         profiler.start("Test").stop();
         profiler.start("Test").close();
 
-        ProfilerCallReport report = getCallReport(reporter.buildReportAndReset());
+        ProfiledCallReport report = getCallReport(reporter.buildReportAndReset());
 
         assertEquals(0, report.getActiveCallsLatencyMax());
     }
@@ -75,7 +75,7 @@ public class AggregatingReporterActiveCallsTest {
         long call2Time = call2.timeFromCallStart();
         long call3Time = call3.timeFromCallStart();
 
-        ProfilerCallReport report = getCallReport(reporter.buildReportAndReset());
+        ProfiledCallReport report = getCallReport(reporter.buildReportAndReset());
 
         long call2AfterReportTime = call2.timeFromCallStart();
 
@@ -143,7 +143,7 @@ public class AggregatingReporterActiveCallsTest {
         );
     }
 
-    private ProfilerCallReport getCallReport(ProfilerReport profilerReport) {
+    private ProfiledCallReport getCallReport(ProfilerReport profilerReport) {
         assertNotNull(profilerReport.getProfilerCallReports());
         assertEquals(1, profilerReport.getProfilerCallReports().size());
         return profilerReport.getProfilerCallReports().get(0);

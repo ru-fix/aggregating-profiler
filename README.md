@@ -25,7 +25,7 @@ Suppose that we want to trace how much time it takes for SmartService to compute
 Sync service measurement: 
 ```java
 // Init single profiler instance per application 
-Profiler profiler = new SimpleProfiler();
+Profiler profiler = new AggregatingProfiler();
 ...
 
 // Create profiled call each time you want to make measurement 
@@ -103,9 +103,6 @@ such lambdas will be used to gather indicators values.
 Here is list of metrics that Profiler will accumulate and flush to external storage for each ProfiledCall:
  
 ProfiledCalls:
-* latency 
-* 
-*
  - latency - time between two points: when method invoked and when method completed);
  - throughput - how often method was invoked (invocation per second)
  - max throughput - we made measurement  during 2 minutes and want to find point in time 
@@ -116,9 +113,9 @@ ProfiledCalls:
 Here is list of metrics that Profiler will request and flush to external storage for each Indicator:
 
 Indicators:
-* value
-* 
-* 
+- value
+- 
+- 
 
 
 
@@ -137,7 +134,7 @@ gradle clean build
 ```
 
 ## Other tracing projects
-There are several projects for tracing that you can take a look to:
+There are several projects for tracing that you can take a look:
 
 OpenTracing:  
 https://github.com/opentracing/opentracing-java  

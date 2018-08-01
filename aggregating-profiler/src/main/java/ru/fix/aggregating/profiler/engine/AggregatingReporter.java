@@ -3,7 +3,7 @@ package ru.fix.aggregating.profiler.engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.fix.aggregating.profiler.AggregatingProfiler;
-import ru.fix.aggregating.profiler.ProfilerCallReport;
+import ru.fix.aggregating.profiler.ProfiledCallReport;
 import ru.fix.aggregating.profiler.ProfilerReport;
 import ru.fix.aggregating.profiler.ProfilerReporter;
 
@@ -89,7 +89,7 @@ public class AggregatingReporter implements ProfilerReporter {
                             return null;
                         }));
 
-        List<ProfilerCallReport> collect = new ArrayList<>();
+        List<ProfiledCallReport> collect = new ArrayList<>();
 
         writeLock.lock();
         try {
@@ -101,7 +101,7 @@ public class AggregatingReporter implements ProfilerReporter {
                         .anyMatch(p -> p.matcher(entry.getKey()).matches())) {
                     continue;
                 }
-                ProfilerCallReport counterReport = buildReportAndReset(entry.getKey(), entry.getValue(), spentTime);
+                ProfiledCallReport counterReport = buildReportAndReset(entry.getKey(), entry.getValue(), spentTime);
 
                 // skip and remove empty counter
                 if (counterReport.getCallsCountSum() == 0 && counterReport.getActiveCallsCountMax() == 0) {
@@ -115,19 +115,19 @@ public class AggregatingReporter implements ProfilerReporter {
             writeLock.unlock();
         }
 
-        collect.sort(Comparator.comparing(ProfilerCallReport::getName));
+        collect.sort(Comparator.comparing(ProfiledCallReport::getName));
 
         return new ProfilerReport(indicators, collect);
     }
 
-    private ProfilerCallReport buildReportAndReset(String name, SharedCounters counters, long elapsed) {
+    private ProfiledCallReport buildReportAndReset(String name, SharedCounters counters, long elapsed) {
         long callsCount = counters.getCallsCount().sumThenReset();
         long startedCallsCount = counters.getStartedCallsCount().sumThenReset();
         long sumStartStopLatency = counters.getSumStartStopLatency().sumThenReset();
 
         if (callsCount == 0) {
             cleanCounters(counters);
-            return new ProfilerCallReport(name)
+            return new ProfiledCallReport(name)
                     .setStartedCallsCountSum(startedCallsCount)
                     .setActiveCallsCountMax(counters.getActiveCallsCounter().sum())
                     .setActiveCallsLatencyMax(activeCallsMaxLatencyAndResetActiveCalls(counters));
@@ -135,7 +135,7 @@ public class AggregatingReporter implements ProfilerReporter {
 
         long payloadTotal = counters.getPayloadSum().sumThenReset();
 
-        return new ProfilerCallReport(name)
+        return new ProfiledCallReport(name)
                 .setLatencyMin(counters.getLatencyMin().getAndSet(Long.MAX_VALUE))
                 .setLatencyMax(counters.getLatencyMax().getAndSet(0))
                 .setLatencyAvg(sumStartStopLatency / callsCount)

@@ -6,9 +6,9 @@ import java.util.Map;
 public class ProfilerReport {
 
     private final Map<String, Long> indicators;
-    private final List<ProfilerCallReport> profilerCallReports;
+    private final List<ProfiledCallReport> profilerCallReports;
 
-    public ProfilerReport(Map<String, Long> indicators, List<ProfilerCallReport> profilerCallReports) {
+    public ProfilerReport(Map<String, Long> indicators, List<ProfiledCallReport> profilerCallReports) {
         this.indicators = indicators;
         this.profilerCallReports = profilerCallReports;
     }
@@ -17,7 +17,7 @@ public class ProfilerReport {
         return indicators;
     }
 
-    public List<ProfilerCallReport> getProfilerCallReports() {
+    public List<ProfiledCallReport> getProfilerCallReports() {
         return profilerCallReports;
     }
 

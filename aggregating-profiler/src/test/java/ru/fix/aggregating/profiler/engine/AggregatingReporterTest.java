@@ -38,7 +38,7 @@ public class AggregatingReporterTest {
         //someMethod()
         call.stop();
 
-        ProfilerCallReport report = getCallReport(reporter.buildReportAndReset());
+        ProfiledCallReport report = getCallReport(reporter.buildReportAndReset());
 
         assertEquals(1, report.getCallsCountSum());
         assertEquals(1, report.getPayloadSum());
@@ -51,7 +51,7 @@ public class AggregatingReporterTest {
         //someMethod()
         call.stop(30);
 
-        ProfilerCallReport report = getCallReport(reporter.buildReportAndReset());
+        ProfiledCallReport report = getCallReport(reporter.buildReportAndReset());
 
         assertEquals(1, report.getCallsCountSum());
         assertEquals(30, report.getPayloadSum());
@@ -65,7 +65,7 @@ public class AggregatingReporterTest {
 
         List<Pattern> reList = new ArrayList<Pattern>();
         reList.add(Pattern.compile(".*RE"));
-        ProfilerCallReport report = getCallReport(
+        ProfiledCallReport report = getCallReport(
                 reporter.buildReportAndReset(reList));
 
         assertEquals(1, report.getCallsCountSum());
@@ -85,7 +85,7 @@ public class AggregatingReporterTest {
         assertEquals(profilerReport.getProfilerCallReports().size(), 0);
     }
 
-    private ProfilerCallReport getCallReport(ProfilerReport profilerReport) {
+    private ProfiledCallReport getCallReport(ProfilerReport profilerReport) {
         assertNotNull(profilerReport.getProfilerCallReports());
         assertEquals(1, profilerReport.getProfilerCallReports().size());
         return profilerReport.getProfilerCallReports().get(0);
