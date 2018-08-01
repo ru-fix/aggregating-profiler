@@ -162,5 +162,5 @@ https://github.com/apache/incubator-htrace
 Zipkin:  
 https://github.com/openzipkin/zipkin/
 
-Dropwizard metrics:
+Dropwizard metrics:  
 https://github.com/dropwizard/metrics
