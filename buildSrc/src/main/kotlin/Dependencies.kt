@@ -3,7 +3,7 @@ object Vers {
     val kotlin_logging = "1.5.4"
     val sl4j = "1.7.25"
     val dokkav = "0.9.16"
-    val gradleReleasePlugin = "1.2.18"
+    val gradleReleasePlugin = "1.2.19"
     val junit = "5.2.0"
 
 }

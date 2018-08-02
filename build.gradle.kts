@@ -18,8 +18,6 @@ import kotlin.properties.Delegates
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-val groupId = "ru.fix"
-
 buildscript {
     repositories {
         jcenter()
