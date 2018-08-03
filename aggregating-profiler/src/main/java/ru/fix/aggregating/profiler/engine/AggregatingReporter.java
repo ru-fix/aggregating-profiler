@@ -48,14 +48,14 @@ public class AggregatingReporter implements ProfilerReporter {
     }
 
     public void updateCounters(String profiledCallName, Consumer<SharedCounters> updateAction) {
-        readLock.lock();
+//        readLock.lock();
         try {
             updateAction.accept(
                     sharedCounters.computeIfAbsent(profiledCallName, key ->
                             new SharedCounters(numberOfActiveCallsToTrackAndKeepBetweenReports)
                     ));
         } finally {
-            readLock.unlock();
+//            readLock.unlock();
         }
     }
 
