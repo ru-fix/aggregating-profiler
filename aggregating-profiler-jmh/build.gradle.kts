@@ -6,13 +6,9 @@ import org.gradle.kotlin.dsl.*
 plugins {
     java
     kotlin("jvm")
-//    id("com.github.johnrengelman.shadow")
     id("me.champeau.gradle.jmh")
 }
 
-//apply{
-//    plugin("me.champeau.gradle.jmh")
-//}
 
 jmh{
     warmupIterations = 1
@@ -20,14 +16,6 @@ jmh{
     duplicateClassesStrategy  = DuplicatesStrategy.WARN
 }
 
-
-
-//val shadowJar: ShadowJar by tasks
-//shadowJar.apply {
-//    manifest.attributes["Main-Class"] = "ru.fix.aggregating.profiler.jmh.MainKt"
-//}
-
-//    mainClassName = "ru.fix.aggregating.profiler.jmh.SharedCountersJmh"
 
 dependencies {
     /**
