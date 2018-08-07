@@ -20,7 +20,7 @@ public class MaxThroughputPerSecondCalculatorTest {
 
     @Test
     public void testCall() throws Exception {
-        MaxThroughputPerSecondCalculator c = Mockito.spy(new MaxThroughputPerSecondCalculator());
+        MaxThroughputPerSecondAccumulator c = Mockito.spy(new MaxThroughputPerSecondAccumulator());
 
         when(c.currentTimeMillis()).thenReturn(1000L, 1100L, 2000L);
         c.call();
@@ -49,7 +49,7 @@ public class MaxThroughputPerSecondCalculatorTest {
 
         final int EXPECTED_MAX_THROUGHPUT = COUNT_OF_THREADS * 1000 / ACCURACY;
 
-        MaxThroughputPerSecondCalculator calculator = new MaxThroughputPerSecondCalculator();
+        MaxThroughputPerSecondAccumulator calculator = new MaxThroughputPerSecondAccumulator();
         ExecutorService pool = Executors.newFixedThreadPool(COUNT_OF_THREADS);
 
         AtomicBoolean shutdownFlag = new AtomicBoolean();

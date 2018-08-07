@@ -13,7 +13,12 @@ plugins {
 jmh{
     warmupIterations = 1
     fork = 1
+    threads = 4
     duplicateClassesStrategy  = DuplicatesStrategy.WARN
+//    include = listOf("DifferentWaysToIncrementBatchOfCountersJmh")
+//    include = listOf("CallAggregateJmh.*")
+
+
 }
 
 

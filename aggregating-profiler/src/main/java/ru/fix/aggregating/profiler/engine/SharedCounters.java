@@ -23,8 +23,8 @@ public class SharedCounters {
     private final AtomicLong payloadMax = new AtomicLong();
     private final LongAdder payloadSum = new LongAdder();
 
-    private final MaxThroughputPerSecondCalculator maxThroughput = new MaxThroughputPerSecondCalculator();
-    private final MaxThroughputPerSecondCalculator maxPayloadThroughput = new MaxThroughputPerSecondCalculator();
+    private final MaxThroughputPerSecondAccumulator maxThroughput = new MaxThroughputPerSecondAccumulator();
+    private final MaxThroughputPerSecondAccumulator maxPayloadThroughput = new MaxThroughputPerSecondAccumulator();
 
     private final LongAdder activeCallsCounter = new LongAdder();
     private final ActiveCallsSet activeCalls = new ActiveCallsSet();
@@ -67,11 +67,11 @@ public class SharedCounters {
         return payloadSum;
     }
 
-    public MaxThroughputPerSecondCalculator getMaxThroughput() {
+    public MaxThroughputPerSecondAccumulator getMaxThroughput() {
         return maxThroughput;
     }
 
-    public MaxThroughputPerSecondCalculator getMaxPayloadThroughput() {
+    public MaxThroughputPerSecondAccumulator getMaxPayloadThroughput() {
         return maxPayloadThroughput;
     }
 
