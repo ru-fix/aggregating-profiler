@@ -16,26 +16,26 @@ import java.util.concurrent.atomic.LongAdder;
  */
 public class CallAggregate {
 
-    private final String callName;
+    final String callName;
 
-    private final LongAdder callsCountSum = new LongAdder();
-    private final LongAdder latencySum = new LongAdder();
+    final LongAdder callsCountSum = new LongAdder();
+    final LongAdder latencySum = new LongAdder();
 
-    private final LongAccumulator latencyMin = new LongAccumulator(Math::min, Long.MAX_VALUE);
-    private final LongAccumulator latencyMax = new LongAccumulator(Math::max, 0L);
+    final LongAccumulator latencyMin = new LongAccumulator(Math::min, Long.MAX_VALUE);
+    final LongAccumulator latencyMax = new LongAccumulator(Math::max, 0L);
 
 
-    private final LongAdder payloadSum = new LongAdder();
-    private final LongAccumulator payloadMin = new LongAccumulator(Math::min, Long.MAX_VALUE);
-    private final LongAccumulator payloadMax = new LongAccumulator(Math::max, 0L);
+    final LongAdder payloadSum = new LongAdder();
+    final LongAccumulator payloadMin = new LongAccumulator(Math::min, Long.MAX_VALUE);
+    final LongAccumulator payloadMax = new LongAccumulator(Math::max, 0L);
 
-    private final MaxThroughputPerSecondAccumulator maxThroughputPerSecond = new MaxThroughputPerSecondAccumulator();
-    private final MaxThroughputPerSecondAccumulator maxPayloadThroughputPerSecond = new MaxThroughputPerSecondAccumulator();
+    final MaxThroughputPerSecondAccumulator maxThroughputPerSecond = new MaxThroughputPerSecondAccumulator();
+    final MaxThroughputPerSecondAccumulator maxPayloadThroughputPerSecond = new MaxThroughputPerSecondAccumulator();
 
-    private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
+    final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
 
-    private final LongAdder activeCallsSum = new LongAdder();
-    private final Set<AggregatingCall> activeCalls = ConcurrentHashMap.newKeySet();
+    final LongAdder activeCallsSum = new LongAdder();
+    final Set<AggregatingCall> activeCalls = ConcurrentHashMap.newKeySet();
 
     public CallAggregate(
             String callName,
@@ -173,8 +173,8 @@ public class CallAggregate {
 
                 .setPayloadThroughputAvg(elapsed != 0 ? payloadTotal * 1000_000 / elapsed : 0)
 
-                .setThroughputPerSecondMax(maxThroughputPerSecond.getAndReset())
-                .setPayloadThroughputPerSecondMax(maxPayloadThroughputPerSecond.getAndReset());
+                .setThroughputPerSecondMax(maxThroughputPerSecond.getAndReset(System.currentTimeMillis()))
+                .setPayloadThroughputPerSecondMax(maxPayloadThroughputPerSecond.getAndReset(System.currentTimeMillis()));
     }
 
     private long activeCallsMaxLatencyAndResetActiveCalls() {

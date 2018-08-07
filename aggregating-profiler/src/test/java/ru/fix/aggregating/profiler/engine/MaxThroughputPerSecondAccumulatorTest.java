@@ -1,11 +1,13 @@
 package ru.fix.aggregating.profiler.engine;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,29 +15,24 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
-public class MaxThroughputPerSecondCalculatorTest {
-    private static final Logger log = LoggerFactory.getLogger(MaxThroughputPerSecondCalculatorTest.class);
+public class MaxThroughputPerSecondAccumulatorTest {
+    private static final Logger log = LoggerFactory.getLogger(MaxThroughputPerSecondAccumulatorTest.class);
 
     @Test
     public void testCall() throws Exception {
-        MaxThroughputPerSecondAccumulator c = Mockito.spy(new MaxThroughputPerSecondAccumulator());
+        MaxThroughputPerSecondAccumulator accumulator = new MaxThroughputPerSecondAccumulator();
+        long timestamp = System.currentTimeMillis();
 
-        when(c.currentTimeMillis()).thenReturn(1000L, 1100L, 2000L);
-        c.call();
-        c.call();
-        c.call();
-        assertEquals(2, c.getMaxAndReset());
+        accumulator.call(timestamp, 1);
+        accumulator.call(timestamp, 3);
+        assertEquals(4, accumulator.getAndReset(timestamp + 1000));
 
-        when(c.currentTimeMillis()).thenReturn(3000L, 4000L, 4100L, 4200L, 5000L);
-        c.call();
-        c.call();
-        c.call();
-        c.call();
-        assertEquals(3, c.getMaxAndReset());
+        accumulator.call(timestamp + 1000, 5);
+        accumulator.call(timestamp + 2000, 13);
+        accumulator.call(timestamp + 3000, 3);
 
-        assertEquals(0, c.getMaxAndReset());
+        assertEquals(13, accumulator.getAndReset (timestamp + 3000));
     }
 
     @Test
@@ -67,7 +64,7 @@ public class MaxThroughputPerSecondCalculatorTest {
                     long ticksDiff = currentTicks - startTicks;
 
                     if (ticksDiff > 0) {
-                        calculator.call(ticksDiff);
+                        calculator.call(System.currentTimeMillis(), ticksDiff);
                     } else {
                         Thread.yield();
                     }
@@ -87,7 +84,7 @@ public class MaxThroughputPerSecondCalculatorTest {
 
         reportBuildingSchedule.set(Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(
                 () -> {
-                    long result = calculator.getMaxAndReset();
+                    long result = calculator.getAndReset(System.currentTimeMillis());
                     log.info("MaxThroughput: {}", result);
                     int reportBuildAttemptNumber = buildReportAttempt.incrementAndGet();
 

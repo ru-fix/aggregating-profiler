@@ -26,6 +26,11 @@ public class CallAggregateJmh {
 
     @Benchmark
     public void call() {
+        callAggregate.call(timestamp, 0, 1);
+    }
+
+    @Benchmark
+    public void call_with_latency() {
         callAggregate.call(timestamp, 27L, 1);
     }
 

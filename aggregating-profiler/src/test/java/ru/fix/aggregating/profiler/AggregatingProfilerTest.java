@@ -66,8 +66,8 @@ public class AggregatingProfilerTest {
             ProfiledCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertThat(report.callsThroughputAvg, lessThanOrEqualTo(70L));
-            assertThat(report.callsThroughputAvg, greaterThanOrEqualTo(40L));
+            assertThat(report.callsThroughputAvg, lessThanOrEqualTo(70_000L));
+            assertThat(report.callsThroughputAvg, greaterThanOrEqualTo(40_000L));
         }
     }
 
@@ -109,7 +109,7 @@ public class AggregatingProfilerTest {
             for (int i = 0; i < 50; i++) {
                 long startTime = System.currentTimeMillis();
                 sleep(100);
-                call.call(startTime, System.currentTimeMillis(), i);
+                call.call(startTime, i);
             }
 
             ProfiledCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);

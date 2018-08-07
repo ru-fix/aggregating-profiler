@@ -12,18 +12,19 @@ public class MaxThroughputPerSecondAccumulator {
     private final AtomicLong startOfSecondTimestamp = new AtomicLong();
 
     public void call(long currentTimestamp, long eventCount) {
-        eventCountSum.add(eventCount);
         long start = startOfSecondTimestamp.get();
-
         if (start + ONE_SECOND_MS <= currentTimestamp) {
             if (startOfSecondTimestamp.compareAndSet(start, currentTimestamp)) {
                 long sum = eventCountSum.sumThenReset();
                 maxEventCountPerSecond.accumulate(sum);
             }
         }
+        eventCountSum.add(eventCount);
     }
 
-    public long getAndReset() {
+    public long getAndReset(long currentTimestamp) {
+        //update counters before report return
+        call(currentTimestamp, 0);
         return maxEventCountPerSecond.getThenReset();
     }
 }
