@@ -28,3 +28,4 @@ ProfilerJmh.profiledCall_start_stop                                thrpt    5   
 ProfilerJmh.profiler_call                                          thrpt    5  193076168.332 ±  2369465.952  ops/s
 ProfilerJmh.system_current_time                                    thrpt    5  198894430.667 ±  7801246.107  ops/s
 ProfilerJmh.system_nanotime                                        thrpt    5  181457755.221 ± 47084483.866  ops/s
+MaxThrougputPerSecondAccumulatorJmh.timestamp_and_call             thrpt    5  143647684.472 ± 37455754.127  ops/s
