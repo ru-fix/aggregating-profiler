@@ -1,4 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import me.champeau.gradle.JMHPluginExtension
 import org.gradle.kotlin.dsl.*
 
@@ -15,10 +14,6 @@ jmh{
     fork = 1
     threads = 4
     duplicateClassesStrategy  = DuplicatesStrategy.WARN
-//    include = listOf("DifferentWaysToIncrementBatchOfCountersJmh")
-//    include = listOf("CallAggregateJmh.*")
-
-
 }
 
 
