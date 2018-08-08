@@ -9,24 +9,21 @@ import java.util.function.Supplier;
 public interface ProfiledCall extends AutoCloseable {
 
     /**
-     * If you want to evaluate calls count or whether the method was called
+     * Evaluate calls count or whether the method was called.
      */
     void call();
-
-    /**
-     * Call with payload ( = 1) and start-stop time
-     */
-    void call(long startTime, long endTime);
-
-    /**
-     * Call with payload and start-stop time
-     */
-    void call(long startTime, long endTime, long payload);
 
     /**
      * Call with payload
      */
     void call(long payload);
+
+    /**
+     * @param startTime when call started in ms.
+     *                  Latency will be calculated as time span between {@link System#currentTimeMillis()} and startTime
+     * @param payload
+     */
+    void call(long startTime, long payload);
 
     /**
      * if you want to know some metrics then you should start and stop profiled call
@@ -88,5 +85,4 @@ public interface ProfiledCall extends AutoCloseable {
      */
     @Override
     void close();
-
 }

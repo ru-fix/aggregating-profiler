@@ -13,7 +13,6 @@ public class ProfiledCallReport {
 
     long callsThroughputAvg;
     long callsCountSum;
-    long startedCallsCountSum;
 
     long reportingTimeAvg;
 
@@ -36,7 +35,7 @@ public class ProfiledCallReport {
     @Override
     public String toString() {
         return String.format("%s: LatMin: %d, LatMax: %d, LatAvg: %d," +
-                        " CallsCnt: %d, CallsThrpt: %d, StCallsCnt: %d, RepTime: %d," +
+                        " CallsCnt: %d, CallsThrpt: %d, RepTime: %d," +
                         " PldMin %d, PldMax %d, PldAvg %d," +
                         " PldSum: %d, PldThrpt: %d," +
                         " MaxThrpt: %d, MaxPldThrpt: %d," +
@@ -48,7 +47,6 @@ public class ProfiledCallReport {
 
                 callsCountSum,
                 callsThroughputAvg,
-                startedCallsCountSum,
                 reportingTimeAvg,
 
                 payloadMin,
@@ -149,15 +147,6 @@ public class ProfiledCallReport {
 
     public ProfiledCallReport setCallsCountSum(long callsCountSum) {
         this.callsCountSum = callsCountSum;
-        return this;
-    }
-
-    public long getStartedCallsCountSum() {
-        return startedCallsCountSum;
-    }
-
-    public ProfiledCallReport setStartedCallsCountSum(long startedCallsCountSum) {
-        this.startedCallsCountSum = startedCallsCountSum;
         return this;
     }
 

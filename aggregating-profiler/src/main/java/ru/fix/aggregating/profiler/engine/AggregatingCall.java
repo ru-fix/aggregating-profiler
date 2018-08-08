@@ -20,57 +20,36 @@ public class AggregatingCall implements ProfiledCall {
 
     final AtomicLong startTime = new AtomicLong();
 
-    final SharedCountersMutator mutator;
+    final CallAggregateMutator aggregateMutator;
 
     final String profiledCallName;
 
-    public AggregatingCall(String profiledCallName, SharedCountersMutator mutator) {
-        this.mutator = mutator;
+    public AggregatingCall(String profiledCallName, CallAggregateMutator aggregateMutator) {
+        this.aggregateMutator = aggregateMutator;
         this.profiledCallName = profiledCallName;
     }
 
     @Override
     public void call() {
-        mutator.updateCounters(profiledCallName, sharedCounters -> {
-            sharedCounters.getCallsCount().increment();
-            sharedCounters.getMaxThroughput().call();
-        });
-    }
-
-    @Override
-    public void call(long startTime, long endTime, long payload) {
-        long latencyValue = endTime - startTime;
-        mutator.updateCounters(profiledCallName, sharedCounters -> {
-            sharedCounters.getCallsCount().increment();
-
-            sharedCounters.getSumStartStopLatency().add(latencyValue);
-            sharedCounters.getLatencyMin().accumulateAndGet(latencyValue, Math::min);
-            sharedCounters.getLatencyMax().accumulateAndGet(latencyValue, Math::max);
-
-            sharedCounters.getPayloadMin().accumulateAndGet(payload, Math::min);
-            sharedCounters.getPayloadMax().accumulateAndGet(payload, Math::max);
-            sharedCounters.getPayloadSum().add(payload);
-            sharedCounters.getMaxThroughput().call();
-            sharedCounters.getMaxPayloadThroughput().call(payload);
-        });
-    }
-
-    @Override
-    public void call(long startTime, long endTime) {
-        call(startTime, endTime, 1);
+        aggregateMutator.updateAggregate(
+                profiledCallName,
+                aggregate -> aggregate.call(System.currentTimeMillis(), 0, 1));
     }
 
     @Override
     public void call(long payload) {
-        mutator.updateCounters(profiledCallName, sharedCounters -> {
-            sharedCounters.getCallsCount().increment();
-            sharedCounters.getMaxThroughput().call();
+        aggregateMutator.updateAggregate(
+                profiledCallName,
+                aggregate -> aggregate.call(System.currentTimeMillis(), 0, 1));
+    }
 
-            sharedCounters.getPayloadMin().accumulateAndGet(payload, Math::min);
-            sharedCounters.getPayloadMax().accumulateAndGet(payload, Math::max);
-            sharedCounters.getPayloadSum().add(payload);
-            sharedCounters.getMaxPayloadThroughput().call(payload);
-        });
+    @Override
+    public void call(long startTime, long payload) {
+        Long currentTime = System.currentTimeMillis();
+
+        aggregateMutator.updateAggregate(
+                profiledCallName,
+                aggregate -> aggregate.call(currentTime, currentTime - startTime, payload));
     }
 
     @Override
@@ -80,12 +59,10 @@ public class AggregatingCall implements ProfiledCall {
                     " Profiled call: " + profiledCallName);
         }
         startTime.set(System.nanoTime());
-        mutator.updateCounters(profiledCallName, sharedCounters -> {
-            sharedCounters.getStartedCallsCount().increment();
 
-            sharedCounters.getActiveCalls().add(this);
-            sharedCounters.getActiveCallsCounter().increment();
-        });
+        aggregateMutator.updateAggregate(
+                profiledCallName,
+                aggregate -> aggregate.start(this));
         return this;
     }
 
@@ -102,23 +79,9 @@ public class AggregatingCall implements ProfiledCall {
     private void updateCountersOnStop(long payload) {
         long latencyValue = (System.nanoTime() - startTime.get()) / 1000000;
 
-        mutator.updateCounters(profiledCallName, sharedCounters -> {
-            sharedCounters.getCallsCount().increment();
-
-            sharedCounters.getSumStartStopLatency().add(latencyValue);
-            sharedCounters.getLatencyMin().accumulateAndGet(latencyValue, Math::min);
-            sharedCounters.getLatencyMax().accumulateAndGet(latencyValue, Math::max);
-
-
-            sharedCounters.getPayloadMin().accumulateAndGet(payload, Math::min);
-            sharedCounters.getPayloadMax().accumulateAndGet(payload, Math::max);
-            sharedCounters.getPayloadSum().add(payload);
-            sharedCounters.getMaxThroughput().call();
-            sharedCounters.getMaxPayloadThroughput().call(payload);
-
-            sharedCounters.getActiveCalls().remove(this);
-            sharedCounters.getActiveCallsCounter().decrement();
-        });
+        aggregateMutator.updateAggregate(
+                profiledCallName,
+                aggregate -> aggregate.stop(this, System.currentTimeMillis(), latencyValue, payload));
     }
 
     public long timeFromCallStart() {
@@ -202,10 +165,9 @@ public class AggregatingCall implements ProfiledCall {
             // do nothing, if not started or stopped already
             return;
         }
-        mutator.updateCounters(profiledCallName, sharedCounters -> {
-            sharedCounters.getActiveCalls().remove(this);
-            sharedCounters.getActiveCallsCounter().decrement();
-        });
+        aggregateMutator.updateAggregate(
+                profiledCallName,
+                aggregate -> aggregate.close(this));
     }
 
     @Override

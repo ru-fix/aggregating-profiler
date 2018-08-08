@@ -66,8 +66,8 @@ public class AggregatingProfilerTest {
             ProfiledCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertThat(report.callsThroughputAvg, lessThanOrEqualTo(70L));
-            assertThat(report.callsThroughputAvg, greaterThanOrEqualTo(40L));
+            assertThat(report.callsThroughputAvg, lessThanOrEqualTo(70_000L));
+            assertThat(report.callsThroughputAvg, greaterThanOrEqualTo(40_000L));
         }
     }
 
@@ -109,7 +109,7 @@ public class AggregatingProfilerTest {
             for (int i = 0; i < 50; i++) {
                 long startTime = System.currentTimeMillis();
                 sleep(100);
-                call.call(startTime, System.currentTimeMillis(), i);
+                call.call(startTime, i);
             }
 
             ProfiledCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
@@ -309,18 +309,20 @@ public class AggregatingProfilerTest {
 
     @Test
     void reportBuildAndReset() throws Exception {
+        final int WRITERS = 5;
+
         Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         AtomicInteger threadIdx = new AtomicInteger();
-        int writers = Math.max(Runtime.getRuntime().availableProcessors() - 1, 1);
-        ExecutorService executorService = Executors.newFixedThreadPool(writers,
+
+        ExecutorService executorService = Executors.newFixedThreadPool(WRITERS,
                 r -> new Thread(r, "thread-" + threadIdx.getAndIncrement())
         );
 
         LongAdder callCount = new LongAdder();
         AtomicBoolean isRunning = new AtomicBoolean(true);
-        for (int i = 0; i < writers; i++) {
+        for (int i = 0; i < WRITERS; i++) {
             executorService.execute(() -> {
                 while (isRunning.get()) {
                     ProfiledCall profiledCall = profiler.start(Thread.currentThread().getName());
@@ -341,7 +343,7 @@ public class AggregatingProfilerTest {
 
         isRunning.set(false);
         executorService.shutdown();
-        executorService.awaitTermination(5, TimeUnit.SECONDS);
+        assertTrue( executorService.awaitTermination(5, TimeUnit.SECONDS) );
 
         reports.add(reporter.buildReportAndReset());
 
@@ -350,7 +352,9 @@ public class AggregatingProfilerTest {
                 .map(ProfiledCallReport::getCallsCountSum)
                 .reduce(0L, Long::sum);
 
-        assertEquals(callCount.sum(), callCountFromReports);
+
+
+        assertEquals(callCount.sum(), callCountFromReports, ()-> "Current report: " + reporter.buildReportAndReset());
     }
 
     @Test

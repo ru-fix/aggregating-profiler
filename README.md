@@ -110,15 +110,17 @@ ProfiledCalls:
    - latencyMin minimum latency
    - latencyAvg average latency
  - callsCountSum - how many times profiledCall was invoked
- - callsThroughputAvg - average rate of profiledCall invocation per second
- - startedCallsCountSum - how many times profiledCall started
+ - callsThroughputAvg - average rate of profiledCall milli invocation per second 
+ (123 means that there was 0.123 invocation per second)
  - payload - payload provided via stop method of profiledCall
    - payloadMin - min value of payload
    - payloadMax - max value of payload
    - payloadAvg - avg value of payload
    - payloadSum - total sum of payload provided within reporting interval
-   - payloadThroughputAvg - payload rate per second
- - throughputPerSecondMax - maximum rate within second time interval that was achieved during reporting period
+   - payloadThroughputAvg - payload rate milli invocation per second
+   (123 means that there was 0.123 invocation per second)
+ - throughputPerSecondMax - maximum rate within second time interval that was achieved during reporting period 
+ (17 means that there was 17 invocation within 1 second interval)
  - activeCalls - calls that are still running at the end of reporting period
    - activeCallsCountMax - count of active calls that still running at the end of reporting period  
    - activeCallsLatencyMax - maximum latency of active call
@@ -146,8 +148,13 @@ val service = MyService(NoopProfiler() )
 
 ```
 ## How to build this project
+Build: 
 ```
 gradle clean build
+```
+Run jmh tests:
+```
+gradle clean build -xtest jmh --info --no-daemon
 ```
 
 ## Other tracing projects
