@@ -96,7 +96,17 @@ public class AggregatingReporter implements ProfilerReporter {
             }
             ProfiledCallReport counterReport = entry.getValue().buildReportAndReset(spentTime);
 
-            // skip and remove empty counter
+            // Skip and remove empty counter
+            // There are always a lot of ProfiledCalls that are rare active, or active only short period of time
+            // during application startup or scheduled tasks.
+            // Removing empty aggregates reduce amount of memory consumed by profiler in such cases.
+            //
+            // TODO: We can lose some metrics
+            // Reporter sees empty CallAggregate and removed it from map.
+            // There is a ProfiledCall that already obtained reference to this CallAggregate,
+            // but not yet incremented counters in it.
+            // ProfiledCall will increment counters in CallAggregate that will be destroyed by GC,
+            // and will never be accessed by ProfilerReporter
             if (counterReport.getCallsCountSum() == 0 && counterReport.getActiveCallsCountMax() == 0) {
                 iterator.remove();
                 continue;
