@@ -30,6 +30,18 @@ public class ProfilerJmh {
     }
 
     @Benchmark
+    public void profiledCall_call_with_latency() {
+        ProfiledCall call = profiler.profiledCall("name");
+        call.call(System.currentTimeMillis() - 25);
+    }
+
+    @Benchmark
+    public void profiledCall_call_with_latency_and_payload() {
+        ProfiledCall call = profiler.profiledCall("name");
+        call.call(System.currentTimeMillis() - 25, 5);
+    }
+
+    @Benchmark
     public void profiler_call() {
         profiler.call("name");
     }
