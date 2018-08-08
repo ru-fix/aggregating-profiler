@@ -110,9 +110,10 @@ public class DifferentWaysToIncrementBatchOfCountersJmh {
 
     ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     ReentrantReadWriteLock.ReadLock readLock = readWriteLock.readLock();
+    ReentrantReadWriteLock.WriteLock writeLock = readWriteLock.writeLock();
 
     @Benchmark
-    public void read_write_lock5() {
+    public void read_write_lock_read5() {
         readLock.lock();
 
         long1++;
@@ -125,7 +126,20 @@ public class DifferentWaysToIncrementBatchOfCountersJmh {
     }
 
     @Benchmark
-    public void read_write_lock1() {
+    public void read_write_lock_write5() {
+        writeLock.lock();
+
+        long1++;
+        long2++;
+        long3++;
+        long4++;
+        long5++;
+
+        writeLock.unlock();
+    }
+
+    @Benchmark
+    public void read_write_lock_read1() {
         readLock.lock();
 
         long1++;
