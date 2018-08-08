@@ -1,7 +1,9 @@
 package ru.fix.aggregating.profiler;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 /**
  * @author Kamil Asfandiyarov
@@ -81,8 +83,25 @@ public interface Profiler {
     void detachIndicator(String name);
 
     /**
-     * Create new instance of reporter.
-     * Reporter is closable resource
+     * Creates new instances of reporter.
+     * Reporter is closable resource.
+     * <pre>{@code
+     * // Creates single instance of Reporter that aggregates all metrics.
+     * ProfilerReporter reporter = createReporters(emptyList(), false).get(0);
+     * }</pre>
+     * <pre>{@code
+     * // Creates two instances of Reporter. First aggregate metrics that starts with foo, second - all other metrics.
+     * List<ProfilerReporter> reporters = createReporters(List.of(Pattern.compile("^foo.*")), true)
+     * ProfilerReporter fooReporter = reporters.get(0);
+     * ProfilerReporter aooOtherReporter = reporters.get(1);
+     * }</pre>
+     * <pre>{@code
+     * // Creates single instance of Reporter that aggregates only metrics that starts with bar.
+     * ProfilerReporter barReporter = createReporters(List.of(Pattern.compile("^foo.*")), false).get(0);
+     * }</pre>
+     *
+     * @param filter Filter metrics by name. Empty list means that there is no filter
+     * @param reporterForUnmatchedMetrics create reporter for metrics that does not match filters.
      */
-    ProfilerReporter createReporter();
+    List<ProfilerReporter> createReporters(List<Pattern> filter, boolean reporterForUnmatchedMetrics);
 }
