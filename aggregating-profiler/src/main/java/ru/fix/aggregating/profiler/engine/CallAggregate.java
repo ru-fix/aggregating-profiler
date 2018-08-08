@@ -144,7 +144,7 @@ public class CallAggregate {
     }
 
     public ProfiledCallReport buildReportAndReset(long elapsed) {
-        long callsCount = callsCountSum.sumThenReset();
+        long callsCount = LongAdderDrainer.drain(callsCountSum);
 
         ProfiledCallReport report = new ProfiledCallReport(callName)
                 .setActiveCallsCountMax(activeCallsSum.sum())
@@ -155,12 +155,12 @@ public class CallAggregate {
             return report;
         }
 
-        long payloadTotal = payloadSum.sumThenReset();
+        long payloadTotal = LongAdderDrainer.drain(payloadSum);
 
         return report
                 .setLatencyMin(latencyMin.getThenReset())
                 .setLatencyMax(latencyMax.getThenReset())
-                .setLatencyAvg(latencySum.sumThenReset() / callsCount)
+                .setLatencyAvg(LongAdderDrainer.drain(latencySum) / callsCount)
 
                 .setCallsThroughputAvg(elapsed != 0 ? callsCount * 1000_000 / elapsed : 0)
 
