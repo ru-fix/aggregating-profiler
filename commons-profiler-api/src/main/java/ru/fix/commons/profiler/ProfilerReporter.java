@@ -1,6 +1,8 @@
 package ru.fix.commons.profiler;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public interface ProfilerReporter extends AutoCloseable {
@@ -24,5 +26,7 @@ public interface ProfilerReporter extends AutoCloseable {
     /**
      * @return empty report in case of empty patterns
      */
-    ProfilerReport buildReportAndReset(List<Pattern> patterns);
+    ProfilerReport buildReportAndReset(String tag);
+
+    void setGroupsSeparator(Map<String, Set<Pattern>> groupSeparator);
 }

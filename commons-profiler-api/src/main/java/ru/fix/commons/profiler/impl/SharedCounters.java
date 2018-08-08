@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
+import ru.fix.commons.profiler.MetricsGroupTag;
+
 /**
  * @author Kamil Asfandiyarov
  */
@@ -31,8 +33,14 @@ class SharedCounters {
 
     private final AtomicBoolean recordActiveCalls = new AtomicBoolean();
 
+    private final MetricsGroupTag groupTag = new MetricsGroupTag();
+    
     public SharedCounters(boolean recordActiveCalls) {
         this.recordActiveCalls.set(recordActiveCalls);
+    }
+
+    public MetricsGroupTag getGroupTag() {
+        return this.groupTag;
     }
 
     void setRecordActiveCalls(boolean recordActiveCalls) {

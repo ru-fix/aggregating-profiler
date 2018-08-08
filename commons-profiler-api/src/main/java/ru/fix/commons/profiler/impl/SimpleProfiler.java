@@ -1,15 +1,17 @@
 package ru.fix.commons.profiler.impl;
 
 import ru.fix.commons.profiler.IndicationProvider;
+import ru.fix.commons.profiler.IndicationProviderTag;
 import ru.fix.commons.profiler.ProfiledCall;
 import ru.fix.commons.profiler.Profiler;
 import ru.fix.commons.profiler.ProfilerReporter;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-
+import java.util.regex.Pattern;
 
 /**
  * @author Kamil Asfandiyarov
@@ -20,8 +22,9 @@ public class SimpleProfiler implements Profiler {
 
     private final CopyOnWriteArrayList<ProfilerReporterImpl> profilerReporters = new CopyOnWriteArrayList<>();
 
-    private final Map<String, IndicationProvider> indicators = new ConcurrentHashMap<>();
-
+    private final Map<String, IndicationProviderTag> indicators = new ConcurrentHashMap<>();
+    private final Map<String, Set<Pattern>> groupSeparator = new ConcurrentHashMap<>();
+    
     @Override
     public ProfiledCall profiledCall(String name) {
         return new ProfiledCallImpl(this, name);
@@ -37,10 +40,12 @@ public class SimpleProfiler implements Profiler {
         return this;
     }
 
-
     @Override
     public void attachIndicator(String name, IndicationProvider indicationProvider) {
-        indicators.put(normalizeIndicatorName(name), indicationProvider);
+        IndicationProviderTag tag = new IndicationProviderTag(indicationProvider);
+        String newName = normalizeIndicatorName(name);
+        tag.evalGroupTag(newName, groupSeparator);
+        indicators.put(newName,tag);
     }
 
     @Override
@@ -59,10 +64,10 @@ public class SimpleProfiler implements Profiler {
         profilerReporters.forEach(reporter -> reporter.applyToSharedCounters(profiledCallName, consumer));
     }
 
-    Map<String, IndicationProvider> getIndicators() {
+    Map<String, IndicationProviderTag> getIndicators() {
         return indicators;
     }
-
+            
     @Override
     public ProfilerReporter createReporter() {
         return new ProfilerReporterImpl(this);
@@ -73,5 +78,10 @@ public class SimpleProfiler implements Profiler {
             boolean enableActiveCallsMaxLatency,
             int activeCallsToKeepBetweenReports) {
         return new ProfilerReporterImpl(this, enableActiveCallsMaxLatency, activeCallsToKeepBetweenReports);
+    }
+
+    public void setGroupsSeparator(Map<String, Set<Pattern>> groupSeparator) {
+        this.groupSeparator.clear();
+        this.groupSeparator.putAll(groupSeparator);
     }
 }
