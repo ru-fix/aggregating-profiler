@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
  * @author Andrey Kiselev
  */
 
-//преределать на два класса. чтоб испоьзоваля отдельный IndicatorProviderTag
 public class MetricsGroupTag {
     public final static String DEFAULT_TAG_NAME = "default";
     private volatile String tagValue = DEFAULT_TAG_NAME;

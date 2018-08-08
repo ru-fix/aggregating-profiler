@@ -58,6 +58,9 @@ class ProfilerReporterImpl implements ProfilerReporter {
     public void setGroupsSeparator(Map<String, Set<Pattern>> groupSeparator) {
         this.groupSeparator.clear();
         this.groupSeparator.putAll(groupSeparator);
+        writeLock.lock();
+        this.sharedCounters.forEach((k, v) -> v.getGroupTag().evalGroupTag(k, groupSeparator));
+        writeLock.unlock();
     }
 
     @Override

@@ -83,5 +83,6 @@ public class SimpleProfiler implements Profiler {
     public void setGroupsSeparator(Map<String, Set<Pattern>> groupSeparator) {
         this.groupSeparator.clear();
         this.groupSeparator.putAll(groupSeparator);
+        this.indicators.forEach((k, v) -> v.evalGroupTag(k, groupSeparator));
     }
 }
