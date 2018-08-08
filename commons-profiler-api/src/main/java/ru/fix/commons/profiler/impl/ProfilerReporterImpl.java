@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import ru.fix.commons.profiler.ProfilerCallReport;
 import ru.fix.commons.profiler.ProfilerReport;
 import ru.fix.commons.profiler.ProfilerReporter;
+import ru.fix.commons.profiler.MetricsGroupTag;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +23,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
     private static final Logger log = LoggerFactory.getLogger(ProfilerReporterImpl.class);
 
     private final Map<String, SharedCounters> sharedCounters = new ConcurrentHashMap<>();
+    private final Map<String, Set<Pattern>> groupSeparator = new ConcurrentHashMap<>();
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
@@ -53,6 +55,15 @@ class ProfilerReporterImpl implements ProfilerReporter {
     }
 
     @Override
+    public void setGroupsSeparator(Map<String, Set<Pattern>> groupSeparator) {
+        this.groupSeparator.clear();
+        this.groupSeparator.putAll(groupSeparator);
+        writeLock.lock();
+        this.sharedCounters.forEach((k, v) -> v.getGroupTag().evalGroupTag(k, groupSeparator));
+        writeLock.unlock();
+    }
+
+    @Override
     public boolean setEnableActiveCallsMaxLatency(boolean enable) {
         boolean prevValue = this.enableActiveCallsMaxLatency.getAndSet(enable);
 
@@ -71,9 +82,14 @@ class ProfilerReporterImpl implements ProfilerReporter {
     public void applyToSharedCounters(String profiledCallName, Consumer<SharedCounters> consumer) {
         readLock.lock();
         try {
-            consumer.accept(sharedCounters.computeIfAbsent(profiledCallName, key ->
-                    new SharedCounters(enableActiveCallsMaxLatency.get())
-            ));
+            consumer.accept(
+                sharedCounters.computeIfAbsent(
+                    profiledCallName,
+                    key -> {
+                        SharedCounters sc =  new SharedCounters(enableActiveCallsMaxLatency.get());
+                        sc.getGroupTag().evalGroupTag(profiledCallName, groupSeparator);
+                        return sc;
+                    }));
         } finally {
             readLock.unlock();
         }
@@ -85,24 +101,22 @@ class ProfilerReporterImpl implements ProfilerReporter {
     }
 
     @Override
-    public ProfilerReport buildReportAndReset(List<Pattern> patterns) {
-        return buildReportAndReset(Optional.ofNullable(patterns));
+    public ProfilerReport buildReportAndReset(String tag) {
+        return buildReportAndReset(Optional.ofNullable(tag));
     }
 
-    private ProfilerReport buildReportAndReset(Optional<List<Pattern>> patterns) {
+    private ProfilerReport buildReportAndReset(Optional<String> tag) {
         long timestamp = System.currentTimeMillis();
         long spentTime = timestamp - lastReportTimestamp.getAndSet(timestamp);
 
         Map<String, Long> indicators = profiler.getIndicators()
                 .entrySet()
                 .stream()
-                .filter(entry -> !patterns.isPresent() || patterns.get()
-                        .stream()
-                        .anyMatch(p -> p.matcher(entry.getKey()).matches()))
+                .filter(entry -> entry.getValue().getTagValue().equals(tag.get()))
                 .collect(Collectors.toMap(Map.Entry::getKey,
                         e -> {
                             try {
-                                return e.getValue().get();
+                                return e.getValue().getProvider().get();
                             } catch (Exception ex) {
                                 log.error(ex.getMessage(), ex);
                             }
@@ -116,9 +130,7 @@ class ProfilerReporterImpl implements ProfilerReporter {
             for (Iterator<Map.Entry<String, SharedCounters>> iterator = sharedCounters.entrySet().iterator();
                  iterator.hasNext(); ) {
                 Map.Entry<String, SharedCounters> entry = iterator.next();
-                if (patterns.isPresent() && !patterns.get()
-                        .stream()
-                        .anyMatch(p -> p.matcher(entry.getKey()).matches())) {
+                if (tag.isPresent() && ! entry.getValue().getGroupTag().getTagValue().equals(tag.orElse(null))) {
                     continue;
                 }
                 ProfilerCallReport counterReport = buildReportAndReset(entry.getKey(), entry.getValue(), spentTime);
