@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 public class AggregatingReporter implements ProfilerReporter {
     private static final Logger log = LoggerFactory.getLogger(AggregatingReporter.class);
 
+    private static final String INDICATOR_SUFFIX = ".indicatorMax";
+
     private final Map<String, CallAggregate> sharedCounters = new ConcurrentHashMap<>();
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
@@ -74,7 +76,14 @@ public class AggregatingReporter implements ProfilerReporter {
                 .filter(entry -> !patterns.isPresent() || patterns.get()
                         .stream()
                         .anyMatch(p -> p.matcher(entry.getKey()).matches()))
-                .collect(Collectors.toMap(Map.Entry::getKey,
+                .collect(Collectors.toMap(
+                        e -> {
+                            String name = e.getKey();
+                            if (!name.endsWith(INDICATOR_SUFFIX)) {
+                                name = name.concat(INDICATOR_SUFFIX);
+                            }
+                            return name;
+                        },
                         e -> {
                             try {
                                 return e.getValue().get();

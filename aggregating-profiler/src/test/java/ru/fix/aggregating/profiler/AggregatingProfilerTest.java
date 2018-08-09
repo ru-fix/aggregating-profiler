@@ -803,4 +803,15 @@ public class AggregatingProfilerTest {
     private static CompletableFuture<String> cfSupplierThrowsChecked() throws InterruptedException {
         throw new InterruptedException();
     }
+
+
+    @Test
+    public void indicator_name_ends_with_indicator_max_suffix(){
+        Profiler profiler = new AggregatingProfiler();
+        profiler.attachIndicator("my.indicator", () -> 147L);
+        ProfilerReporter reporter = profiler.createReporter();
+        Map<String, Long> indicators = reporter.buildReportAndReset().getIndicators();
+        assertTrue(indicators.containsKey("my.indicator.indicatorMax"));
+        assertEquals(147L, indicators.get("my.indicator.indicatorMax").longValue());
+    }
 }
