@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class AggregatingReporter implements ProfilerReporter {
     private static final Logger log = LoggerFactory.getLogger(AggregatingReporter.class);
 
-    private final Map<String, SharedCounters> sharedCounters = new ConcurrentHashMap<>();
+    private final Map<String, CallAggregate> sharedCounters = new ConcurrentHashMap<>();
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
@@ -47,16 +47,11 @@ public class AggregatingReporter implements ProfilerReporter {
         lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
     }
 
-    public void updateCounters(String profiledCallName, Consumer<SharedCounters> updateAction) {
-        readLock.lock();
-        try {
-            updateAction.accept(
-                    sharedCounters.computeIfAbsent(profiledCallName, key ->
-                            new SharedCounters(numberOfActiveCallsToTrackAndKeepBetweenReports)
-                    ));
-        } finally {
-            readLock.unlock();
-        }
+    public void updateCallAggregates(String profiledCallName, Consumer<CallAggregate> updateAction) {
+        updateAction.accept(
+                sharedCounters.computeIfAbsent(profiledCallName, key ->
+                        new CallAggregate(profiledCallName, numberOfActiveCallsToTrackAndKeepBetweenReports)
+                ));
     }
 
     @Override
@@ -91,128 +86,39 @@ public class AggregatingReporter implements ProfilerReporter {
 
         List<ProfiledCallReport> collect = new ArrayList<>();
 
-        writeLock.lock();
-        try {
-            for (Iterator<Map.Entry<String, SharedCounters>> iterator = sharedCounters.entrySet().iterator();
-                 iterator.hasNext(); ) {
-                Map.Entry<String, SharedCounters> entry = iterator.next();
-                if (patterns.isPresent() && !patterns.get()
-                        .stream()
-                        .anyMatch(p -> p.matcher(entry.getKey()).matches())) {
-                    continue;
-                }
-                ProfiledCallReport counterReport = buildReportAndReset(entry.getKey(), entry.getValue(), spentTime);
-
-                // skip and remove empty counter
-                if (counterReport.getCallsCountSum() == 0 && counterReport.getActiveCallsCountMax() == 0) {
-                    iterator.remove();
-                    continue;
-                }
-
-                collect.add(counterReport);
+        for (Iterator<Map.Entry<String, CallAggregate>> iterator = sharedCounters.entrySet().iterator();
+             iterator.hasNext(); ) {
+            Map.Entry<String, CallAggregate> entry = iterator.next();
+            if (patterns.isPresent() && !patterns.get()
+                    .stream()
+                    .anyMatch(p -> p.matcher(entry.getKey()).matches())) {
+                continue;
             }
-        } finally {
-            writeLock.unlock();
+            ProfiledCallReport counterReport = entry.getValue().buildReportAndReset(spentTime);
+
+            // Skip and remove empty counter
+            // There are always a lot of ProfiledCalls that are rare active, or active only short period of time
+            // during application startup or scheduled tasks.
+            // Removing empty aggregates reduce amount of memory consumed by profiler in such cases.
+            //
+            // TODO: We can lose some metrics
+            // Reporter sees empty CallAggregate and removed it from map.
+            // There is a ProfiledCall that already obtained reference to this CallAggregate,
+            // but not yet incremented counters in it.
+            // ProfiledCall will increment counters in CallAggregate that will be destroyed by GC,
+            // and will never be accessed by ProfilerReporter
+            if (counterReport.getCallsCountSum() == 0 && counterReport.getActiveCallsCountMax() == 0) {
+                iterator.remove();
+                continue;
+            }
+
+            collect.add(counterReport);
         }
+
 
         collect.sort(Comparator.comparing(ProfiledCallReport::getName));
 
         return new ProfilerReport(indicators, collect);
-    }
-
-    private ProfiledCallReport buildReportAndReset(String name, SharedCounters counters, long elapsed) {
-        long callsCount = counters.getCallsCount().sumThenReset();
-        long startedCallsCount = counters.getStartedCallsCount().sumThenReset();
-        long sumStartStopLatency = counters.getSumStartStopLatency().sumThenReset();
-
-        if (callsCount == 0) {
-            cleanCounters(counters);
-            return new ProfiledCallReport(name)
-                    .setStartedCallsCountSum(startedCallsCount)
-                    .setActiveCallsCountMax(counters.getActiveCallsCounter().sum())
-                    .setActiveCallsLatencyMax(activeCallsMaxLatencyAndResetActiveCalls(counters));
-        }
-
-        long payloadTotal = counters.getPayloadSum().sumThenReset();
-
-        return new ProfiledCallReport(name)
-                .setLatencyMin(counters.getLatencyMin().getAndSet(Long.MAX_VALUE))
-                .setLatencyMax(counters.getLatencyMax().getAndSet(0))
-                .setLatencyAvg(sumStartStopLatency / callsCount)
-
-                .setCallsThroughputAvg(elapsed != 0 ? callsCount * 1000 / elapsed : 0)
-
-                .setCallsCountSum(callsCount)
-                .setStartedCallsCountSum(startedCallsCount)
-
-                .setPayloadMin(counters.getPayloadMin().getAndSet(Long.MAX_VALUE))
-                .setPayloadMax(counters.getPayloadMax().getAndSet(0))
-                .setPayloadSum(payloadTotal)
-                .setPayloadAvg(payloadTotal / callsCount)
-                .setPayloadThroughputAvg(elapsed != 0 ? payloadTotal * 1000 / elapsed : 0)
-
-                .setReportingTimeAvg(elapsed)
-
-                .setThroughputPerSecondMax(counters.getMaxThroughput().getMaxAndReset())
-                .setPayloadThroughputPerSecondMax(counters.getMaxPayloadThroughput().getMaxAndReset())
-
-                .setActiveCallsCountMax(counters.getActiveCallsCounter().sum())
-                .setActiveCallsLatencyMax(activeCallsMaxLatencyAndResetActiveCalls(counters));
-    }
-
-    private long activeCallsMaxLatencyAndResetActiveCalls(SharedCounters counters) {
-        Optional<AggregatingCall> longestCall = resetActiveCallsAndGetLongest(counters);
-        return longestCall
-                .map(AggregatingCall::timeFromCallStart)
-                .orElse(0L);
-
-    }
-
-    private Optional<AggregatingCall> resetActiveCallsAndGetLongest(SharedCounters counters) {
-        if (numberOfActiveCallsToTrackAndKeepBetweenReports.get() == 0) {
-            if(!counters.getActiveCalls().isEmpty()) {
-                counters.getActiveCalls().reset();
-            }
-            return Optional.empty();
-        }
-
-        AggregatingCall[] longest = new AggregatingCall[1];
-
-        Set<AggregatingCall> top = new HashSet<>();
-        counters.getActiveCalls()
-                .stream()
-                .sorted(Comparator.comparingLong(AggregatingCall::timeFromCallStart).reversed())
-                .limit(numberOfActiveCallsToTrackAndKeepBetweenReports.get())
-                .forEachOrdered(call -> {
-                    if (top.isEmpty()) {
-                        longest[0] = call;
-                    }
-                    top.add(call);
-                });
-
-        Iterator<AggregatingCall> calls = counters.getActiveCalls().iterator();
-        while (calls.hasNext()) {
-            AggregatingCall call = calls.next();
-            if (!top.contains(call)) {
-                calls.remove();
-            }
-        }
-
-        return Optional.ofNullable(longest[0]);
-    }
-
-    private static void cleanCounters(SharedCounters counters) {
-        counters.getCallsCount().reset();
-
-        counters.getLatencyMax().set(0);
-        counters.getLatencyMin().set(Long.MAX_VALUE);
-        counters.getSumStartStopLatency().reset();
-
-        counters.getPayloadSum().reset();
-        counters.getPayloadMax().set(0);
-        counters.getPayloadMin().set(Long.MAX_VALUE);
-        counters.getMaxThroughput().reset();
-        counters.getMaxPayloadThroughput().reset();
     }
 
     @Override

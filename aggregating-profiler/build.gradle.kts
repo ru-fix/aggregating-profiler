@@ -23,7 +23,6 @@ dependencies {
     testCompile(Libs.kotlin_stdlib)
     testCompile(Libs.kotlin_reflect)
 
-    testCompile(Libs.mockito)
     testCompile(Libs.slf4j_simple)
     testCompile(Libs.hamcrest)
 }

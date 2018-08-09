@@ -31,7 +31,7 @@ public class AggregatingProfiler implements Profiler {
                 (profiledCallName, updateAction) ->
                         profilerReporters.forEach(
                                 reporter ->
-                                        reporter.updateCounters(profiledCallName, updateAction)
+                                        reporter.updateCallAggregates(profiledCallName, updateAction)
                         )
         );
     }

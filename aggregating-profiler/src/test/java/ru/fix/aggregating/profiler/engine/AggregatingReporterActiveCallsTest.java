@@ -102,9 +102,9 @@ public class AggregatingReporterActiveCallsTest {
 
         reporter.buildReportAndReset();
 
-        reporter.updateCounters("Test", counters -> {
-            assertEquals(numberOfActiveCallsToTrackAndKeepBetweenReports, counters.getActiveCalls().size());
-            assertTrue(counters.getActiveCalls().containsAll(longestCalls));
+        reporter.updateCallAggregates("Test", counters -> {
+            assertEquals(numberOfActiveCallsToTrackAndKeepBetweenReports, counters.activeCalls.size());
+            assertTrue(counters.activeCalls.containsAll(longestCalls));
         });
     }
 
@@ -122,9 +122,9 @@ public class AggregatingReporterActiveCallsTest {
 
         reporter.buildReportAndReset();
 
-        reporter.updateCounters("Test", counters -> {
-            assertEquals(numberOfActiveCallsToTrackAndKeepBetweenReports, counters.getActiveCalls().size());
-            assertTrue(counters.getActiveCalls().containsAll(longestCalls));
+        reporter.updateCallAggregates("Test", counters -> {
+            assertEquals(numberOfActiveCallsToTrackAndKeepBetweenReports, counters.activeCalls.size());
+            assertTrue(counters.activeCalls.containsAll(longestCalls));
         });
     }
 
@@ -138,8 +138,8 @@ public class AggregatingReporterActiveCallsTest {
         reporter.buildReportAndReset();
 
 
-        reporter.updateCounters("Test", counters ->
-                assertTrue(counters.getActiveCalls().isEmpty())
+        reporter.updateCallAggregates("Test", counters ->
+                assertTrue(counters.activeCalls.isEmpty())
         );
     }
 

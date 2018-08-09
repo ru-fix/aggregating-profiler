@@ -5,6 +5,7 @@ object Vers {
     val dokkav = "0.9.16"
     val gradleReleasePlugin = "1.2.19"
     val junit = "5.2.0"
+    val jmh = "1.21"
 
 }
 
@@ -22,10 +23,16 @@ object Libs {
     val junit_api = "org.junit.jupiter:junit-jupiter-api:${Vers.junit}"
     val junit_engine = "org.junit.jupiter:junit-jupiter-engine:${Vers.junit}"
 
-    val mockito = "org.mockito:mockito-all:1.10.19"
-    val mockito_kotiln = "com.nhaarman:mockito-kotlin-kt1.1:1.5.0"
     val kotlin_logging = "io.github.microutils:kotlin-logging:${Vers.kotlin_logging}"
     val hamcrest = "org.hamcrest:hamcrest-all:1.3"
+
+    val jmhGradlePlugin = "me.champeau.gradle:jmh-gradle-plugin:0.4.7"
+    val jmh = "org.openjdk.jmh:jmh-core:${Vers.jmh}"
+    val jmhGeneratorAnn = "org.openjdk.jmh:jmh-generator-annprocess:${Vers.jmh}"
+    val jmhGeneratorBytecode = "org.openjdk.jmh:jmh-generator-bytecode:${Vers.jmh}"
+    val shadowPlugin = "com.github.jengelman.gradle.plugins:shadow:2.0.4"
+
+
 }
 
 
