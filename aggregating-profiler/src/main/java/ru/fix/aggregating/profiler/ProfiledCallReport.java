@@ -150,6 +150,10 @@ public class ProfiledCallReport {
         return this;
     }
 
+    /**
+     * Average rate of profiledCall milli invocation per second
+     * (123 means that there was 0.123 invocation per second)
+     */
     public long getCallsThroughputAvg() {
         return callsThroughputAvg;
     }
@@ -159,6 +163,10 @@ public class ProfiledCallReport {
         return this;
     }
 
+    /**
+     * Average payload rate milli invocation per second
+     * (123 means that there was 0.123 invocation per second)
+     */
     public long getPayloadThroughputAvg() {
         return payloadThroughputAvg;
     }

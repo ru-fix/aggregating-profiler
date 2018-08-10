@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 public class AggregatingReporter implements ProfilerReporter {
     private static final Logger log = LoggerFactory.getLogger(AggregatingReporter.class);
 
+    private static final String INDICATOR_SUFFIX = ".indicatorMax";
+
     private final Map<String, CallAggregate> sharedCounters = new ConcurrentHashMap<>();
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
