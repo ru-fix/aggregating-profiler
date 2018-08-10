@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.LongAdder;
 /**
  * @author Kamil Asfandiyarov
  */
-public class CallAggregate {
+public class CallAggregate implements Tagged {
 
     final String callName;
 
@@ -36,6 +36,7 @@ public class CallAggregate {
 
     final LongAdder activeCallsSum = new LongAdder();
     final Set<AggregatingCall> activeCalls = ConcurrentHashMap.newKeySet();
+    final Map<String, String> tags = new HashMap<>()
 
     public CallAggregate(
             String callName,
@@ -46,6 +47,11 @@ public class CallAggregate {
 
     }
 
+    @Override
+    public String getTags() {
+        return this.tags;
+    }
+    
     /**
      * @param currentTimestamp
      * @param latency Ignored in case of -1

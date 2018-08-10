@@ -60,24 +60,22 @@ public class AggregatingReporter implements ProfilerReporter {
     }
 
     @Override
-    public ProfilerReport buildReportAndReset(List<Pattern> patterns) {
-        return buildReportAndReset(Optional.ofNullable(patterns));
+    public ProfilerReport buildReportAndReset(String tag) {
+        return buildReportAndReset(Optional.ofNullable(tag));
     }
 
-    private ProfilerReport buildReportAndReset(Optional<List<Pattern>> patterns) {
+    private ProfilerReport buildReportAndReset(Optional<String> tag) {
         long timestamp = System.currentTimeMillis();
         long spentTime = timestamp - lastReportTimestamp.getAndSet(timestamp);
 
         Map<String, Long> indicators = profiler.getIndicators()
                 .entrySet()
                 .stream()
-                .filter(entry -> !patterns.isPresent() || patterns.get()
-                        .stream()
-                        .anyMatch(p -> p.matcher(entry.getKey()).matches()))
+                .filter(entry -> entry.getValue().getTagValue().equals(tag.get()))
                 .collect(Collectors.toMap(Map.Entry::getKey,
                         e -> {
                             try {
-                                return e.getValue().get();
+                                return e.getValue().getProvider().get();
                             } catch (Exception ex) {
                                 log.error(ex.getMessage(), ex);
                             }

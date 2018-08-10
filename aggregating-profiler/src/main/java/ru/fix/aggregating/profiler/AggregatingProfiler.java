@@ -46,7 +46,9 @@ public class AggregatingProfiler implements Profiler {
 
     @Override
     public void attachIndicator(String name, IndicationProvider indicationProvider) {
-        indicators.put(NameNormalizer.trimDots(name), indicationProvider);
+        indicators.put(
+            NameNormalizer.trimDots(name),
+            tagger.wrapIndicationProvider(indicationProvider));
     }
 
     @Override

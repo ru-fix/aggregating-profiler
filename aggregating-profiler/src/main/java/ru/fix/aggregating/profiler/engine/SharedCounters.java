@@ -8,10 +8,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
+import ru.fix.aggregating.profiler.Tagged;
+
 /**
  * @author Kamil Asfandiyarov
  */
-public class SharedCounters {
+public class SharedCounters implements Tagged {
     private final LongAdder callsCount = new LongAdder();
     private final LongAdder startedCallsCount = new LongAdder();
     private final LongAdder sumStartStopLatency = new LongAdder();
@@ -31,10 +33,17 @@ public class SharedCounters {
 
     private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
 
+    private final Map<String, String> tags = new HashMap<>();
+
     public SharedCounters(AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports) {
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
     }
 
+    @Override
+    public Map<String, String> getTags() {
+        return tags;
+    }
+    
     public LongAdder getCallsCount() {
         return callsCount;
     }
