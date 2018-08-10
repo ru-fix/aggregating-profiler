@@ -18,7 +18,7 @@ public class AggregatingCall implements ProfiledCall {
 
     final AtomicBoolean started = new AtomicBoolean();
 
-    final AtomicLong startTime = new AtomicLong();
+    final AtomicLong startNanoTime = new AtomicLong();
 
     final CallAggregateMutator aggregateMutator;
 
@@ -58,7 +58,7 @@ public class AggregatingCall implements ProfiledCall {
             throw new IllegalArgumentException("Start method was already called." +
                     " Profiled call: " + profiledCallName);
         }
-        startTime.set(System.nanoTime());
+        startNanoTime.set(System.nanoTime());
 
         aggregateMutator.updateAggregate(
                 profiledCallName,
@@ -77,15 +77,19 @@ public class AggregatingCall implements ProfiledCall {
     }
 
     private void updateCountersOnStop(long payload) {
-        long latencyValue = (System.nanoTime() - startTime.get()) / 1000000;
+        long latencyValue = (System.nanoTime() - startNanoTime.get()) / 1000000;
 
         aggregateMutator.updateAggregate(
                 profiledCallName,
                 aggregate -> aggregate.stop(this, System.currentTimeMillis(), latencyValue, payload));
     }
 
+    public long startNanoTime(){
+        return startNanoTime.get();
+    }
+
     public long timeFromCallStart() {
-        return (System.nanoTime() - startTime.get()) / 1000000;
+        return (System.nanoTime() - startNanoTime.get()) / 1000000;
     }
 
     @Override

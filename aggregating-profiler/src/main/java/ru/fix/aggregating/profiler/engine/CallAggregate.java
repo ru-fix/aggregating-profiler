@@ -129,7 +129,7 @@ public class CallAggregate {
         Set<AggregatingCall> top = new HashSet<>();
         activeCalls
                 .stream()
-                .sorted(Comparator.comparingLong(AggregatingCall::timeFromCallStart).reversed())
+                .sorted(Comparator.comparingLong(AggregatingCall::startNanoTime))
                 .limit(numberOfActiveCallsToTrackAndKeepBetweenReports.get())
                 .forEachOrdered(call -> {
                     if (top.isEmpty()) {
