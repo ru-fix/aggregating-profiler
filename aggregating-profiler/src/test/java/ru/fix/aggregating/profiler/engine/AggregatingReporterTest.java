@@ -5,8 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.fix.aggregating.profiler.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -58,29 +57,41 @@ public class AggregatingReporterTest {
     }
 
     @Test
-    public void buildReportWithRegexp() {
-        ProfiledCall call = profiler.start("TestRE");
-        //someMethod()
+    public void buildReportWithDefault() {
+        ProfiledCall call = profiler.start("test");
         call.stop(30);
 
-        List<Pattern> reList = new ArrayList<Pattern>();
-        reList.add(Pattern.compile(".*RE"));
         ProfiledCallReport report = getCallReport(
-                reporter.buildReportAndReset(reList));
+                reporter.buildReportAndReset("default"));
 
-        assertEquals(1, report.getCallsCountSum());
         assertEquals(30, report.getPayloadSum());
     }
 
     @Test
-    public void buildReportWithRegexpFail() {
-        ProfiledCall call = profiler.start("TestR_E");
-        //someMethod()
+    public void buildReportWithSharedCounterTag() {
+        Map<String, Set<Pattern>> separator = new HashMap<>();
+        separator.put("tag", new HashSet<Pattern>());
+        separator.get("tag").add(Pattern.compile(".*test.*"));
+        reporter = profiler.createReporter(new Tagger(separator));
+        ProfiledCall call = profiler.start("test");
         call.stop(30);
 
-        List<Pattern> reList = new ArrayList<Pattern>();
-        reList.add(Pattern.compile(".*RE"));
-        ProfilerReport profilerReport = reporter.buildReportAndReset(reList);
+        ProfilerReport profilerReport = reporter.buildReportAndReset("tag");
+        assertNotNull(profilerReport.getProfilerCallReports());
+        assertEquals(profilerReport.getProfilerCallReports().size(), 0);
+    }
+
+    @Test
+    public void buildReportWithIndicatorTag() {
+        Map<String, Set<Pattern>> separator = new HashMap<>();
+        separator.put("tag", new HashSet<Pattern>());
+        separator.get("tag").add(Pattern.compile(".*nop.*"));
+        reporter = profiler.createReporter(new Tagger(separator));
+        profiler.attachIndicator("nop", () -> new Long(10));
+        ProfiledCall call = profiler.start("test");
+        call.stop(30);
+
+        ProfilerReport profilerReport = reporter.buildReportAndReset("tag");
         assertNotNull(profilerReport.getProfilerCallReports());
         assertEquals(profilerReport.getProfilerCallReports().size(), 0);
     }

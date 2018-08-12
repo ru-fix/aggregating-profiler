@@ -1,11 +1,14 @@
 package ru.fix.aggregating.profiler.engine;
 
 import ru.fix.aggregating.profiler.ProfiledCallReport;
+import ru.fix.aggregating.profiler.Tagged;
 
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAccumulator;
@@ -36,7 +39,7 @@ public class CallAggregate implements Tagged {
 
     final LongAdder activeCallsSum = new LongAdder();
     final Set<AggregatingCall> activeCalls = ConcurrentHashMap.newKeySet();
-    final Map<String, String> tags = new HashMap<>()
+    final Map<String, String> tags = new HashMap<>();
 
     public CallAggregate(
             String callName,
@@ -48,7 +51,7 @@ public class CallAggregate implements Tagged {
     }
 
     @Override
-    public String getTags() {
+    public Map<String, String> getTags() {
         return this.tags;
     }
     

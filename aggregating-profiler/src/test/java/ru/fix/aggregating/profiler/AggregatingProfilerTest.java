@@ -811,6 +811,7 @@ public class AggregatingProfilerTest {
         profiler.attachIndicator("my.indicator", () -> 147L);
         ProfilerReporter reporter = profiler.createReporter();
         Map<String, Long> indicators = reporter.buildReportAndReset().getIndicators();
+        System.out.println("   >>>"+indicators.toString());
         assertTrue(indicators.containsKey("my.indicator.indicatorMax"));
         assertEquals(147L, indicators.get("my.indicator.indicatorMax").longValue());
     }

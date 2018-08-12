@@ -32,7 +32,7 @@ public class PrefixedProfiler implements Profiler {
     }
 
     @Override
-    public ProfilerReporter createReporter() {
-        return profiler.createReporter();
+    public ProfilerReporter createReporter(Tagger tagger) {
+        return profiler.createReporter(tagger);
     }
 }

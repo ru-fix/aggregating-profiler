@@ -1,4 +1,4 @@
-package ru.fix.commons.profiler;
+package ru.fix.aggregating.profiler;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -10,11 +10,11 @@ import java.util.regex.Pattern;
  * @author Andrey Kiselev
  */
 
-public class IndicationProviderTaged implements Tagged {
+public class IndicationProviderTagged implements Tagged {
     private final Map<String, String> tags = new HashMap<>();
     private final IndicationProvider provider;
     
-    public IndicationProviderTag(IndicationProvider provider) {
+    public IndicationProviderTagged(IndicationProvider provider) {
         this.provider = provider;
     }
 
@@ -23,7 +23,7 @@ public class IndicationProviderTaged implements Tagged {
     }
 
     @Override
-    public String getTags() {
+    public Map<String, String> getTags() {
         return this.tags;
     }
 }
