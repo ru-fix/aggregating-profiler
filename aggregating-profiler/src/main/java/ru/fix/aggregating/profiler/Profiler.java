@@ -84,9 +84,7 @@ public interface Profiler {
      * Create new instance of reporter.
      * Reporter is closable resource
      */
-    default ProfilerReporter createReporter() {
-        return createReporter(new Tagger());
-    }
+    ProfilerReporter createReporter();
 
-    ProfilerReporter createReporter(Tagger tagger);
+    void setTagger(Tagger tagger);
 }

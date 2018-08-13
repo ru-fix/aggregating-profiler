@@ -75,7 +75,12 @@ public class NoopProfiler implements Profiler {
     }
 
     @Override
-    public ProfilerReporter createReporter(Tagger tagger) {
+    public void setTagger(Tagger tagger) {
+        return;
+    }
+
+    @Override
+    public ProfilerReporter createReporter() {
         throw new UnsupportedOperationException();
     }
 }

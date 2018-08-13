@@ -40,7 +40,7 @@ public class AggregatingReporter implements ProfilerReporter {
 
     private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
     private final ClosingCallback closingCallback;
-    private Tagger tagger = new Tagger();
+    private volatile Tagger tagger = new Tagger();
 
     public AggregatingReporter(AggregatingProfiler profiler,
                                AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
@@ -85,8 +85,15 @@ public class AggregatingReporter implements ProfilerReporter {
         Map<String, Long> indicators = profiler.getIndicators()
                 .entrySet()
                 .stream()
-            //.filter(entry -> ! tag.isPresent() || entry.getValue().getTags().get(Tagged.GRAPHITE_SELECTOR).equals(tag.get()))
-                .collect(Collectors.toMap(Map.Entry::getKey,
+                .filter(entry -> ! tag.isPresent() || tag.get().equals(entry.getValue().getTags().get(Tagged.GRAPHITE_SELECTOR)))
+                .collect(Collectors.toMap(
+                        e -> {
+                            String name = e.getKey();
+                            if (!name.endsWith(INDICATOR_SUFFIX)) {
+                                name = name.concat(INDICATOR_SUFFIX);
+                            }
+                            return name;
+                        },
                         e -> {
                             try {
                                 return e.getValue().getProvider().get();

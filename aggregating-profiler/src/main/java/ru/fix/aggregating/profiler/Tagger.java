@@ -40,8 +40,12 @@ public class Tagger {
                  }
              }
          }
-        
+
         obj.getTags().put(tagName, DEFAULT_TAG_VALUE);
         return obj;
+    }
+
+    public String toString() {
+        return "Tagger "+hashCode()+" gs="+groupSeparator.toString();
     }
 }

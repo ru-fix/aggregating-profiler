@@ -29,7 +29,12 @@ public class SuffixedProfiler implements Profiler {
     }
 
     @Override
-    public ProfilerReporter createReporter(Tagger tagger) {
-        return profiler.createReporter(tagger);
+    public void setTagger(Tagger tagger) {
+        profiler.setTagger(tagger);
+    }
+
+    @Override
+    public ProfilerReporter createReporter() {
+        return profiler.createReporter();
     }
 }
