@@ -39,7 +39,7 @@ public class CallAggregate implements Tagged {
 
     final LongAdder activeCallsSum = new LongAdder();
     final Set<AggregatingCall> activeCalls = ConcurrentHashMap.newKeySet();
-    final Map<String, String> tags = new HashMap<>();
+    final Map<String, String> tags = new ConcurrentHashMap<>();
 
     public CallAggregate(
             String callName,

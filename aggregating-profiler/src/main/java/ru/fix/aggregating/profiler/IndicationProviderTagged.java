@@ -1,8 +1,7 @@
 package ru.fix.aggregating.profiler;
 
 import java.util.Map;
-import java.util.HashMap;
-//import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -11,7 +10,7 @@ import java.util.regex.Pattern;
  */
 
 public class IndicationProviderTagged implements Tagged {
-    private final Map<String, String> tags = new HashMap<>();
+    private final Map<String, String> tags = new ConcurrentHashMap<>();
     private final IndicationProvider provider;
     
     public IndicationProviderTagged(IndicationProvider provider) {

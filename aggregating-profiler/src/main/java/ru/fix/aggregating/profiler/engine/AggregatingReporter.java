@@ -40,32 +40,35 @@ public class AggregatingReporter implements ProfilerReporter {
 
     private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
     private final ClosingCallback closingCallback;
-    private volatile Tagger tagger = new Tagger();
+    private volatile Tagger tagger;
 
     public AggregatingReporter(AggregatingProfiler profiler,
                                AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
-                               ClosingCallback closingCallback) {
+                               ClosingCallback closingCallback,
+                               Tagger tagger) {
         this.profiler = profiler;
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
         this.closingCallback = closingCallback;
+        this.tagger = tagger;
         lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
     }
 
     public void setTagger(Tagger tagger) {
         this.tagger = tagger;
+        this.sharedCounters.forEach((k, v) -> tagger.setTag(k, v));
     }
-    
+
     public void updateCallAggregates(String profiledCallName, Consumer<CallAggregate> updateAction) {
         updateAction.accept(
-            tagger.setTag(
+            sharedCounters.computeIfAbsent(
                 profiledCallName,
-                sharedCounters.computeIfAbsent(
-                    profiledCallName,
-                    key -> {
-                        return new CallAggregate(
+                key -> {
+                    return tagger.setTag(
+                        profiledCallName,
+                        new CallAggregate(
                             profiledCallName,
-                            numberOfActiveCallsToTrackAndKeepBetweenReports);
-                    })));
+                            numberOfActiveCallsToTrackAndKeepBetweenReports));
+                }));
     }
 
     @Override

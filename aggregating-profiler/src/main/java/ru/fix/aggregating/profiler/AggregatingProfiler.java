@@ -20,14 +20,14 @@ public class AggregatingProfiler implements Profiler {
     private final CopyOnWriteArrayList<AggregatingReporter> profilerReporters = new CopyOnWriteArrayList<>();
 
     private final Map<String, IndicationProviderTagged> indicators = new ConcurrentHashMap<>();
-    private volatile Tagger tagger = new Tagger();
+    private volatile Tagger tagger = new DefaultGraphiteTagger();
     
     /**
      * if 0 then tracking uncompleted profiled calls is disabled
      */
     private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports = new AtomicInteger(10);
 
-    @Override
+
     public ProfiledCall profiledCall(String name) {
         return new AggregatingCall(
                 name,
@@ -43,6 +43,7 @@ public class AggregatingProfiler implements Profiler {
         this.tagger = tagger;
         profilerReporters.forEach(
             reporter -> reporter.setTagger(tagger));
+        indicators.forEach((k, v) -> tagger.setTag(k, v));
     }
     
     private void registerReporter(AggregatingReporter reporter) {
@@ -55,10 +56,11 @@ public class AggregatingProfiler implements Profiler {
 
     @Override
     public void attachIndicator(String name, IndicationProvider indicationProvider) {
+        String normalizedName = NameNormalizer.trimDots(name);
         indicators.put(
-            NameNormalizer.trimDots(name),
+            normalizedName,
             tagger.setTag(
-                name,
+                normalizedName,
                 new IndicationProviderTagged(
                     indicationProvider)));
     }
@@ -78,7 +80,8 @@ public class AggregatingProfiler implements Profiler {
         reporter[0] = new AggregatingReporter(
                 this,
                 numberOfActiveCallsToTrackAndKeepBetweenReports,
-                () -> this.unregisterReporter(reporter[0]));
+                () -> this.unregisterReporter(reporter[0]),
+                tagger);
         reporter[0].setTagger(tagger);
         this.registerReporter(reporter[0]);
         return reporter[0];
