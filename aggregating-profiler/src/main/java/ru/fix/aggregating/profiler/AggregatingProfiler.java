@@ -43,7 +43,7 @@ public class AggregatingProfiler implements Profiler {
         this.tagger = tagger;
         profilerReporters.forEach(
             reporter -> reporter.setTagger(tagger));
-        indicators.forEach((k, v) -> tagger.setTag(k, v));
+        indicators.forEach(tagger::setTag);
     }
     
     private void registerReporter(AggregatingReporter reporter) {
@@ -62,7 +62,9 @@ public class AggregatingProfiler implements Profiler {
             tagger.setTag(
                 normalizedName,
                 new IndicationProviderTagged(
-                    indicationProvider)));
+                    indicationProvider)
+            )
+        );
     }
 
     @Override
