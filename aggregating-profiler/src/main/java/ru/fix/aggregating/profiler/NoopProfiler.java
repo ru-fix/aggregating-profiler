@@ -77,6 +77,7 @@ public class NoopProfiler implements Profiler {
 
     @Override
     public void setTagger(Optional<Tagger> tagger) {
+        //no need any changes
     }
 
     @Override
