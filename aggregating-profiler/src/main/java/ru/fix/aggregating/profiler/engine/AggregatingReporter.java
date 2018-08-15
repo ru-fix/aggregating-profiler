@@ -44,18 +44,19 @@ public class AggregatingReporter implements ProfilerReporter {
 
     public AggregatingReporter(AggregatingProfiler profiler,
                                AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
-                               ClosingCallback closingCallback,
-                               Tagger tagger) {
+                               ClosingCallback closingCallback) {
         this.profiler = profiler;
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
         this.closingCallback = closingCallback;
-        this.tagger = tagger;
         lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
     }
 
-    public void setTagger(Tagger tagger) {
-        this.tagger = tagger;
-        this.sharedCounters.forEach((k, v) -> tagger.setTag(k, v));
+    @Override
+    public void setTagger(Optional<Tagger> tagger) {
+        tagger.ifPresent(t -> {
+                this.tagger = t;
+                this.sharedCounters.forEach(t::assignTag);
+            });
     }
 
     public void updateCallAggregates(String profiledCallName, Consumer<CallAggregate> updateAction) {
@@ -63,7 +64,8 @@ public class AggregatingReporter implements ProfilerReporter {
             sharedCounters.computeIfAbsent(
                 profiledCallName,
                 key -> {
-                    return tagger.setTag(
+                    return Tagger.assignTag(
+                        tagger,
                         profiledCallName,
                         new CallAggregate(
                             profiledCallName,
@@ -88,7 +90,7 @@ public class AggregatingReporter implements ProfilerReporter {
         Map<String, Long> indicators = profiler.getIndicators()
                 .entrySet()
                 .stream()
-                .filter(entry -> ! tag.isPresent() || tag.get().equals(entry.getValue().getTags().get(Tagged.GRAPHITE_SELECTOR)))
+                .filter(entry -> ! tag.isPresent() || tag.get().equals(entry.getValue().getTags().get(Tagged.DEFAULT_TAG_KEY)))
                 .collect(Collectors.toMap(
                         e -> {
                             String name = e.getKey();
@@ -111,7 +113,7 @@ public class AggregatingReporter implements ProfilerReporter {
         for (Iterator<Map.Entry<String, CallAggregate>> iterator = sharedCounters.entrySet().iterator();
              iterator.hasNext(); ) {
             Map.Entry<String, CallAggregate> entry = iterator.next();
-            if (tag.isPresent() && ! tag.get().equals(entry.getValue().getTags().get(Tagged.GRAPHITE_SELECTOR))) {
+            if (tag.isPresent() && ! tag.get().equals(entry.getValue().getTags().get(Tagged.DEFAULT_TAG_KEY))) {
                 continue;
             }
             ProfiledCallReport counterReport = entry.getValue().buildReportAndReset(spentTime);

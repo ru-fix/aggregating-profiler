@@ -2,6 +2,7 @@ package ru.fix.aggregating.profiler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collections;
 
 /**
  *
@@ -22,6 +23,11 @@ public class IndicationProviderTagged implements Tagged {
 
     @Override
     public Map<String, String> getTags() {
-        return this.tags;
+        return Collections.unmodifiableMap(this.tags);
+    }
+
+    @Override
+    public void setTag(String name, String value) {
+        this.tags.put(name, value);
     }
 }

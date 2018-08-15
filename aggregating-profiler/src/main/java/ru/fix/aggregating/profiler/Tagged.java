@@ -8,6 +8,7 @@ import java.util.Map;
  */
 
 public interface Tagged {
-    static final String GRAPHITE_SELECTOR = "graphite";
+    static final String DEFAULT_TAG_KEY = "defkey";
     Map<String, String> getTags();
+    void setTag(String name, String value);
 }

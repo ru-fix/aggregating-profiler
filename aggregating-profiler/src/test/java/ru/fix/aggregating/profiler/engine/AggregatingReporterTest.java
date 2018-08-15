@@ -58,12 +58,13 @@ public class AggregatingReporterTest {
 
     @Test
     public void buildReportWithDefault() {
+        profiler.setTagger(new DefaultTagger());
         ProfiledCall call = profiler.start("test");
         call.stop(30);
 
         ProfiledCallReport report = getCallReport(
             reporter.buildReportAndReset(
-                Tagger.DEFAULT_GRAPHITE_TAG_VALUE));
+                Tagger.DEFAULT_TAG_VALUE));
         
         assertEquals(30, report.getPayloadSum());
     }
@@ -73,7 +74,7 @@ public class AggregatingReporterTest {
         Map<String, Set<Pattern>> separator = new HashMap<>();
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*test.*"));
-        profiler.setTagger(new RegexpGraphiteTagger(separator));
+        profiler.setTagger(new RegexpTagger(separator));
         reporter = profiler.createReporter();
         ProfiledCall call = profiler.start("test");
         call.stop(30);
@@ -88,7 +89,7 @@ public class AggregatingReporterTest {
         Map<String, Set<Pattern>> separator = new HashMap<>();
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*nop.*"));
-        profiler.setTagger(new RegexpGraphiteTagger(separator));
+        profiler.setTagger(new RegexpTagger(separator));
         profiler.attachIndicator("nop", () -> new Long(10));
         ProfiledCall call = profiler.start("test");
         call.stop(30);
@@ -106,7 +107,7 @@ public class AggregatingReporterTest {
         Map<String, Set<Pattern>> separator = new HashMap<>();
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*nop.*"));
-        profiler.setTagger(new RegexpGraphiteTagger(separator));
+        profiler.setTagger(new RegexpTagger(separator));
         profiler.attachIndicator("nop", () -> new Long(10));
         ProfiledCall call = profiler.start("test");
         call.stop(30);
@@ -114,7 +115,7 @@ public class AggregatingReporterTest {
         separator = new HashMap<>();
         separator.put("tag1", new HashSet<Pattern>());
         separator.get("tag1").add(Pattern.compile(".*nop.*"));
-        profiler.setTagger(new RegexpGraphiteTagger(separator));
+        profiler.setTagger(new RegexpTagger(separator));
         reporter = profiler.createReporter();
         ProfilerReport profilerReport = reporter.buildReportAndReset("tag1");
 

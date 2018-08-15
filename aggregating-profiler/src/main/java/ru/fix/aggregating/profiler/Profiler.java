@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 /**
  * @author Kamil Asfandiyarov
  */
-public interface Profiler {
+public interface Profiler extends Tagging {
 
     /**
      * @param name Name of profiling call (e.g name of method about to be profiled)
@@ -85,6 +85,4 @@ public interface Profiler {
      * Reporter is closable resource
      */
     ProfilerReporter createReporter();
-
-    void setTagger(Tagger tagger);
 }

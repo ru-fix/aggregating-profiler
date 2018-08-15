@@ -5,6 +5,7 @@ import ru.fix.aggregating.profiler.engine.AggregatingReporter;
 import ru.fix.aggregating.profiler.engine.NameNormalizer;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,7 +19,7 @@ public class AggregatingProfiler implements Profiler {
     private final CopyOnWriteArrayList<AggregatingReporter> profilerReporters = new CopyOnWriteArrayList<>();
 
     private final Map<String, IndicationProviderTagged> indicators = new ConcurrentHashMap<>();
-    private volatile Tagger tagger = new DefaultGraphiteTagger();
+    private volatile Tagger tagger;
     
     /**
      * if 0 then tracking uncompleted profiled calls is disabled
@@ -37,11 +38,14 @@ public class AggregatingProfiler implements Profiler {
         );
     }
 
-    public void setTagger(Tagger tagger) {
-        this.tagger = tagger;
-        profilerReporters.forEach(
-            reporter -> reporter.setTagger(tagger));
-        indicators.forEach(tagger::setTag);
+    @Override
+    public void setTagger(Optional<Tagger> tagger) {
+        tagger.ifPresent(t -> {
+                this.tagger = t;
+                profilerReporters.forEach(
+                    reporter -> reporter.setTagger(t));
+                indicators.forEach(t::assignTag);
+            });
     }
     
     private void registerReporter(AggregatingReporter reporter) {
@@ -57,12 +61,11 @@ public class AggregatingProfiler implements Profiler {
         String normalizedName = NameNormalizer.trimDots(name);
         indicators.put(
             normalizedName,
-            tagger.setTag(
+            Tagger.assignTag(
+                tagger,
                 normalizedName,
                 new IndicationProviderTagged(
-                    indicationProvider)
-            )
-        );
+                    indicationProvider)));
     }
 
     @Override
@@ -80,8 +83,7 @@ public class AggregatingProfiler implements Profiler {
         reporter[0] = new AggregatingReporter(
                 this,
                 numberOfActiveCallsToTrackAndKeepBetweenReports,
-                () -> this.unregisterReporter(reporter[0]),
-                tagger);
+                () -> this.unregisterReporter(reporter[0]));
         reporter[0].setTagger(tagger);
         this.registerReporter(reporter[0]);
         return reporter[0];

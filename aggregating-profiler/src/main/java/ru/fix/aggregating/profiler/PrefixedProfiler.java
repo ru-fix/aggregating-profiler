@@ -1,5 +1,6 @@
 package ru.fix.aggregating.profiler;
 
+import java.util.Optional;
 import ru.fix.aggregating.profiler.engine.NameNormalizer;
 
 /**
@@ -32,7 +33,7 @@ public class PrefixedProfiler implements Profiler {
     }
 
     @Override
-    public void setTagger(Tagger tagger) {
+    public void setTagger(Optional<Tagger> tagger) {
         profiler.setTagger(tagger);
     }
 

@@ -4,6 +4,7 @@ import ru.fix.aggregating.profiler.ProfiledCallReport;
 import ru.fix.aggregating.profiler.Tagged;
 
 import java.util.Comparator;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -51,7 +52,12 @@ public class CallAggregate implements Tagged {
 
     @Override
     public Map<String, String> getTags() {
-        return this.tags;
+        return Collections.unmodifiableMap(this.tags);
+    }
+
+    @Override
+    public void setTag(String name, String value) {
+        this.tags.put(name, value);
     }
     
     /**

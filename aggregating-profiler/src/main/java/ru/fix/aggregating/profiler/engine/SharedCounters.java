@@ -1,6 +1,7 @@
 package ru.fix.aggregating.profiler.engine;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
@@ -43,7 +44,12 @@ public class SharedCounters implements Tagged {
 
     @Override
     public Map<String, String> getTags() {
-        return tags;
+        return Collections.unmodifiableMap(this.tags);
+    }
+
+    @Override
+    public void setTag(String name, String value) {
+        this.tags.put(name, value);
     }
     
     public LongAdder getCallsCount() {
