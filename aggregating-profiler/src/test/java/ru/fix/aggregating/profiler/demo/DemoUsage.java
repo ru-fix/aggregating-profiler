@@ -54,7 +54,7 @@ public class DemoUsage {
         Tagger tagger = new RegexpTagger(tagRules);
 
         Profiler profiler = new AggregatingProfiler();
-        profiler.setTagger(tagger);
+        profiler.changeTagger(tagger);
 
         try (ProfilerReporter reporter = profiler.createReporter()) {
 
