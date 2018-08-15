@@ -20,7 +20,15 @@ public class AggregatingProfiler implements Profiler {
 
     private final Map<String, IndicationProviderTagged> indicators = new ConcurrentHashMap<>();
     private volatile Tagger tagger;
-    
+
+    public AggregatingProfiler(Tagger tagger) {
+        this.tagger = tagger;
+    }
+
+    public AggregatingProfiler() {
+        this(new NullTagger());
+    }
+
     /**
      * if 0 then tracking uncompleted profiled calls is disabled
      */
@@ -39,13 +47,11 @@ public class AggregatingProfiler implements Profiler {
     }
 
     @Override
-    public void setTagger(Optional<Tagger> tagger) {
-        tagger.ifPresent(t -> {
-                this.tagger = t;
-                profilerReporters.forEach(
-                    reporter -> reporter.setTagger(t));
-                indicators.forEach(t::assignTag);
-            });
+    public void changeTagger(Tagger tagger) {
+        profilerReporters.forEach(
+            reporter -> reporter.changeTagger(tagger)
+        );
+        indicators.forEach(tagger::assignTag);
     }
     
     private void registerReporter(AggregatingReporter reporter) {
@@ -84,7 +90,7 @@ public class AggregatingProfiler implements Profiler {
                 this,
                 numberOfActiveCallsToTrackAndKeepBetweenReports,
                 () -> this.unregisterReporter(reporter[0]));
-        reporter[0].setTagger(tagger);
+        reporter[0].changeTagger(tagger);
         this.registerReporter(reporter[0]);
         return reporter[0];
     }

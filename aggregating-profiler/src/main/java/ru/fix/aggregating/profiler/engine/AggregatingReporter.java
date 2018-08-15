@@ -2,12 +2,7 @@ package ru.fix.aggregating.profiler.engine;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.fix.aggregating.profiler.AggregatingProfiler;
-import ru.fix.aggregating.profiler.ProfiledCallReport;
-import ru.fix.aggregating.profiler.ProfilerReport;
-import ru.fix.aggregating.profiler.ProfilerReporter;
-import ru.fix.aggregating.profiler.Tagged;
-import ru.fix.aggregating.profiler.Tagger;
+import ru.fix.aggregating.profiler.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,35 +37,42 @@ public class AggregatingReporter implements ProfilerReporter {
     private final ClosingCallback closingCallback;
     private volatile Tagger tagger;
 
-    public AggregatingReporter(AggregatingProfiler profiler,
-                               AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
-                               ClosingCallback closingCallback) {
+    public AggregatingReporter(
+            AggregatingProfiler profiler,
+            AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
+            ClosingCallback closingCallback
+    ) {
+        this(profiler, numberOfActiveCallsToTrackAndKeepBetweenReports, closingCallback, new NullTagger());
+    }
+
+    public AggregatingReporter(
+            AggregatingProfiler profiler,
+            AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
+            ClosingCallback closingCallback,
+            Tagger tagger
+    ) {
         this.profiler = profiler;
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
         this.closingCallback = closingCallback;
         lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
+        this.tagger = tagger;
     }
 
     @Override
-    public void setTagger(Optional<Tagger> tagger) {
-        tagger.ifPresent(t -> {
-                this.tagger = t;
-                this.sharedCounters.forEach(t::assignTag);
-            });
+    public void changeTagger(Tagger tagger) {
+        this.sharedCounters.forEach(tagger::assignTag);
     }
 
     public void updateCallAggregates(String profiledCallName, Consumer<CallAggregate> updateAction) {
         updateAction.accept(
             sharedCounters.computeIfAbsent(
                 profiledCallName,
-                key -> {
-                    return Tagger.assignTag(
-                        tagger,
+                key -> Tagger.assignTag(
+                    tagger,
+                    profiledCallName,
+                    new CallAggregate(
                         profiledCallName,
-                        new CallAggregate(
-                            profiledCallName,
-                            numberOfActiveCallsToTrackAndKeepBetweenReports));
-                }));
+                        numberOfActiveCallsToTrackAndKeepBetweenReports))));
     }
 
     @Override
