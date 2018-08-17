@@ -12,7 +12,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class AggregatingReporter implements ProfilerReporter {
@@ -53,6 +52,7 @@ public class AggregatingReporter implements ProfilerReporter {
         this.profiler = profiler;
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
         this.closingCallback = closingCallback;
+        this.tagger = tagger;
         lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
     }
 
