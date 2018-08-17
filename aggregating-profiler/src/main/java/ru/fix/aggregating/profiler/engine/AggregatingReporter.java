@@ -2,12 +2,7 @@ package ru.fix.aggregating.profiler.engine;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.fix.aggregating.profiler.AggregatingProfiler;
-import ru.fix.aggregating.profiler.ProfiledCallReport;
-import ru.fix.aggregating.profiler.ProfilerReport;
-import ru.fix.aggregating.profiler.ProfilerReporter;
-import ru.fix.aggregating.profiler.Tagged;
-import ru.fix.aggregating.profiler.Tagger;
+import ru.fix.aggregating.profiler.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,6 +40,16 @@ public class AggregatingReporter implements ProfilerReporter {
     public AggregatingReporter(AggregatingProfiler profiler,
                                AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
                                ClosingCallback closingCallback) {
+        this(profiler,
+             numberOfActiveCallsToTrackAndKeepBetweenReports,
+             closingCallback,
+             new NullTagger());
+    }
+
+    public AggregatingReporter(AggregatingProfiler profiler,
+                               AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
+                               ClosingCallback closingCallback,
+                               Tagger tagger) {
         this.profiler = profiler;
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
         this.closingCallback = closingCallback;
@@ -63,14 +68,11 @@ public class AggregatingReporter implements ProfilerReporter {
         updateAction.accept(
             sharedCounters.computeIfAbsent(
                 profiledCallName,
-                key -> {
-                    return Tagger.assignTag(
-                        tagger,
+                key -> tagger.assignTag(
+                    profiledCallName,
+                    new CallAggregate(
                         profiledCallName,
-                        new CallAggregate(
-                            profiledCallName,
-                            numberOfActiveCallsToTrackAndKeepBetweenReports));
-                }));
+                        numberOfActiveCallsToTrackAndKeepBetweenReports))));
     }
 
     @Override

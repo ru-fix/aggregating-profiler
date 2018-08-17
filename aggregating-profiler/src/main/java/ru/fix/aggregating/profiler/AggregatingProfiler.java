@@ -20,7 +20,15 @@ public class AggregatingProfiler implements Profiler {
 
     private final Map<String, IndicationProviderTagged> indicators = new ConcurrentHashMap<>();
     private volatile Tagger tagger;
-    
+
+    public AggregatingProfiler(Tagger tagger) {
+        this.tagger = tagger;
+    }
+
+    public AggregatingProfiler() {
+        this(new NullTagger());
+    }
+
     /**
      * if 0 then tracking uncompleted profiled calls is disabled
      */
@@ -61,8 +69,7 @@ public class AggregatingProfiler implements Profiler {
         String normalizedName = NameNormalizer.trimDots(name);
         indicators.put(
             normalizedName,
-            Tagger.assignTag(
-                tagger,
+            tagger.assignTag(
                 normalizedName,
                 new IndicationProviderTagged(
                     indicationProvider)));
