@@ -5,7 +5,7 @@ import ru.fix.aggregating.profiler.engine.AggregatingReporter;
 import ru.fix.aggregating.profiler.engine.NameNormalizer;
 
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,13 +47,12 @@ public class AggregatingProfiler implements Profiler {
     }
 
     @Override
-    public void setTagger(Optional<Tagger> tagger) {
-        tagger.ifPresent(t -> {
-                this.tagger = t;
-                profilerReporters.forEach(
-                    reporter -> reporter.setTagger(t));
-                indicators.forEach(t::assignTag);
-            });
+    public void setTagger(Tagger tagger) {
+        Objects.requireNonNull(tagger);
+        this.tagger = tagger;
+        profilerReporters.forEach(
+            reporter -> reporter.setTagger(tagger));
+        indicators.forEach(tagger::assignTag);
     }
     
     private void registerReporter(AggregatingReporter reporter) {

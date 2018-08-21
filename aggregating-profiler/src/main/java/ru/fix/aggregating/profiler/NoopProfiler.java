@@ -1,6 +1,5 @@
 package ru.fix.aggregating.profiler;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -75,8 +74,7 @@ public class NoopProfiler implements Profiler {
     public void detachIndicator(String name) {
     }
 
-    @Override
-    public void setTagger(Optional<Tagger> tagger) {
+    public void setTagger(Tagger tagger) {
         //no need any changes
     }
 

@@ -56,12 +56,10 @@ public class AggregatingReporter implements ProfilerReporter {
         lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
     }
 
-    @Override
-    public void setTagger(Optional<Tagger> tagger) {
-        tagger.ifPresent(t -> {
-                this.tagger = t;
-                this.sharedCounters.forEach(t::assignTag);
-            });
+    public void setTagger(Tagger tagger) {
+        Objects.requireNonNull(tagger);
+        this.tagger = tagger;
+        this.sharedCounters.forEach(tagger::assignTag);
     }
 
     public void updateCallAggregates(String profiledCallName, Consumer<CallAggregate> updateAction) {
