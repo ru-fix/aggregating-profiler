@@ -20,17 +20,17 @@ public class RegexpTagger extends DefaultTagger {
     @Override
     public <T extends Tagged> T assignTag(String tagName,
                                           String profiledCallName,
-                                          T obj) {
+                                          T tagged) {
         for(Map.Entry<String, Set<Pattern>> entry : groupSeparator.entrySet()) {
              for(Pattern p : entry.getValue()) {
                  if(p.matcher(profiledCallName).matches()) {
-                     obj.setTag(tagName, entry.getKey());
-                     return obj;
+                     tagged.setTag(tagName, entry.getKey());
+                     return tagged;
                  }
              }
          }
 
-        return super.assignTag(tagName, profiledCallName, obj);
+        return super.assignTag(tagName, profiledCallName, tagged);
     }
 
 }

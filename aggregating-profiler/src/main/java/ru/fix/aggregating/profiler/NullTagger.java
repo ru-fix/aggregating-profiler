@@ -7,12 +7,12 @@ package ru.fix.aggregating.profiler;
 public class NullTagger implements Tagger {
 
     @Override
-    public <T extends Tagged> T assignTag(String profiledCallName, T obj) {
-        return obj;
+    public <T extends Tagged> T assignTag(String profiledCallName, T tagged) {
+        return tagged;
     }
 
     @Override
-    public <T extends Tagged> T assignTag(String tagName, String profiledCallName, T obj) {
-        return obj;
+    public <T extends Tagged> T assignTag(String tagName, String profiledCallName, T tagged) {
+        return tagged;
     }
 }

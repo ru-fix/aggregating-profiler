@@ -8,18 +8,18 @@ package ru.fix.aggregating.profiler;
 public class DefaultTagger implements Tagger {
     @Override
     public <T extends Tagged> T assignTag(String profiledCallName,
-                                          T obj) {
+                                          T tagged) {
         return assignTag(Tagged.DEFAULT_TAG_KEY,
                          profiledCallName,
-                         obj);
+                         tagged);
     }
 
     @Override
     public <T extends Tagged> T assignTag(String tagName,
                                           String profiledCallName,
-                                          T obj) {
-        obj.setTag(tagName, Tagger.DEFAULT_TAG_VALUE);
-        return obj;
+                                          T tagged) {
+        tagged.setTag(tagName, Tagger.DEFAULT_TAG_VALUE);
+        return tagged;
     }
 
 }
