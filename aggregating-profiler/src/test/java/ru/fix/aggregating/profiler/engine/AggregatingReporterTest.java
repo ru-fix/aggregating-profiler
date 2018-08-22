@@ -57,7 +57,7 @@ public class AggregatingReporterTest {
     }
 
     @Test
-    public void defaultTagger_buildReportWithDefault() {
+    public void defaultTaggerBuildReportWithDefault() {
         profiler.setTagger(new DefaultTagger());
         ProfiledCall call = profiler.start("test");
         call.stop(30);
@@ -70,7 +70,7 @@ public class AggregatingReporterTest {
     }
 
     @Test
-    public void regexpTagger_buildReportWithSharedCounterTag() {
+    public void regexpTaggerBuildReportWithSharedCounterTag() {
         Map<String, Set<Pattern>> separator = new HashMap<>();
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*test.*"));
@@ -85,7 +85,7 @@ public class AggregatingReporterTest {
     }
 
     @Test
-    public void regexpTagger_buildReportWithIndicatorTag() {
+    public void regexpTaggerBuildReportWithIndicatorTag() {
         Map<String, Set<Pattern>> separator = new HashMap<>();
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*nop.*"));
@@ -103,7 +103,7 @@ public class AggregatingReporterTest {
     }
 
     @Test
-    public void changeTaggerReassignTags_buildOldReportForNewTag() {
+    public void changeTaggerReassignTagsBuildOldReportForNewTag() {
         Map<String, Set<Pattern>> separator = new HashMap<>();
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*nop.*"));
