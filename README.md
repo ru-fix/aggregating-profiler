@@ -141,7 +141,7 @@ Total count of active calls are 2.
 
 There are two metrics that measure throughput: callsThroughputAvg and throughputPerSecondMax.
 In given example there was  9 invocations during 1 minute:   
-9 / 60 * 1000 =  150 invocation per second or 0.150 invocations per second
+9 / 60 * 1000 =  150 milli invocation per second or 0.150 invocations per second
 - callsThroughputAvg - 150
 
 During reporting period there was time then invocations occurred most often.  
