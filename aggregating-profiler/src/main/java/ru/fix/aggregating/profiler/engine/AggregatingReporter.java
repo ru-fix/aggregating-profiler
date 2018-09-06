@@ -27,11 +27,6 @@ public class AggregatingReporter implements ProfilerReporter {
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
-    // update counters lock
-    private final Lock readLock = readWriteLock.readLock();
-    // create report and then reset counters lock
-    private final Lock writeLock = readWriteLock.writeLock();
-
     private final AggregatingProfiler profiler;
 
     private final AtomicLong lastReportTimestamp;
