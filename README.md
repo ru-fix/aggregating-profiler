@@ -145,7 +145,7 @@ In given example there was  9 invocations during 1 minute:
 - callsThroughputAvg - 150
 
 During reporting period there was time then invocations occurred most often.  
-We can find time intervals of size 1 second where were 4 invocations.
+We can find time interval of size 1 second where were 4 invocations.
 This means that during reporting period there was time when throughput reached 4 invocations per second.  
 And average throughput during reporting period of 1 minute is only 0.15 invocation per second. 
 - throughputPerSecondMax - 4
