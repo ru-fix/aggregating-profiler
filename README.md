@@ -126,12 +126,16 @@ Latency is the time in milliseconds between two points: profiledCall start and s
 Total calls count will be 4.  
   - callsCountSum - 4 - how many times profiledCall was invoked
 
-Profiled call #6 started during current reporting period but not stopped will be ignored.  
-Profiled calls #7 and #8 started in current or previous reporting period and still running considered as activeCalls.  
-Profiled call #8 will have maximum latency: activeCallsLatencyMax.
+Profiled call #6 not started during current reporting period and will be ignored.
+Profiled call #7 started during current reporting period but not stopped yet. 
+It will not be used in latency and callsCount calculation but it will be used during activeCalls calculation.  
+Profiled calls #7 and #8 started in current or previous reporting period and still running. 
+They considered as activeCalls.  
+Profiled call #8 will have maximum latency: 90000ms (96000 is total time, 
+but at the end of reporting period duration of the profiled call #8 was only 90_000ms.).
 Total count of active calls are 2.  
    - activeCallsCountMax - 2  
-   - activeCallsLatencyMax - 96000ms
+   - activeCallsLatencyMax - 90_000ms
  
 ![](docs/metric-example-throughput.png?raw=true "Graph View")
 
