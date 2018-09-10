@@ -18,7 +18,7 @@ public class AggregatingProfiler implements Profiler {
 
     private final CopyOnWriteArrayList<AggregatingReporter> profilerReporters = new CopyOnWriteArrayList<>();
 
-    private final Map<String, IndicationProviderTagged> indicators = new ConcurrentHashMap<>();
+    private final Map<String, TaggedIndicationProvider> indicators = new ConcurrentHashMap<>();
     private volatile Tagger tagger;
 
     public AggregatingProfiler(Tagger tagger) {
@@ -26,7 +26,7 @@ public class AggregatingProfiler implements Profiler {
     }
 
     public AggregatingProfiler() {
-        this(new NullTagger());
+        this(new NoopTagger());
     }
 
     /**
@@ -70,7 +70,7 @@ public class AggregatingProfiler implements Profiler {
             normalizedName,
             tagger.assignTag(
                 normalizedName,
-                new IndicationProviderTagged(
+                new TaggedIndicationProvider(
                     indicationProvider)));
     }
 
@@ -79,7 +79,7 @@ public class AggregatingProfiler implements Profiler {
         indicators.remove(NameNormalizer.trimDots(name));
     }
 
-    public Map<String, IndicationProviderTagged> getIndicators() {
+    public Map<String, TaggedIndicationProvider> getIndicators() {
         return indicators;
     }
 

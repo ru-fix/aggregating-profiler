@@ -9,11 +9,11 @@ import java.util.Collections;
  * @author Andrey Kiselev
  */
 
-public class IndicationProviderTagged implements Tagged {
+public class TaggedIndicationProvider implements Tagged {
     private final Map<String, String> tags = new ConcurrentHashMap<>();
     private final IndicationProvider provider;
     
-    public IndicationProviderTagged(IndicationProvider provider) {
+    public TaggedIndicationProvider(IndicationProvider provider) {
         this.provider = provider;
     }
 
@@ -26,6 +26,11 @@ public class IndicationProviderTagged implements Tagged {
         return Collections.unmodifiableMap(this.tags);
     }
 
+    @Override
+    public boolean hasTag(String tagName, String tagValue) {
+        return tags.containsKey(tagName) && tags.get(tagName).equals(tagValue);
+    }
+    
     @Override
     public void setTag(String name, String value) {
         this.tags.put(name, value);

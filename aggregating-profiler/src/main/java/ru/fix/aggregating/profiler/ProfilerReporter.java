@@ -9,5 +9,5 @@ public interface ProfilerReporter extends AutoCloseable {
     /**
      * @return empty report in case of empty patterns
      */
-    ProfilerReport buildReportAndReset(String tag);
+    ProfilerReport buildReportAndReset(String tagName, String tagValue);
 }

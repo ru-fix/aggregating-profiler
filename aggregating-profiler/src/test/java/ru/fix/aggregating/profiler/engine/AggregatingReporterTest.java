@@ -57,19 +57,6 @@ public class AggregatingReporterTest {
     }
 
     @Test
-    public void defaultTaggerBuildReportWithDefault() {
-        profiler.setTagger(new DefaultTagger());
-        ProfiledCall call = profiler.start("test");
-        call.stop(30);
-
-        ProfiledCallReport report = getCallReport(
-            reporter.buildReportAndReset(
-                Tagger.DEFAULT_TAG_VALUE));
-        
-        assertEquals(30, report.getPayloadSum());
-    }
-
-    @Test
     public void regexpTaggerBuildReportWithSharedCounterTag() {
         Map<String, Set<Pattern>> separator = new HashMap<>();
         separator.put("tag", new HashSet<Pattern>());
@@ -79,7 +66,7 @@ public class AggregatingReporterTest {
         ProfiledCall call = profiler.start("test");
         call.stop(30);
 
-        ProfilerReport profilerReport = reporter.buildReportAndReset("tag");
+        ProfilerReport profilerReport = reporter.buildReportAndReset(RegexpTagger.RATE_TAG, "tag");
         assertNotNull(profilerReport.getProfilerCallReports());
         assertEquals(1, profilerReport.getProfilerCallReports().size());
     }
@@ -95,7 +82,7 @@ public class AggregatingReporterTest {
         call.stop(30);
         
         reporter = profiler.createReporter();
-        ProfilerReport profilerReport = reporter.buildReportAndReset("tag");
+        ProfilerReport profilerReport = reporter.buildReportAndReset(RegexpTagger.RATE_TAG, "tag");
 
         assertNotNull(profilerReport.getProfilerCallReports());
         assertEquals(0, profilerReport.getProfilerCallReports().size());
@@ -117,7 +104,7 @@ public class AggregatingReporterTest {
         separator.get("tag1").add(Pattern.compile(".*nop.*"));
         profiler.setTagger(new RegexpTagger(separator));
         reporter = profiler.createReporter();
-        ProfilerReport profilerReport = reporter.buildReportAndReset("tag1");
+        ProfilerReport profilerReport = reporter.buildReportAndReset(RegexpTagger.RATE_TAG, "tag1");
 
         assertNotNull(profilerReport.getProfilerCallReports());
         assertEquals(0, profilerReport.getProfilerCallReports().size());

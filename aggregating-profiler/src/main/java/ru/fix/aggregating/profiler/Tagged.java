@@ -8,7 +8,7 @@ import java.util.Map;
  */
 
 public interface Tagged {
-    static final String DEFAULT_TAG_KEY = "defkey";
-    Map<String, String> getTags();
+    Map<String, String> getTags(); 
+    boolean hasTag(String tagName, String tagValue);
     void setTag(String name, String value);
 }

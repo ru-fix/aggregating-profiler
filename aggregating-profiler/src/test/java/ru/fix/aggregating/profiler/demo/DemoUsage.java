@@ -62,20 +62,26 @@ public class DemoUsage {
             // second call must go to default group
             profiler.profiledCall("call1.name").call();
             profiler.profiledCall("call2.name").call();
-
+           
             // report for special group
-            ProfilerReport reportContains1 = reporter.buildReportAndReset("contains_number_1");
+            ProfilerReport reportContains1 = reporter.buildReportAndReset(RegexpTagger.RATE_TAG, "contains_number_1");
             assertEquals(1, reportContains1.getProfilerCallReports().size());
             ProfiledCallReport profiledCallReport = reportContains1.getProfilerCallReports().get(0);
             assertEquals("call1.name", profiledCallReport.getName());
             assertEquals(1, profiledCallReport.getCallsCountSum());
 
             // report for default group
-            ProfilerReport reportDefaults = reporter.buildReportAndReset(Tagger.DEFAULT_TAG_VALUE);
+            ProfilerReport reportDefaults = reporter.buildReportAndReset(RegexpTagger.RATE_TAG, RegexpTagger.RATE_TAG);
             assertEquals(1, reportDefaults.getProfilerCallReports().size());
             ProfiledCallReport profiledCallReportDefault = reportDefaults.getProfilerCallReports().get(0);
             assertEquals("call2.name", profiledCallReportDefault.getName());
             assertEquals(1, profiledCallReportDefault.getCallsCountSum());
+
+            // report for all, ignore group
+            profiler.profiledCall("call1.name").call();
+            profiler.profiledCall("call2.name").call();
+            ProfilerReport reportBackward = reporter.buildReportAndReset();
+            assertEquals(2, reportBackward.getProfilerCallReports().size());
         }
     }
 }

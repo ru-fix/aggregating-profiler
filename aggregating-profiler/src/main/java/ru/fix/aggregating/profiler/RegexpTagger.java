@@ -10,13 +10,23 @@ import java.util.regex.Pattern;
  * @author Andrey Kiselev
  */
 
-public class RegexpTagger extends DefaultTagger {
+public class RegexpTagger implements Tagger {
+    public final static String RATE_TAG = "rateTag";
+    
     private final Map<String, Set<Pattern>> groupSeparator = new HashMap<>();
 
     public RegexpTagger(Map<String, Set<Pattern>> groupSeparator) {
         this.groupSeparator.putAll(groupSeparator);
     }
 
+    @Override
+    public <T extends Tagged> T assignTag(String profiledCallName,
+                                          T tagged) {
+        return assignTag(RegexpTagger.RATE_TAG,
+                         profiledCallName,
+                         tagged);
+    }
+    
     @Override
     public <T extends Tagged> T assignTag(String tagName,
                                           String profiledCallName,
@@ -29,8 +39,9 @@ public class RegexpTagger extends DefaultTagger {
                  }
              }
          }
-
-        return super.assignTag(tagName, profiledCallName, tagged);
+        
+        tagged.setTag(tagName, RegexpTagger.RATE_TAG);
+        return tagged;
     }
 
 }

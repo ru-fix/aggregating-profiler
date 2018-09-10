@@ -51,6 +51,11 @@ public class SharedCounters implements Tagged {
     public void setTag(String name, String value) {
         this.tags.put(name, value);
     }
+
+    @Override
+    public boolean hasTag(String tagName, String tagValue) {
+        return tags.containsKey(tagName) && tags.get(tagName).equals(tagValue);
+    }
     
     public LongAdder getCallsCount() {
         return callsCount;

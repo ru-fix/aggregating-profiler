@@ -42,7 +42,7 @@ public class AggregatingReporter implements ProfilerReporter {
         this(profiler,
              numberOfActiveCallsToTrackAndKeepBetweenReports,
              closingCallback,
-             new NullTagger());
+             new NoopTagger());
     }
 
     public AggregatingReporter(AggregatingProfiler profiler,
@@ -75,22 +75,24 @@ public class AggregatingReporter implements ProfilerReporter {
 
     @Override
     public ProfilerReport buildReportAndReset() {
-        return buildReportAndReset(Optional.empty());
+        return buildReportAndReset(Optional.empty(), Optional.empty());
     }
 
     @Override
-    public ProfilerReport buildReportAndReset(String tag) {
-        return buildReportAndReset(Optional.ofNullable(tag));
+    public ProfilerReport buildReportAndReset(String tagName, String tagValue) {
+        return buildReportAndReset(Optional.ofNullable(tagName),
+                                   Optional.ofNullable(tagValue));
     }
 
-    private ProfilerReport buildReportAndReset(Optional<String> tag) {
+    private ProfilerReport buildReportAndReset(Optional<String> tagName,
+                                               Optional<String> tagValue) {
         long timestamp = System.currentTimeMillis();
         long spentTime = timestamp - lastReportTimestamp.getAndSet(timestamp);
 
         Map<String, Long> indicators = profiler.getIndicators()
                 .entrySet()
                 .stream()
-                .filter(entry -> ! tag.isPresent() || tag.get().equals(entry.getValue().getTags().get(Tagged.DEFAULT_TAG_KEY)))
+                .filter(entry -> ! tagName.isPresent() || entry.getValue().hasTag(tagName.get(), tagValue.orElse(null)))
                 .collect(Collectors.toMap(
                         e -> {
                             String name = e.getKey();
@@ -113,7 +115,7 @@ public class AggregatingReporter implements ProfilerReporter {
         for (Iterator<Map.Entry<String, CallAggregate>> iterator = sharedCounters.entrySet().iterator();
              iterator.hasNext(); ) {
             Map.Entry<String, CallAggregate> entry = iterator.next();
-            if (tag.isPresent() && ! tag.get().equals(entry.getValue().getTags().get(Tagged.DEFAULT_TAG_KEY))) {
+            if (tagName.isPresent() && ! entry.getValue().hasTag(tagName.get(), tagValue.orElse(null))) {
                 continue;
             }
             ProfiledCallReport counterReport = entry.getValue().buildReportAndReset(spentTime);
