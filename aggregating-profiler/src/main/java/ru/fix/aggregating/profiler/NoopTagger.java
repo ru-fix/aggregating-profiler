@@ -10,9 +10,4 @@ public class NoopTagger implements Tagger {
     public <T extends Tagged> T assignTag(String profiledCallName, T tagged) {
         return tagged;
     }
-
-    @Override
-    public <T extends Tagged> T assignTag(String tagName, String profiledCallName, T tagged) {
-        return tagged;
-    }
 }

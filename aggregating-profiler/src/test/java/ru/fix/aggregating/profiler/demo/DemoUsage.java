@@ -48,10 +48,11 @@ public class DemoUsage {
     @Test
     void howToDealWithTags() throws Exception {
         // if metric contains "1" we move it to separate group
+        String testTag = "testTag";
         Map<String, Set<Pattern>> tagRules = new HashMap<>();
         tagRules.put("contains_number_1", new HashSet<>());
         tagRules.get("contains_number_1").add(Pattern.compile(".*1.*"));
-        Tagger tagger = new RegexpTagger(tagRules);
+        Tagger tagger = new RegexpTagger(testTag, tagRules);
 
         Profiler profiler = new AggregatingProfiler();
         profiler.setTagger(tagger);
@@ -64,14 +65,14 @@ public class DemoUsage {
             profiler.profiledCall("call2.name").call();
            
             // report for special group
-            ProfilerReport reportContains1 = reporter.buildReportAndReset(RegexpTagger.RATE_TAG, "contains_number_1");
+            ProfilerReport reportContains1 = reporter.buildReportAndReset(testTag, "contains_number_1");
             assertEquals(1, reportContains1.getProfilerCallReports().size());
             ProfiledCallReport profiledCallReport = reportContains1.getProfilerCallReports().get(0);
             assertEquals("call1.name", profiledCallReport.getName());
             assertEquals(1, profiledCallReport.getCallsCountSum());
 
             // report for default group
-            ProfilerReport reportDefaults = reporter.buildReportAndReset(RegexpTagger.RATE_TAG, RegexpTagger.RATE_TAG);
+            ProfilerReport reportDefaults = reporter.buildReportAndReset(testTag, testTag);
             assertEquals(1, reportDefaults.getProfilerCallReports().size());
             ProfiledCallReport profiledCallReportDefault = reportDefaults.getProfilerCallReports().get(0);
             assertEquals("call2.name", profiledCallReportDefault.getName());

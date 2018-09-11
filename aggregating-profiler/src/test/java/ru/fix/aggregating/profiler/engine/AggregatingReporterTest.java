@@ -59,14 +59,15 @@ public class AggregatingReporterTest {
     @Test
     public void regexpTaggerBuildReportWithSharedCounterTag() {
         Map<String, Set<Pattern>> separator = new HashMap<>();
+        String testTag = "testTag";
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*test.*"));
-        profiler.setTagger(new RegexpTagger(separator));
+        profiler.setTagger(new RegexpTagger(testTag, separator));
         reporter = profiler.createReporter();
         ProfiledCall call = profiler.start("test");
         call.stop(30);
 
-        ProfilerReport profilerReport = reporter.buildReportAndReset(RegexpTagger.RATE_TAG, "tag");
+        ProfilerReport profilerReport = reporter.buildReportAndReset(testTag, "tag");
         assertNotNull(profilerReport.getProfilerCallReports());
         assertEquals(1, profilerReport.getProfilerCallReports().size());
     }
@@ -74,15 +75,16 @@ public class AggregatingReporterTest {
     @Test
     public void regexpTaggerBuildReportWithIndicatorTag() {
         Map<String, Set<Pattern>> separator = new HashMap<>();
+        String testTag = "testTag";
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*nop.*"));
-        profiler.setTagger(new RegexpTagger(separator));
+        profiler.setTagger(new RegexpTagger(testTag, separator));
         profiler.attachIndicator("nop", () -> new Long(10));
         ProfiledCall call = profiler.start("test");
         call.stop(30);
         
         reporter = profiler.createReporter();
-        ProfilerReport profilerReport = reporter.buildReportAndReset(RegexpTagger.RATE_TAG, "tag");
+        ProfilerReport profilerReport = reporter.buildReportAndReset(testTag, "tag");
 
         assertNotNull(profilerReport.getProfilerCallReports());
         assertEquals(0, profilerReport.getProfilerCallReports().size());
@@ -92,9 +94,10 @@ public class AggregatingReporterTest {
     @Test
     public void changeTaggerReassignTagsBuildOldReportForNewTag() {
         Map<String, Set<Pattern>> separator = new HashMap<>();
+        String testTag = "testTag";
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*nop.*"));
-        profiler.setTagger(new RegexpTagger(separator));
+        profiler.setTagger(new RegexpTagger(testTag, separator));
         profiler.attachIndicator("nop", () -> new Long(10));
         ProfiledCall call = profiler.start("test");
         call.stop(30);
@@ -102,9 +105,9 @@ public class AggregatingReporterTest {
         separator = new HashMap<>();
         separator.put("tag1", new HashSet<Pattern>());
         separator.get("tag1").add(Pattern.compile(".*nop.*"));
-        profiler.setTagger(new RegexpTagger(separator));
+        profiler.setTagger(new RegexpTagger(testTag, separator));
         reporter = profiler.createReporter();
-        ProfilerReport profilerReport = reporter.buildReportAndReset(RegexpTagger.RATE_TAG, "tag1");
+        ProfilerReport profilerReport = reporter.buildReportAndReset(testTag, "tag1");
 
         assertNotNull(profilerReport.getProfilerCallReports());
         assertEquals(0, profilerReport.getProfilerCallReports().size());

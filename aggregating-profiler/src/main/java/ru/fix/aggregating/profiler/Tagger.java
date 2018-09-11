@@ -7,5 +7,4 @@ package ru.fix.aggregating.profiler;
 
 public interface Tagger {
     <T extends Tagged> T assignTag(String profiledCallName, T tagged);
-    <T extends Tagged> T assignTag(String tagName, String profiledCallName, T tagged);
 }
