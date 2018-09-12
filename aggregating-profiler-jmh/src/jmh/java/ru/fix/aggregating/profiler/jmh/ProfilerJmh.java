@@ -11,7 +11,7 @@ import ru.fix.aggregating.profiler.Profiler;
 @State(Scope.Benchmark)
 public class ProfilerJmh {
 
-    final Profiler profiler = new AggregatingProfiler(new NoopTagger());
+    final Profiler profiler = new AggregatingProfiler();
 
     @Benchmark
     public long system_current_time() {

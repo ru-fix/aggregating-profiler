@@ -7,7 +7,6 @@ import ru.fix.aggregating.profiler.AggregatingProfiler;
 import ru.fix.aggregating.profiler.ProfiledCall;
 import ru.fix.aggregating.profiler.ProfiledCallReport;
 import ru.fix.aggregating.profiler.ProfilerReport;
-import ru.fix.aggregating.profiler.NoopTagger;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +25,7 @@ public class AggregatingReporterActiveCallsTest {
 
     @BeforeEach
     public void setup() {
-        profiler = new AggregatingProfiler(new NoopTagger())
+        profiler = new AggregatingProfiler()
                         .setNumberOfActiveCallsToTrackAndKeepBetweenReports(25);
         reporter = (AggregatingReporter) profiler.createReporter();
     }

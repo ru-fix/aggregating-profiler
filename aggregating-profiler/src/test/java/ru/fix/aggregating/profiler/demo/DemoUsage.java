@@ -18,7 +18,7 @@ public class DemoUsage {
 
     @Test
     void howToCallProfilerAndObtainsReport() throws Exception {
-        Profiler profiler = new AggregatingProfiler(new NoopTagger());
+        Profiler profiler = new AggregatingProfiler();
 
         // start collecting data from profilers
         try (ProfilerReporter reporter = profiler.createReporter()) {
@@ -54,7 +54,7 @@ public class DemoUsage {
         tagRules.get("contains_number_1").add(Pattern.compile(".*1.*"));
         Tagger tagger = new RegexpTagger(testTag, tagRules);
 
-        Profiler profiler = new AggregatingProfiler(new NoopTagger());
+        Profiler profiler = new AggregatingProfiler();
         profiler.setTagger(tagger);
 
         try (ProfilerReporter reporter = profiler.createReporter()) {

@@ -38,15 +38,6 @@ public class AggregatingReporter implements ProfilerReporter {
 
     public AggregatingReporter(AggregatingProfiler profiler,
                                AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
-                               ClosingCallback closingCallback) {
-        this(profiler,
-             numberOfActiveCallsToTrackAndKeepBetweenReports,
-             closingCallback,
-             new NoopTagger());
-    }
-
-    public AggregatingReporter(AggregatingProfiler profiler,
-                               AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
                                ClosingCallback closingCallback,
                                Tagger tagger) {
         this.profiler = profiler;

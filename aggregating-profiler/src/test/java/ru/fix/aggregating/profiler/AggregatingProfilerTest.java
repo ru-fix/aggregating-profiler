@@ -33,7 +33,7 @@ public class AggregatingProfilerTest {
 
     @Test
     void report_name() throws Exception {
-        Profiler profiler = new AggregatingProfiler(new NoopTagger());
+        Profiler profiler = new AggregatingProfiler();
 
         try (ProfilerReporter reporter = profiler.createReporter()) {
 
@@ -50,7 +50,7 @@ public class AggregatingProfilerTest {
     @Test
     void single_thread_fixed_throughput() throws Exception {
 
-        Profiler profiler = new AggregatingProfiler(new NoopTagger());
+        Profiler profiler = new AggregatingProfiler();
 
         ProfiledCall call = profiler.profiledCall("single_thread_fixed_throughput");
         try (ProfilerReporter reporter = profiler.createReporter()) {
@@ -74,7 +74,7 @@ public class AggregatingProfilerTest {
     @Test
     void single_thread_fixed_latency() throws Exception {
 
-        Profiler profiler = new AggregatingProfiler(new NoopTagger());
+        Profiler profiler = new AggregatingProfiler();
 
         ProfiledCall call = profiler.profiledCall("single_thread_fixed_latency");
         try (ProfilerReporter reporter = profiler.createReporter()) {
@@ -98,7 +98,7 @@ public class AggregatingProfilerTest {
 
     @Test
     void single_thread_fixed_latency_start_nanotime() throws Exception {
-        Profiler profiler = new AggregatingProfiler(new NoopTagger());
+        Profiler profiler = new AggregatingProfiler();
 
         ProfiledCall call = profiler.profiledCall("single_thread_fixed_latency");
         try (ProfilerReporter reporter = profiler.createReporter()) {
@@ -126,7 +126,7 @@ public class AggregatingProfilerTest {
     @Test
     void parallel_threads_fixed_latency() throws Exception {
 
-        Profiler profiler = new AggregatingProfiler(new NoopTagger());
+        Profiler profiler = new AggregatingProfiler();
         try (ProfilerReporter reporter = profiler.createReporter()) {
             ExecutorService pool = Executors.newCachedThreadPool();
 
@@ -156,7 +156,7 @@ public class AggregatingProfilerTest {
     @Test
     void between_thread_call_fixed_latency() throws Exception {
 
-        Profiler profiler = new AggregatingProfiler(new NoopTagger());
+        Profiler profiler = new AggregatingProfiler();
         try (ProfilerReporter reporter = profiler.createReporter()) {
             ExecutorService pool1 = Executors.newCachedThreadPool();
             ExecutorService pool2 = Executors.newCachedThreadPool();
@@ -220,7 +220,7 @@ public class AggregatingProfilerTest {
 
     @Test
     void simple_start_stop_with_zero_payload() throws Exception {
-        Profiler profiler = new AggregatingProfiler(new NoopTagger());
+        Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         ProfiledCall call = profiler.profiledCall("simple_start_stop_with_zero_payload");
@@ -243,7 +243,7 @@ public class AggregatingProfilerTest {
     @Test
     void payload_min_max_total() throws Exception {
 
-        Profiler profiler = new AggregatingProfiler(new NoopTagger());
+        Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         ProfiledCall call = profiler.profiledCall("payload_min_max_total");
@@ -271,7 +271,7 @@ public class AggregatingProfilerTest {
 
     @Test
     void skip_empty_metrics() throws Exception {
-        Profiler profiler = new AggregatingProfiler(new NoopTagger());
+        Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         ProfiledCall call = profiler.profiledCall("call_1");
@@ -311,7 +311,7 @@ public class AggregatingProfilerTest {
     void reportBuildAndReset() throws Exception {
         final int WRITERS = 5;
 
-        Profiler profiler = new AggregatingProfiler(new NoopTagger());
+        Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         AtomicInteger threadIdx = new AtomicInteger();
@@ -359,7 +359,7 @@ public class AggregatingProfilerTest {
 
     @Test
     void profile_not_explicitly_stopped() {
-        AggregatingProfiler profiler = new AggregatingProfiler(new NoopTagger());
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         profiler.call("call");
@@ -382,7 +382,7 @@ public class AggregatingProfilerTest {
 
     @Test
     void profile_explicitly_stopped() throws Exception {
-        AggregatingProfiler profiler = new AggregatingProfiler(new NoopTagger());
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         profiler.call("call");
@@ -437,7 +437,7 @@ public class AggregatingProfilerTest {
 
     @Test
     void profile_unchecked_future() throws Exception {
-        AggregatingProfiler profiler = new AggregatingProfiler(new NoopTagger());
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         profiler.call("call");
@@ -466,7 +466,7 @@ public class AggregatingProfilerTest {
 
     @Test
     void profile_checked_future() throws Exception {
-        AggregatingProfiler profiler = new AggregatingProfiler(new NoopTagger());
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         profiler.call("call");
@@ -494,7 +494,7 @@ public class AggregatingProfilerTest {
 
     @Test
     void try_with_resource() throws Exception {
-        AggregatingProfiler profiler = new AggregatingProfiler(new NoopTagger());
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         // try-with-resources
@@ -583,7 +583,7 @@ public class AggregatingProfilerTest {
 
     @Test
     void blocks() throws Exception {
-        AggregatingProfiler profiler = new AggregatingProfiler(new NoopTagger());
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         profiler.profile("profile.1", AggregatingProfilerTest::resThrowableUnchecked);
@@ -628,7 +628,7 @@ public class AggregatingProfilerTest {
 
     @Test
     void profile_futures() throws Exception {
-        AggregatingProfiler profiler = new AggregatingProfiler(new NoopTagger());
+        AggregatingProfiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         CompletableFuture<String> future;
@@ -807,7 +807,7 @@ public class AggregatingProfilerTest {
 
     @Test
     public void indicatorNameEndsWithIndicatorMaxSuffix(){
-        Profiler profiler = new AggregatingProfiler(new NoopTagger());
+        Profiler profiler = new AggregatingProfiler();
         profiler.attachIndicator("my.indicator", () -> 147L);
         ProfilerReporter reporter = profiler.createReporter();
         Map<String, Long> indicators = reporter.buildReportAndReset().getIndicators();
