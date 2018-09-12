@@ -5,6 +5,7 @@ import ru.fix.aggregating.profiler.PrefixedProfiler;
 import ru.fix.aggregating.profiler.Profiler;
 import ru.fix.aggregating.profiler.AggregatingProfiler;
 import ru.fix.aggregating.profiler.SuffixedProfiler;
+import ru.fix.aggregating.profiler.NoopTagger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -13,7 +14,7 @@ public class SuffixedProfilerTest {
     @Test
     void whenCreatesProfiledCallThenProfiledCallContainsTrueNameChain() {
 
-        Profiler sp = new AggregatingProfiler();
+        Profiler sp = new AggregatingProfiler(new NoopTagger());
         Profiler root = new SuffixedProfiler(sp, "root");
         Profiler node1 = new SuffixedProfiler(root, "node1");
 
@@ -23,7 +24,7 @@ public class SuffixedProfilerTest {
     @Test
     void whenCreatesProfiledCallWithDotNameThenProfiledCallContainsTrueNameChain() {
 
-        Profiler sp = new AggregatingProfiler();
+        Profiler sp = new AggregatingProfiler(new NoopTagger());
         Profiler root = new SuffixedProfiler(sp, "root.");
         Profiler node1 = new SuffixedProfiler(root, ".node1.");
 
@@ -33,7 +34,10 @@ public class SuffixedProfilerTest {
     @Test
     void whenUsePrefixedProfilerThenProfiledCallContainsTrueNameChain() {
 
-        PrefixedProfiler srv1 = new PrefixedProfiler(new AggregatingProfiler(), "srv1.");
+        PrefixedProfiler srv1 = new PrefixedProfiler(
+            new AggregatingProfiler(
+                new NoopTagger()),
+            "srv1.");
         Profiler root = new SuffixedProfiler(srv1, "root");
         Profiler node1 = new SuffixedProfiler(root, "node1");
 

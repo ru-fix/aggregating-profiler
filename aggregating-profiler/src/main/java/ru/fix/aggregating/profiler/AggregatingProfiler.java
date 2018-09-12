@@ -25,10 +25,6 @@ public class AggregatingProfiler implements Profiler {
         this.tagger = tagger;
     }
 
-    public AggregatingProfiler() {
-        this(new NoopTagger());
-    }
-
     /**
      * if 0 then tracking uncompleted profiled calls is disabled
      */

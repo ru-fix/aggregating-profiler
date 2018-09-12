@@ -22,7 +22,7 @@ public class AggregatingReporterTest {
 
     @BeforeEach
     public void setup() {
-        profiler = new AggregatingProfiler();
+        profiler = new AggregatingProfiler(new NoopTagger());
         reporter = profiler.createReporter();
     }
 
