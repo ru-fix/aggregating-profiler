@@ -72,7 +72,7 @@ public class DemoUsage {
             assertEquals(1, profiledCallReport.getCallsCountSum());
 
             // report for default group
-            ProfilerReport reportDefaults = reporter.buildReportAndReset(testTag, testTag);
+            ProfilerReport reportDefaults = reporter.buildReportAndReset(testTag); //whith EMPTY_VALUE by default
             assertEquals(1, reportDefaults.getProfilerCallReports().size());
             ProfiledCallReport profiledCallReportDefault = reportDefaults.getProfilerCallReports().get(0);
             assertEquals("call2.name", profiledCallReportDefault.getName());

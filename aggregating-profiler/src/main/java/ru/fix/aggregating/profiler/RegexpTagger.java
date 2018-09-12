@@ -11,13 +11,13 @@ import java.util.regex.Pattern;
  */
 
 public class RegexpTagger implements Tagger {
-    private final String defaultTagName;
+    private final String tagName;
     private final Map<String, Set<Pattern>> groupSeparator = new HashMap<>();
 
-    public RegexpTagger(String defaultTagName,
+    public RegexpTagger(String tagName,
                         Map<String, Set<Pattern>> groupSeparator) {
         this.groupSeparator.putAll(groupSeparator);
-        this.defaultTagName = defaultTagName;
+        this.tagName = tagName;
     }
 
     @Override
@@ -26,13 +26,13 @@ public class RegexpTagger implements Tagger {
         for(Map.Entry<String, Set<Pattern>> entry : groupSeparator.entrySet()) {
              for(Pattern p : entry.getValue()) {
                  if(p.matcher(profiledCallName).matches()) {
-                     tagged.setTag(defaultTagName, entry.getKey());
+                     tagged.setTag(tagName, entry.getKey());
                      return tagged;
                  }
              }
          }
         
-        tagged.setTag(defaultTagName, defaultTagName);
+        tagged.setTag(tagName, Tagger.EMPTY_VALUE);
         return tagged;
     }
 
