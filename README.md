@@ -100,9 +100,58 @@ such lambdas will be used to gather indicators values.
 
 
 ### ProfiledCall metrics  
-Here is list of metrics that Profiler will accumulate and flush to external storage for each ProfiledCall:
+
+#### Example
+
+There are several metrics that Profiler will accumulate and flush to external storage for each ProfiledCall invocation.  
+Each metric have a name.
+
+- name - dot separated metric name
+
+![](docs/metric-example-start-stop.png?raw=true "Graph View")
+
+In given example reporting period is 1 minute. That means that profiler aggregates information during 1 minute 
+and then flushes it to storage. 
+- reportingTimeAvg = 60_000
+
+Profiler takes into consideration only metrics received from profiled calls that was closed
+during reporting period.   
+Profiled calls 1 was closed and reported in previous reporting period and will be ignored.   
+Profiled calls #2, #3, #4, #5 will be reported. Their metrics will be used to build report.
+Latency is the time in milliseconds between two points: profiledCall start and stop
+  - latencyMax = 1000ms
+  - latencyMin = 400ms
+  - latencyAvg = (1000+1000+400+500) / 4 = 725
+   
+Total calls count will be 4.  
+  - callsCountSum - 4 - how many times profiledCall was invoked
+
+Profiled call #6 not started during current reporting period and will be ignored.
+Profiled call #7 started during current reporting period but not stopped yet. 
+It will not be used in latency and callsCount calculation but it will be used during activeCalls calculation.  
+Profiled calls #7 and #8 started in current or previous reporting period and still running. 
+They considered as activeCalls.  
+Profiled call #8 will have maximum latency: 90000ms (96000 is total time, 
+but at the end of reporting period duration of the profiled call #8 was only 90_000ms.).
+Total count of active calls are 2.  
+   - activeCallsCountMax - 2  
+   - activeCallsLatencyMax - 90_000ms
  
-ProfiledCalls:
+![](docs/metric-example-throughput.png?raw=true "Graph View")
+
+There are two metrics that measure throughput: callsThroughputAvg and throughputPerSecondMax.
+In given example there was  9 invocations during 1 minute:   
+9 / 60 * 1000 =  150 milli invocation per second or 0.150 invocations per second
+- callsThroughputAvg - 150
+
+During reporting period there was time then invocations occurred most often.  
+We can find time interval of size 1 second where were 4 invocations.
+This means that during reporting period there was time when throughput reached 4 invocations per second.  
+And average throughput during reporting period of 1 minute is only 0.15 invocation per second. 
+- throughputPerSecondMax - 4
+ 
+
+#### Metrics summary
  - name - dot separated metric name
  - reportingTimeAvg - reporting interval in milliseconds
  - latency - time in milliseconds between two points: profiledCall start and stop
@@ -124,6 +173,9 @@ ProfiledCalls:
  - activeCalls - calls that are still running at the end of reporting period
    - activeCallsCountMax - count of active calls that still running at the end of reporting period  
    - activeCallsLatencyMax - maximum latency of active call
+
+
+
 
 ### Indicator metrics  
 Here is list of metrics that Profiler will request and flush to external storage for each Indicator:
