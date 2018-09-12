@@ -5,6 +5,7 @@ import ru.fix.aggregating.profiler.engine.AggregatingReporter;
 import ru.fix.aggregating.profiler.engine.NameNormalizer;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,14 +18,23 @@ public class AggregatingProfiler implements Profiler {
 
     private final CopyOnWriteArrayList<AggregatingReporter> profilerReporters = new CopyOnWriteArrayList<>();
 
-    private final Map<String, IndicationProvider> indicators = new ConcurrentHashMap<>();
+    private final Map<String, TaggedIndicationProvider> indicators = new ConcurrentHashMap<>();
+    private volatile Tagger tagger;
+
+    public AggregatingProfiler(Tagger tagger) {
+        this.tagger = tagger;
+    }
+
+    public AggregatingProfiler() {
+        this(new NoopTagger());
+    }
 
     /**
      * if 0 then tracking uncompleted profiled calls is disabled
      */
     private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports = new AtomicInteger(10);
 
-    @Override
+
     public ProfiledCall profiledCall(String name) {
         return new AggregatingCall(
                 name,
@@ -36,6 +46,15 @@ public class AggregatingProfiler implements Profiler {
         );
     }
 
+    @Override
+    public void setTagger(Tagger tagger) {
+        Objects.requireNonNull(tagger);
+        this.tagger = tagger;
+        profilerReporters.forEach(
+            reporter -> reporter.setTagger(tagger));
+        indicators.forEach(tagger::assignTag);
+    }
+    
     private void registerReporter(AggregatingReporter reporter) {
         profilerReporters.add(reporter);
     }
@@ -46,7 +65,13 @@ public class AggregatingProfiler implements Profiler {
 
     @Override
     public void attachIndicator(String name, IndicationProvider indicationProvider) {
-        indicators.put(NameNormalizer.trimDots(name), indicationProvider);
+        String normalizedName = NameNormalizer.trimDots(name);
+        indicators.put(
+            normalizedName,
+            tagger.assignTag(
+                normalizedName,
+                new TaggedIndicationProvider(
+                    indicationProvider)));
     }
 
     @Override
@@ -54,7 +79,7 @@ public class AggregatingProfiler implements Profiler {
         indicators.remove(NameNormalizer.trimDots(name));
     }
 
-    public Map<String, IndicationProvider> getIndicators() {
+    public Map<String, TaggedIndicationProvider> getIndicators() {
         return indicators;
     }
 
@@ -64,7 +89,9 @@ public class AggregatingProfiler implements Profiler {
         reporter[0] = new AggregatingReporter(
                 this,
                 numberOfActiveCallsToTrackAndKeepBetweenReports,
-                () -> this.unregisterReporter(reporter[0]));
+                () -> this.unregisterReporter(reporter[0]),
+                new NoopTagger());
+        reporter[0].setTagger(tagger);
         this.registerReporter(reporter[0]);
         return reporter[0];
     }

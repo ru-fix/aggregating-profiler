@@ -1,17 +1,22 @@
 package ru.fix.aggregating.profiler.engine;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
+import ru.fix.aggregating.profiler.Tagged;
+
 /**
  * @author Kamil Asfandiyarov
  */
-public class SharedCounters {
+public class SharedCounters implements Tagged {
     private final LongAdder callsCount = new LongAdder();
     private final LongAdder startedCallsCount = new LongAdder();
     private final LongAdder sumStartStopLatency = new LongAdder();
@@ -31,10 +36,27 @@ public class SharedCounters {
 
     private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
 
+    private final Map<String, String> tags = new HashMap<>();
+
     public SharedCounters(AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports) {
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
     }
 
+    @Override
+    public Map<String, String> getTags() {
+        return Collections.unmodifiableMap(this.tags);
+    }
+
+    @Override
+    public void setTag(String name, String value) {
+        this.tags.put(name, value);
+    }
+
+    @Override
+    public boolean hasTag(String tagName, String tagValue) {
+        return tags.containsKey(tagName) && tags.get(tagName).equals(tagValue);
+    }
+    
     public LongAdder getCallsCount() {
         return callsCount;
     }
