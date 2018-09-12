@@ -74,6 +74,10 @@ public class NoopProfiler implements Profiler {
     public void detachIndicator(String name) {
     }
 
+    public void setTagger(Tagger tagger) {
+        //no need any changes
+    }
+
     @Override
     public ProfilerReporter createReporter() {
         throw new UnsupportedOperationException();

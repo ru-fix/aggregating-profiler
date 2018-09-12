@@ -2,10 +2,7 @@ package ru.fix.aggregating.profiler.engine;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.fix.aggregating.profiler.AggregatingProfiler;
-import ru.fix.aggregating.profiler.ProfiledCallReport;
-import ru.fix.aggregating.profiler.ProfilerReport;
-import ru.fix.aggregating.profiler.ProfilerReporter;
+import ru.fix.aggregating.profiler.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +12,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class AggregatingReporter implements ProfilerReporter {
@@ -33,44 +29,56 @@ public class AggregatingReporter implements ProfilerReporter {
 
     private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
     private final ClosingCallback closingCallback;
-
+    private volatile Tagger tagger;
 
     public AggregatingReporter(AggregatingProfiler profiler,
                                AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
-                               ClosingCallback closingCallback) {
+                               ClosingCallback closingCallback,
+                               Tagger tagger) {
         this.profiler = profiler;
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
         this.closingCallback = closingCallback;
+        this.tagger = tagger;
         lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
+    }
+
+    public void setTagger(Tagger tagger) {
+        Objects.requireNonNull(tagger);
+        this.tagger = tagger;
+        this.sharedCounters.forEach(tagger::assignTag);
     }
 
     public void updateCallAggregates(String profiledCallName, Consumer<CallAggregate> updateAction) {
         updateAction.accept(
-                sharedCounters.computeIfAbsent(profiledCallName, key ->
-                        new CallAggregate(profiledCallName, numberOfActiveCallsToTrackAndKeepBetweenReports)
-                ));
+            sharedCounters.computeIfAbsent(
+                profiledCallName,
+                key -> tagger.assignTag(
+                    profiledCallName,
+                    new CallAggregate(
+                        profiledCallName,
+                        numberOfActiveCallsToTrackAndKeepBetweenReports))));
     }
 
     @Override
     public ProfilerReport buildReportAndReset() {
-        return buildReportAndReset(Optional.empty());
+        return buildReportAndReset(Optional.empty(), Optional.empty());
     }
 
     @Override
-    public ProfilerReport buildReportAndReset(List<Pattern> patterns) {
-        return buildReportAndReset(Optional.ofNullable(patterns));
+    public ProfilerReport buildReportAndReset(String tagName, String tagValue) {
+        return buildReportAndReset(Optional.ofNullable(tagName),
+                                   Optional.ofNullable(tagValue));
     }
 
-    private ProfilerReport buildReportAndReset(Optional<List<Pattern>> patterns) {
+    private ProfilerReport buildReportAndReset(Optional<String> tagName,
+                                               Optional<String> tagValue) {
         long timestamp = System.currentTimeMillis();
         long spentTime = timestamp - lastReportTimestamp.getAndSet(timestamp);
 
         Map<String, Long> indicators = profiler.getIndicators()
                 .entrySet()
                 .stream()
-                .filter(entry -> !patterns.isPresent() || patterns.get()
-                        .stream()
-                        .anyMatch(p -> p.matcher(entry.getKey()).matches()))
+                .filter(entry -> ! tagName.isPresent() || entry.getValue().hasTag(tagName.get(), tagValue.orElse(null)))
                 .collect(Collectors.toMap(
                         e -> {
                             String name = e.getKey();
@@ -81,7 +89,7 @@ public class AggregatingReporter implements ProfilerReporter {
                         },
                         e -> {
                             try {
-                                return e.getValue().get();
+                                return e.getValue().getProvider().get();
                             } catch (Exception ex) {
                                 log.error(ex.getMessage(), ex);
                             }
@@ -93,9 +101,7 @@ public class AggregatingReporter implements ProfilerReporter {
         for (Iterator<Map.Entry<String, CallAggregate>> iterator = sharedCounters.entrySet().iterator();
              iterator.hasNext(); ) {
             Map.Entry<String, CallAggregate> entry = iterator.next();
-            if (patterns.isPresent() && !patterns.get()
-                    .stream()
-                    .anyMatch(p -> p.matcher(entry.getKey()).matches())) {
+            if (tagName.isPresent() && ! entry.getValue().hasTag(tagName.get(), tagValue.orElse(null))) {
                 continue;
             }
             ProfiledCallReport counterReport = entry.getValue().buildReportAndReset(spentTime);

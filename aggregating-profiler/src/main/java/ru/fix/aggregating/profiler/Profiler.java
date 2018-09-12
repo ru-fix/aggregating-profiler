@@ -85,4 +85,6 @@ public interface Profiler {
      * Reporter is closable resource
      */
     ProfilerReporter createReporter();
+
+    void setTagger(Tagger tagger);
 }

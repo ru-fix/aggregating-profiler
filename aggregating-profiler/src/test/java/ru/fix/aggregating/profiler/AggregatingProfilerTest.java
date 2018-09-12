@@ -806,7 +806,7 @@ public class AggregatingProfilerTest {
 
 
     @Test
-    public void indicator_name_ends_with_indicator_max_suffix(){
+    public void indicatorNameEndsWithIndicatorMaxSuffix(){
         Profiler profiler = new AggregatingProfiler();
         profiler.attachIndicator("my.indicator", () -> 147L);
         ProfilerReporter reporter = profiler.createReporter();
