@@ -70,11 +70,6 @@ public class AggregatingReporter implements ProfilerReporter {
     }
 
     @Override
-    public ProfilerReport buildReportAndReset(String tagName) {
-        return buildReportAndReset(tagName, Tagger.EMPTY_VALUE);
-    }
-    
-    @Override
     public ProfilerReport buildReportAndReset(String tagName, String tagValue) {
         return buildReportAndReset(Optional.ofNullable(tagName),
                                    Optional.ofNullable(tagValue));
