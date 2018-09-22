@@ -78,8 +78,22 @@ public class AggregatingReporter implements ProfilerReporter {
         Map<String, Long> indicators = profiler.getIndicators()
                 .entrySet()
                 .stream()
-                .filter(entry -> ! tagName.isPresent() || entry.getValue().hasTag(tagName.get(), tagValue.orElse(null)))
-                .collect(Collectors.toMap(
+                .filter(entry -> ! tagName.isPresent()
+                        || entry.getValue().hasTag(tagName.get(), tagValue.orElse(null)))
+                .filter(entry -> {
+                        try {
+                            if(entry.getValue().getProvider().get() != null) {
+                                return true;
+                            }
+                            log.error("Inicator '{}' return null value", entry.getKey());
+                            return false;
+                        } catch (Exception ex) {
+                            log.error(ex.getMessage(), ex);
+                            return false;
+                        }
+                    })
+                .collect(
+                    Collectors.toMap(
                         e -> {
                             String name = e.getKey();
                             if (!name.endsWith(INDICATOR_SUFFIX)) {
@@ -92,8 +106,8 @@ public class AggregatingReporter implements ProfilerReporter {
                                 return e.getValue().getProvider().get();
                             } catch (Exception ex) {
                                 log.error(ex.getMessage(), ex);
+                                throw new RuntimeException(ex);
                             }
-                            return null;
                         }));
 
         List<ProfiledCallReport> collect = new ArrayList<>();
