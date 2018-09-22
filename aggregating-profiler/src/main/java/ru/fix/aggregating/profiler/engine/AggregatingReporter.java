@@ -106,7 +106,7 @@ public class AggregatingReporter implements ProfilerReporter {
                                 return e.getValue().getProvider().get();
                             } catch (Exception ex) {
                                 log.error(ex.getMessage(), ex);
-                                throw new RuntimeException(ex);
+                                throw new IndicationProviderValueException(ex);
                             }
                         }));
 

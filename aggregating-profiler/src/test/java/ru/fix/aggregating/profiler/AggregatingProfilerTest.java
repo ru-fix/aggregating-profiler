@@ -816,7 +816,7 @@ public class AggregatingProfilerTest {
     }
 
     @Test
-    public void indicator_null_return_value(){
+    public void indicatorNullReturnValue(){
         Profiler profiler = new AggregatingProfiler();
         profiler.attachIndicator("my.indicator", () -> null);
         ProfilerReporter reporter = profiler.createReporter();
