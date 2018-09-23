@@ -80,37 +80,29 @@ public class AggregatingReporter implements ProfilerReporter {
                 .stream()
                 .filter(entry -> ! tagName.isPresent()
                         || entry.getValue().hasTag(tagName.get(), tagValue.orElse(null)))
-                .filter(entry -> {
-                        try {
-                            if(entry.getValue().getProvider().get() != null) {
-                                return true;
-                            }
-                            log.error("Inicator '{}' return null value", entry.getKey());
-                            return false;
-                        } catch (Exception ex) {
-                            log.error(ex.getMessage(), ex);
-                            return false;
-                        }
-                    })
+                .collect(HashMap::new,
+                         (map, entry) -> {
+                             String name = entry.getKey();
+                             if (!name.endsWith(INDICATOR_SUFFIX)) {
+                                 name = name.concat(INDICATOR_SUFFIX);
+                             }
+                             try {
+                                 map.put(name, entry.getValue().getProvider().get());
+                             } catch (Exception ex) {
+                                 log.error(ex.getMessage(), ex);
+                                 map.put(name, null);
+                             }
+                         },
+                         HashMap::putAll)
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getValue() != null)
                 .collect(
                     Collectors.toMap(
-                        e -> {
-                            String name = e.getKey();
-                            if (!name.endsWith(INDICATOR_SUFFIX)) {
-                                name = name.concat(INDICATOR_SUFFIX);
-                            }
-                            return name;
-                        },
-                        e -> {
-                            try {
-                                return e.getValue().getProvider().get();
-                            } catch (Exception ex) {
-                                log.error(ex.getMessage(), ex);
-                                throw new IndicationProviderValueException(ex);
-                            }
-                        }));
-
-        List<ProfiledCallReport> collect = new ArrayList<>();
+                        e -> (String)e.getKey(),
+                        e -> (Long)e.getValue()));
+        
+            List<ProfiledCallReport> collect = new ArrayList<>();
 
         for (Iterator<Map.Entry<String, CallAggregate>> iterator = sharedCounters.entrySet().iterator();
              iterator.hasNext(); ) {
