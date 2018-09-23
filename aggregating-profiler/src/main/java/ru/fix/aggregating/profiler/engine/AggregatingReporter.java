@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import ru.fix.aggregating.profiler.*;
 
 import java.util.*;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -80,22 +81,18 @@ public class AggregatingReporter implements ProfilerReporter {
                 .stream()
                 .filter(entry -> ! tagName.isPresent()
                         || entry.getValue().hasTag(tagName.get(), tagValue.orElse(null)))
-                .collect(HashMap::new,
-                         (map, entry) -> {
-                             String name = entry.getKey();
-                             if (!name.endsWith(INDICATOR_SUFFIX)) {
-                                 name = name.concat(INDICATOR_SUFFIX);
-                             }
-                             try {
-                                 map.put(name, entry.getValue().getProvider().get());
-                             } catch (Exception ex) {
-                                 log.error(ex.getMessage(), ex);
-                                 map.put(name, null);
-                             }
-                         },
-                         HashMap::putAll)
-                .entrySet()
-                .stream()
+                .map(entry -> {
+                        String name = entry.getKey();
+                        if (!name.endsWith(INDICATOR_SUFFIX)) {
+                            name = name.concat(INDICATOR_SUFFIX);
+                        }
+                        try {
+                            return new SimpleEntry(name, entry.getValue().getProvider().get());
+                        } catch (Exception ex) {
+                            log.error(ex.getMessage(), ex);
+                            return new SimpleEntry(name, null);
+                        }
+                    })
                 .filter(entry -> entry.getValue() != null)
                 .collect(
                     Collectors.toMap(
