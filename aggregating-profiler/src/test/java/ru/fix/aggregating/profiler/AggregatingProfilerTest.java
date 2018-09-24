@@ -814,4 +814,13 @@ public class AggregatingProfilerTest {
         assertTrue(indicators.containsKey("my.indicator.indicatorMax"));
         assertEquals(147L, indicators.get("my.indicator.indicatorMax").longValue());
     }
+
+    @Test
+    public void indicatorNullReturnValue(){
+        Profiler profiler = new AggregatingProfiler();
+        profiler.attachIndicator("my.indicator", () -> null);
+        ProfilerReporter reporter = profiler.createReporter();
+        Map<String, Long> indicators = reporter.buildReportAndReset().getIndicators();
+        assertFalse(indicators.containsKey("my.indicator.indicatorMax"));
+    }
 }

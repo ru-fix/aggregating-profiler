@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import ru.fix.aggregating.profiler.*;
 
 import java.util.*;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -78,25 +79,32 @@ public class AggregatingReporter implements ProfilerReporter {
         Map<String, Long> indicators = profiler.getIndicators()
                 .entrySet()
                 .stream()
-                .filter(entry -> ! tagName.isPresent() || entry.getValue().hasTag(tagName.get(), tagValue.orElse(null)))
-                .collect(Collectors.toMap(
-                        e -> {
-                            String name = e.getKey();
-                            if (!name.endsWith(INDICATOR_SUFFIX)) {
-                                name = name.concat(INDICATOR_SUFFIX);
-                            }
-                            return name;
-                        },
-                        e -> {
-                            try {
-                                return e.getValue().getProvider().get();
-                            } catch (Exception ex) {
-                                log.error(ex.getMessage(), ex);
-                            }
-                            return null;
-                        }));
-
-        List<ProfiledCallReport> collect = new ArrayList<>();
+                .filter(entry -> ! tagName.isPresent()
+                        || entry.getValue().hasTag(tagName.get(), tagValue.orElse(null)))
+                .map(entry -> {
+                        String name = entry.getKey();
+                        if (!name.endsWith(INDICATOR_SUFFIX)) {
+                            name = name.concat(INDICATOR_SUFFIX);
+                        }
+                        try {
+                            return new SimpleEntry(name, entry.getValue().getProvider().get());
+                        } catch (Exception ex) {
+                            log.error("Retrieve value for "
+                                      + entry.getKey()
+                                      + " finished with '"
+                                      + ex.getMessage()
+                                      + "'",
+                                      ex);
+                            return new SimpleEntry(name, null);
+                        }
+                    })
+                .filter(entry -> entry.getValue() != null)
+                .collect(
+                    Collectors.toMap(
+                        e -> (String)e.getKey(),
+                        e -> (Long)e.getValue()));
+        
+            List<ProfiledCallReport> collect = new ArrayList<>();
 
         for (Iterator<Map.Entry<String, CallAggregate>> iterator = sharedCounters.entrySet().iterator();
              iterator.hasNext(); ) {
