@@ -89,7 +89,12 @@ public class AggregatingReporter implements ProfilerReporter {
                         try {
                             return new SimpleEntry(name, entry.getValue().getProvider().get());
                         } catch (Exception ex) {
-                            log.error(ex.getMessage(), ex);
+                            log.error("Retrieve value for "
+                                      + entry.getKey()
+                                      + " finished with '"
+                                      + ex.getMessage()
+                                      + "'",
+                                      ex);
                             return new SimpleEntry(name, null);
                         }
                     })
