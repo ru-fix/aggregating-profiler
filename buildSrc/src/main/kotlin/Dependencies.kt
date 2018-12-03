@@ -1,9 +1,9 @@
 object Vers {
-    val kotlin = "1.2.51"
-    val kotlin_logging = "1.5.4"
+    val kotlin = "1.3.10"
+    val kotlin_logging = "1.6.22"
     val sl4j = "1.7.25"
     val dokkav = "0.9.16"
-    val gradleReleasePlugin = "1.2.19"
+    val gradleReleasePlugin = "1.3.3"
     val junit = "5.2.0"
     val jmh = "1.21"
 
@@ -31,8 +31,6 @@ object Libs {
     val jmhGeneratorAnn = "org.openjdk.jmh:jmh-generator-annprocess:${Vers.jmh}"
     val jmhGeneratorBytecode = "org.openjdk.jmh:jmh-generator-bytecode:${Vers.jmh}"
     val shadowPlugin = "com.github.jengelman.gradle.plugins:shadow:2.0.4"
-
-
 }
 
 

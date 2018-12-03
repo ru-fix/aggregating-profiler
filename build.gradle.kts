@@ -93,7 +93,7 @@ subprojects {
         from("src/main/kotlin")
     }
 
-    val dokkaTask by tasks.creating(DokkaTask::class){
+    val dokkaTask by tasks.creating(DokkaTask::class) {
         outputFormat = "javadoc"
         outputDirectory = "$buildDir/dokka"
     }
@@ -117,8 +117,8 @@ subprojects {
                 }
             }
         }
-        (publications) {
-            "maven"(MavenPublication::class) {
+        publications {
+            register("maven", MavenPublication::class) {
                 from(components["java"])
 
                 artifact(sourcesJar)

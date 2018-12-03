@@ -181,7 +181,7 @@ public class CallAggregate implements Tagged {
                 .setLatencyMax(latencyMax.getThenReset())
                 .setLatencyAvg(LongAdderDrainer.drain(latencySum) / callsCount)
 
-                .setCallsThroughputAvg(elapsed != 0 ? callsCount * 1000_000 / elapsed : 0)
+                .setCallsThroughputAvg(elapsed != 0 ? ((double)callsCount * 1000) / elapsed : 0)
 
                 .setCallsCountSum(callsCount)
 
@@ -190,7 +190,7 @@ public class CallAggregate implements Tagged {
                 .setPayloadSum(payloadTotal)
                 .setPayloadAvg(payloadTotal / callsCount)
 
-                .setPayloadThroughputAvg(elapsed != 0 ? payloadTotal * 1000_000 / elapsed : 0)
+                .setPayloadThroughputAvg(elapsed != 0 ? ((double)payloadTotal * 1000) / elapsed : 0)
 
                 .setThroughputPerSecondMax(maxThroughputPerSecond.getAndReset(System.currentTimeMillis()))
                 .setPayloadThroughputPerSecondMax(maxPayloadThroughputPerSecond.getAndReset(System.currentTimeMillis()));

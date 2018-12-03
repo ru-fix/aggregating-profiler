@@ -66,8 +66,8 @@ public class AggregatingProfilerTest {
             ProfiledCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertThat(report.callsThroughputAvg, lessThanOrEqualTo(70_000L));
-            assertThat(report.callsThroughputAvg, greaterThanOrEqualTo(40_000L));
+            assertThat(report.callsThroughputAvg, lessThanOrEqualTo(70.0));
+            assertThat(report.callsThroughputAvg, greaterThanOrEqualTo(40.0));
         }
     }
 
