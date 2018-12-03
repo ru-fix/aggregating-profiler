@@ -141,8 +141,8 @@ Total count of active calls are 2.
 
 There are two metrics that measure throughput: callsThroughputAvg and throughputPerSecondMax.
 In given example there was  9 invocations during 1 minute:   
-9 / 60 * 1000 =  150 milli invocation per second or 0.150 invocations per second
-- callsThroughputAvg - 150
+9 / 60  =  0.15 invocation per second
+- callsThroughputAvg - 0.15
 
 During reporting period there was time then invocations occurred most often.  
 We can find time interval of size 1 second where were 4 invocations.
@@ -159,21 +159,18 @@ And average throughput during reporting period of 1 minute is only 0.15 invocati
    - latencyMin minimum latency
    - latencyAvg average latency
  - callsCountSum - how many times profiledCall was invoked
- - callsThroughputAvg - average rate of profiledCall milli invocation per second 
- (123 means that there was 0.123 invocation per second)
+ - callsThroughputAvg - average rate of profiledCall invocation per second 
  - payload - payload provided via stop method of profiledCall
    - payloadMin - min value of payload
    - payloadMax - max value of payload
    - payloadAvg - avg value of payload
    - payloadSum - total sum of payload provided within reporting interval
-   - payloadThroughputAvg - payload rate milli invocation per second
-   (123 means that there was 0.123 invocation per second)
+   - payloadThroughputAvg - payload rate invocation per second
  - throughputPerSecondMax - maximum rate within second time interval that was achieved during reporting period 
- (17 means that there was 17 invocation within 1 second interval)
+ (17 means that there was a maximum of 17 invocation within 1 second interval)
  - activeCalls - calls that are still running at the end of reporting period
    - activeCallsCountMax - count of active calls that still running at the end of reporting period  
    - activeCallsLatencyMax - maximum latency of active call
-
 
 
 

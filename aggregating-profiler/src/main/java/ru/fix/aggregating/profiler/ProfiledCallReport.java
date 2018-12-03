@@ -11,7 +11,7 @@ public class ProfiledCallReport {
     long latencyMax;
     long latencyAvg;
 
-    long callsThroughputAvg;
+    double callsThroughputAvg;
     long callsCountSum;
 
     long reportingTimeAvg;
@@ -20,7 +20,7 @@ public class ProfiledCallReport {
     long payloadMax;
     long payloadAvg;
     long payloadSum;
-    long payloadThroughputAvg;
+    double payloadThroughputAvg;
 
     long throughputPerSecondMax;
     long payloadThroughputPerSecondMax;
@@ -34,33 +34,22 @@ public class ProfiledCallReport {
 
     @Override
     public String toString() {
-        return String.format("%s: LatMin: %d, LatMax: %d, LatAvg: %d," +
-                        " CallsCnt: %d, CallsThrpt: %d, RepTime: %d," +
-                        " PldMin %d, PldMax %d, PldAvg %d," +
-                        " PldSum: %d, PldThrpt: %d," +
-                        " MaxThrpt: %d, MaxPldThrpt: %d," +
-                        " ActCallsCnt: %d, ActCallsLatMax: %d",
-                getName(),
-                latencyMin,
-                latencyMax,
-                latencyAvg,
-
-                callsCountSum,
-                callsThroughputAvg,
-                reportingTimeAvg,
-
-                payloadMin,
-                payloadMax,
-                payloadAvg,
-
-                payloadSum,
-                payloadThroughputAvg,
-
-                throughputPerSecondMax,
-                payloadThroughputPerSecondMax,
-
-                activeCallsCountMax,
-                activeCallsLatencyMax);
+        return "" + getName() + ":" +
+                " LatMin: " + latencyMin +
+                ", LatMax: " + latencyMax +
+                ", LatAvg: " + latencyAvg +
+                ", CallsCntSum: " + callsCountSum +
+                ", CallsThrptAvg: " + callsThroughputAvg +
+                ", RepTimeAvg: " + reportingTimeAvg +
+                ", PldMin " + payloadMin +
+                ", PldMax " + payloadMax +
+                ", PldAvg " + payloadAvg +
+                ", PldSum: " + payloadSum +
+                ", PldThrptAvg: " + payloadThroughputAvg +
+                ", ThrptPerSecMax: " + throughputPerSecondMax +
+                ", PldThrptPerSecMax: " + payloadThroughputPerSecondMax +
+                ", ActCallsCnt: " + activeCallsCountMax +
+                ", ActCallsLatMax: " + activeCallsLatencyMax;
     }
 
     public String getName() {
@@ -150,28 +139,21 @@ public class ProfiledCallReport {
         return this;
     }
 
-    /**
-     * Average rate of profiledCall milli invocation per second
-     * (123 means that there was 0.123 invocation per second)
-     */
-    public long getCallsThroughputAvg() {
+
+    public double getCallsThroughputAvg() {
         return callsThroughputAvg;
     }
 
-    public ProfiledCallReport setCallsThroughputAvg(long callsThroughputAvg) {
+    public ProfiledCallReport setCallsThroughputAvg(double callsThroughputAvg) {
         this.callsThroughputAvg = callsThroughputAvg;
         return this;
     }
 
-    /**
-     * Average payload rate milli invocation per second
-     * (123 means that there was 0.123 invocation per second)
-     */
-    public long getPayloadThroughputAvg() {
+    public double getPayloadThroughputAvg() {
         return payloadThroughputAvg;
     }
 
-    public ProfiledCallReport setPayloadThroughputAvg(long payloadThroughputAvg) {
+    public ProfiledCallReport setPayloadThroughputAvg(double payloadThroughputAvg) {
         this.payloadThroughputAvg = payloadThroughputAvg;
         return this;
     }

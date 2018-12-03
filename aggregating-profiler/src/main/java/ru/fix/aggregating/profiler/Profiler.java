@@ -34,6 +34,15 @@ public interface Profiler {
     /**
      * Creates and starts profiler which measures provided block of code
      *
+     * @see ProfiledCall#profile(java.util.function.Supplier)
+     */
+    default <R, T extends Throwable> R profileThrowable(String name, ThrowableSupplier<R, T> block) throws T {
+        return profiledCall(name).profileThrowable(block);
+    }
+
+    /**
+     * Creates and starts profiler which measures provided block of code
+     *
      * @see ProfiledCall#profile(java.lang.Runnable)
      */
     default void profile(String name, Runnable block) {
@@ -43,7 +52,7 @@ public interface Profiler {
     /**
      * Measure provided feature execution
      *
-     * @param name       name of profiling call
+     * @param name            name of profiling call
      * @param asyncInvocation CompletableFuture provider
      */
     default <R> CompletableFuture<R> profileFuture(String name, Supplier<CompletableFuture<R>> asyncInvocation) {

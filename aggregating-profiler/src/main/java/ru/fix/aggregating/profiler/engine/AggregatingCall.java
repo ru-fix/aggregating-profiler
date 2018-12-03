@@ -84,7 +84,7 @@ public class AggregatingCall implements ProfiledCall {
                 aggregate -> aggregate.stop(this, System.currentTimeMillis(), latencyValue, payload));
     }
 
-    public long startNanoTime(){
+    public long startNanoTime() {
         return startNanoTime.get();
     }
 
@@ -113,6 +113,18 @@ public class AggregatingCall implements ProfiledCall {
     }
 
     @Override
+    public <R, T extends Throwable> R profileThrowable(ThrowableSupplier<R, T> block) throws T {
+        try {
+            start();
+            R r = block.get();
+            stop();
+            return r;
+        } finally {
+            close();
+        }
+    }
+
+    @Override
     public void profile(Runnable block) {
         try {
             start();
@@ -129,7 +141,7 @@ public class AggregatingCall implements ProfiledCall {
         try {
             start();
             future = asyncInvocation.get();
-        } catch (Throwable exc){
+        } catch (Throwable exc) {
             close();
             throw exc;
         }
@@ -149,7 +161,7 @@ public class AggregatingCall implements ProfiledCall {
         try {
             start();
             future = asyncInvocation.get();
-        } catch (Throwable exc){
+        } catch (Throwable exc) {
             close();
             throw exc;
         }

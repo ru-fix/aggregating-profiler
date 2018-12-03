@@ -64,6 +64,11 @@ public interface ProfiledCall extends AutoCloseable {
     <R> R profile(Supplier<R> block);
 
     /**
+     * Profile provided block of code which returns some result or can throw an exception
+     */
+    <R, T extends Throwable> R profileThrowable(ThrowableSupplier<R, T> block) throws T;
+
+    /**
      * Profile provided block of code without result
      */
     void profile(Runnable block);
