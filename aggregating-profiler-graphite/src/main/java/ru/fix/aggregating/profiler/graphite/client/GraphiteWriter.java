@@ -49,21 +49,6 @@ public class GraphiteWriter {
         }
     }
 
-    public synchronized void write(String metric) throws Exception {
-        try {
-            if (socket == null || !socket.validateSocket()) {
-                log.info("Socket was closed or connect was lost with host {}:{}",
-                        settings.getHost(), settings.getPort());
-                connect(settings);
-            }
-            socket.write(metric);
-        } catch (Exception e) {
-            log.info("Write to socket failed due to exc: {}. Recreate connection {}:{}", e.getMessage(),
-                    settings.getHost(), settings.getPort(), e);
-            connect(settings);
-        }
-    }
-
     public synchronized void close() throws Exception {
         closed = true;
         socket.close();
