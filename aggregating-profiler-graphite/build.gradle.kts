@@ -15,6 +15,12 @@ dependencies {
 
     compile(project(":aggregating-profiler"))
 
+    compile(Libs.kotlin_jdk8)
+    compile(Libs.kotlin_stdlib)
+    compile(Libs.kotlin_reflect)
+
+    compile(Libs.kotlin_logging)
+
     /**
      * Tests
      */
@@ -22,14 +28,17 @@ dependencies {
     testImplementation(Libs.junit_api)
     testRuntimeOnly(Libs.junit_engine)
 
-    testCompile(Libs.kotlin_jdk8)
-    testCompile(Libs.kotlin_stdlib)
-    testCompile(Libs.kotlin_reflect)
+
 
     testCompile(Libs.slf4j_simple)
     testCompile(Libs.hamcrest)
 
     testCompile(Libs.testcontainers_core)
+
+    testCompile(Libs.retrofit)
+    testCompile(Libs.okhttp_logging)
+    testCompile(Libs.hamcrest)
+    testCompile(Libs.awaitility)
 }
 
 

@@ -17,7 +17,7 @@ public class GraphiteWriter {
     private GraphiteSettings settings;
     private boolean closed = false;
 
-    public synchronized void createAndOpen(GraphiteSettings settings) throws Exception {
+    public synchronized void connect(GraphiteSettings settings) throws Exception {
         if (closed) {
             return;
         }
@@ -39,13 +39,13 @@ public class GraphiteWriter {
             if (socket == null || !socket.validateSocket()) {
                 log.info("Socket was closed or connect was lost with host {}:{}",
                         settings.getHost(), settings.getPort());
-                createAndOpen(settings);
+                connect(settings);
             }
             socket.write(metricPrefix, metrics);
         } catch (Exception e) {
             log.info("Write to socket failed due to exc: {}. Recreate connection {}:{}", e.getMessage(),
                     settings.getHost(), settings.getPort(), e);
-            createAndOpen(settings);
+            connect(settings);
         }
     }
 
@@ -54,13 +54,13 @@ public class GraphiteWriter {
             if (socket == null || !socket.validateSocket()) {
                 log.info("Socket was closed or connect was lost with host {}:{}",
                         settings.getHost(), settings.getPort());
-                createAndOpen(settings);
+                connect(settings);
             }
             socket.write(metric);
         } catch (Exception e) {
             log.info("Write to socket failed due to exc: {}. Recreate connection {}:{}", e.getMessage(),
                     settings.getHost(), settings.getPort(), e);
-            createAndOpen(settings);
+            connect(settings);
         }
     }
 

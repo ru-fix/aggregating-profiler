@@ -34,6 +34,10 @@ object Libs {
 
     val testcontainers_core = "org.testcontainers:testcontainers:1.10.2"
     val lombok = "org.projectlombok:lombok:1.18.4"
+
+    val retrofit = "com.squareup.retrofit2:retrofit:2.5.0"
+    val okhttp_logging = "com.squareup.okhttp3:logging-interceptor:3.12.0"
+    val awaitility = "org.awaitility:awaitility:3.1.4"
 }
 
 
