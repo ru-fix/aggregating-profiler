@@ -7,6 +7,7 @@ import org.awaitility.Awaitility.await
 import org.hamcrest.CoreMatchers
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
@@ -45,7 +46,7 @@ class GraphiteReporterTest {
 
     val graphite = Graphite()
 
-    @BeforeAll
+    @BeforeEach
     fun before() {
         graphite.start()
         println("Visit graphite at:\n${graphite.url}\n" +
