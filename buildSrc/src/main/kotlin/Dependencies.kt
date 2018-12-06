@@ -31,6 +31,9 @@ object Libs {
     val jmhGeneratorAnn = "org.openjdk.jmh:jmh-generator-annprocess:${Vers.jmh}"
     val jmhGeneratorBytecode = "org.openjdk.jmh:jmh-generator-bytecode:${Vers.jmh}"
     val shadowPlugin = "com.github.jengelman.gradle.plugins:shadow:2.0.4"
+
+    val testcontainers_core = "org.testcontainers:testcontainers:1.10.2"
+    val lombok = "org.projectlombok:lombok:1.18.4"
 }
 
 

@@ -1,7 +1,5 @@
 package ru.fix.aggregating.profiler;
 
-import java.util.List;
-
 public interface ProfilerReporter extends AutoCloseable {
     ProfilerReport buildReportAndReset();
 
