@@ -20,6 +20,8 @@ dependencies {
     compile(Libs.kotlin_reflect)
 
     compile(Libs.kotlin_logging)
+    compile(Libs.dynamicPropertyApi)
+    compile(Libs.jfixStdlibConcurrency)
 
     /**
      * Tests
@@ -39,6 +41,8 @@ dependencies {
     testCompile(Libs.okhttp_logging)
     testCompile(Libs.hamcrest)
     testCompile(Libs.awaitility)
+
+
 }
 
 

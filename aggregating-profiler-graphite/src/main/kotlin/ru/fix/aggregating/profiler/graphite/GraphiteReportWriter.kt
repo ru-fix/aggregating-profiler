@@ -13,6 +13,8 @@ import java.util.*
 private val log = KotlinLogging.logger {}
 
 /**
+ * Writes single profiler report to graphite
+ *
  * @param metricPrefix will be added as a prefix to each metrics before sending them to graphite
  */
 class GraphiteReportWriter(

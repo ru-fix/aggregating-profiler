@@ -38,6 +38,9 @@ object Libs {
     val retrofit = "com.squareup.retrofit2:retrofit:2.5.0"
     val okhttp_logging = "com.squareup.okhttp3:logging-interceptor:3.12.0"
     val awaitility = "org.awaitility:awaitility:3.1.4"
+
+    val dynamicPropertyApi = "ru.fix:dynamic-property-api:1.0.5"
+    val jfixStdlibConcurrency = "ru.fix:jfix-stdlib-concurrency:1.0.13"
 }
 
 

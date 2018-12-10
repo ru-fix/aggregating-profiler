@@ -80,6 +80,7 @@ class GraphiteReporterTest {
         val callReport2 = ProfiledCallReport("call2").apply {
             callsCountSum = 108
             reportingTimeAvg = 60_000
+            callsThroughputAvg = 12.25
         }
 
         val profilerReport = ProfilerReport(
@@ -130,11 +131,11 @@ class GraphiteReporterTest {
 
         await().until(
                 {
-                    graphiteApi.query(target = "metricPrefix.call2.callsCountSum", from = "-2minutes")
+                    graphiteApi.query(target = "metricPrefix.call2.callsThroughputAvg", from = "-2minutes")
                             .execute()
                             .body()?.string()
                 },
-                CoreMatchers.containsString("108.0"))
+                CoreMatchers.containsString("12.25"))
 
 
         graphiteWriter.close()

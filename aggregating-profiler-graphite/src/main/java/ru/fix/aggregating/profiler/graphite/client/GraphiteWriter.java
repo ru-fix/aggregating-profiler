@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * Writes metrics to graphite
+ *
  * Created by mocichenko on 22.07.2016.
  */
 public class GraphiteWriter {
