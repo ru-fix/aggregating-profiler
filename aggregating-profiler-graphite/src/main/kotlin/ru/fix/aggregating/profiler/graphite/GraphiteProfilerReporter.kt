@@ -126,6 +126,9 @@ class GraphiteProfilerReporter(
 
 
     override fun close() {
+        synchronized(scheduler) {
+            scheduler.forEach { it.shutdown() }
+        }
         profilerReporter.close()
     }
 }

@@ -11,7 +11,6 @@ dependencies {
      * Runtime
      */
     compile(Libs.slf4j_api)
-    compileOnly(Libs.lombok)
 
     compile(project(":aggregating-profiler"))
 
@@ -21,7 +20,9 @@ dependencies {
 
     compile(Libs.kotlin_logging)
     compile(Libs.dynamicPropertyApi)
-    compile(Libs.jfixStdlibConcurrency)
+    compile(Libs.jfixStdlibConcurrency){
+        exclude("ru.fix")
+    }
 
     /**
      * Tests
