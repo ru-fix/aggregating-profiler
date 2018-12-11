@@ -3,6 +3,7 @@ package ru.fix.aggregating.profiler.engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.fix.aggregating.profiler.ProfiledCall;
+import ru.fix.aggregating.profiler.ThrowableRunnable;
 import ru.fix.aggregating.profiler.ThrowableSupplier;
 
 import java.util.concurrent.CompletableFuture;
@@ -119,6 +120,17 @@ public class AggregatingCall implements ProfiledCall {
             R r = block.get();
             stop();
             return r;
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public <T extends Throwable> void profileThrowable(ThrowableRunnable<T> block) throws T {
+        try {
+            start();
+            block.run();
+            stop();
         } finally {
             close();
         }

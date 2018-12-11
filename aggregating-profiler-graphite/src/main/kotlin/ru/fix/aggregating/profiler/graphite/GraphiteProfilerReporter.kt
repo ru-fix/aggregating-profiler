@@ -110,12 +110,12 @@ class GraphiteProfilerReporter(
         return newScheduler
     }
 
-    private fun buildAndSaveReportInGraphite(reporter: () -> ProfilerReport) {
+    private fun buildAndSaveReportInGraphite(buildReport: () -> ProfilerReport) {
         if (!settings.get().enableGraphiteProfiling) {
             return
         }
 
-        val report = reporter()
+        val report = buildReport()
 
         try {
             graphiteReportWriter.saveProfilingReportToGraphite(report)

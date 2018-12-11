@@ -1,5 +1,10 @@
 package ru.fix.aggregating.profiler;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
 /**
  * @author Kamil Asfandiyarov
  */
@@ -34,26 +39,33 @@ public class ProfiledCallReport {
 
     @Override
     public String toString() {
-        return "" + getName() + ":" +
-                " LatMin: " + latencyMin +
-                ", LatMax: " + latencyMax +
-                ", LatAvg: " + latencyAvg +
-                ", CallsCntSum: " + callsCountSum +
-                ", CallsThrptAvg: " + callsThroughputAvg +
-                ", RepTimeAvg: " + reportingTimeAvg +
-                ", PldMin " + payloadMin +
-                ", PldMax " + payloadMax +
-                ", PldAvg " + payloadAvg +
-                ", PldSum: " + payloadSum +
-                ", PldThrptAvg: " + payloadThroughputAvg +
-                ", ThrptPerSecMax: " + throughputPerSecondMax +
-                ", PldThrptPerSecMax: " + payloadThroughputPerSecondMax +
-                ", ActCallsCnt: " + activeCallsCountMax +
-                ", ActCallsLatMax: " + activeCallsLatencyMax;
+        return asMap().entrySet().stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .collect(Collectors.joining(", ", "" + getName() + ": ", ""));
     }
 
     public String getName() {
         return name;
+    }
+
+    public Map<String, Number> asMap() {
+        HashMap<String, Number> map = new HashMap<>();
+        map.put("latencyMin", latencyMin);
+        map.put("latencyMax", latencyMax);
+        map.put("latencyAvg", latencyAvg);
+        map.put("callsCountSum", callsCountSum);
+        map.put("callsThroughputAvg", callsThroughputAvg);
+        map.put("reportingTimeAvg", reportingTimeAvg);
+        map.put("payloadMin", payloadMin);
+        map.put("payloadMax", payloadMax);
+        map.put("payloadAvg", payloadAvg);
+        map.put("payloadSum", payloadSum);
+        map.put("payloadThroughputAvg", payloadThroughputAvg);
+        map.put("throughputPerSecondMax", throughputPerSecondMax);
+        map.put("payloadThroughputPerSecondMax", payloadThroughputPerSecondMax);
+        map.put("activeCallsCountMax", activeCallsCountMax);
+        map.put("activeCallsLatencyMax", activeCallsLatencyMax);
+        return map;
     }
 
     public long getLatencyMin() {

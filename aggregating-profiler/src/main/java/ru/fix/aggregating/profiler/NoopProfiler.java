@@ -55,6 +55,11 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
+        public <T extends Throwable> void profileThrowable(ThrowableRunnable<T> block) throws T {
+            block.run();
+        }
+
+        @Override
         public <R> CompletableFuture<R> profileFuture(Supplier<CompletableFuture<R>> asyncInvocation) {
             return asyncInvocation.get();
         }

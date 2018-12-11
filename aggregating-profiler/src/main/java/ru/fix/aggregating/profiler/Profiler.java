@@ -40,6 +40,10 @@ public interface Profiler {
         return profiledCall(name).profileThrowable(block);
     }
 
+    default <R, T extends Throwable> void profileThrowable(String name, ThrowableRunnable<T> block) throws T {
+        profiledCall(name).profileThrowable(block);
+    }
+
     /**
      * Creates and starts profiler which measures provided block of code
      *
