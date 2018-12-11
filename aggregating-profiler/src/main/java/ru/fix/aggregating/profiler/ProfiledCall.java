@@ -8,6 +8,8 @@ import java.util.function.Supplier;
  */
 public interface ProfiledCall extends AutoCloseable {
 
+    ProfiledCall tag(String name, String value);
+
     /**
      * Evaluate calls count or whether the method was called.
      */
