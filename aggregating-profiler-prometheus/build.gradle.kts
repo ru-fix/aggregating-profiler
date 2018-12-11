@@ -29,6 +29,7 @@ dependencies {
 
 
     testCompile(Libs.slf4j_simple)
+    testCompile(Libs.kotlin_logging)
     testCompile(Libs.hamcrest)
 
     testCompile(Libs.testcontainers_core)
@@ -37,6 +38,7 @@ dependencies {
     testCompile(Libs.okhttp_logging)
     testCompile(Libs.awaitility)
 
+    testCompile(Libs.wiremock)
 
 }
 

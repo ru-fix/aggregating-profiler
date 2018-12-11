@@ -6,7 +6,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.awaitility.Awaitility.await
 import org.hamcrest.CoreMatchers
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.GenericContainer
