@@ -62,7 +62,7 @@ public class AggregatingReporterTest {
         String testTag = "testTag";
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*test.*"));
-        profiler.setTagger(new RegexpTagger(testTag, separator));
+        profiler.setLabelSticker(new RegexpLabelSticker(testTag, separator));
         reporter = profiler.createReporter();
         ProfiledCall call = profiler.start("test");
         call.stop(30);
@@ -78,7 +78,7 @@ public class AggregatingReporterTest {
         String testTag = "testTag";
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*nop.*"));
-        profiler.setTagger(new RegexpTagger(testTag, separator));
+        profiler.setLabelSticker(new RegexpLabelSticker(testTag, separator));
         profiler.attachIndicator("nop", () -> new Long(10));
         ProfiledCall call = profiler.start("test");
         call.stop(30);
@@ -97,7 +97,7 @@ public class AggregatingReporterTest {
         String testTag = "testTag";
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*nop.*"));
-        profiler.setTagger(new RegexpTagger(testTag, separator));
+        profiler.setLabelSticker(new RegexpLabelSticker(testTag, separator));
         profiler.attachIndicator("nop", () -> new Long(10));
         ProfiledCall call = profiler.start("test");
         call.stop(30);
@@ -105,7 +105,7 @@ public class AggregatingReporterTest {
         separator = new HashMap<>();
         separator.put("tag1", new HashSet<Pattern>());
         separator.get("tag1").add(Pattern.compile(".*nop.*"));
-        profiler.setTagger(new RegexpTagger(testTag, separator));
+        profiler.setLabelSticker(new RegexpLabelSticker(testTag, separator));
         reporter = profiler.createReporter();
         ProfilerReport profilerReport = reporter.buildReportAndReset(testTag, "tag1");
 

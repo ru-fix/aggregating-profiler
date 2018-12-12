@@ -52,10 +52,10 @@ public class DemoUsage {
         Map<String, Set<Pattern>> tagRules = new HashMap<>();
         tagRules.put("contains_number_1", new HashSet<>());
         tagRules.get("contains_number_1").add(Pattern.compile(".*1.*"));
-        Tagger tagger = new RegexpTagger(testTag, tagRules);
+        LabelSticker labelSticker = new RegexpLabelSticker(testTag, tagRules);
 
         Profiler profiler = new AggregatingProfiler();
-        profiler.setTagger(tagger);
+        profiler.setLabelSticker(labelSticker);
 
         try (ProfilerReporter reporter = profiler.createReporter()) {
 
@@ -72,7 +72,7 @@ public class DemoUsage {
             assertEquals(1, profiledCallReport.getCallsCountSum());
 
             // report for default group
-            ProfilerReport reportDefaults = reporter.buildReportAndReset(testTag, Tagger.EMPTY_VALUE);
+            ProfilerReport reportDefaults = reporter.buildReportAndReset(testTag, LabelSticker.EMPTY_VALUE);
             assertEquals(1, reportDefaults.getProfilerCallReports().size());
             ProfiledCallReport profiledCallReportDefault = reportDefaults.getProfilerCallReports().get(0);
             assertEquals("call2.name", profiledCallReportDefault.getName());

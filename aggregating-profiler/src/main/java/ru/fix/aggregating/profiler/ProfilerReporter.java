@@ -6,5 +6,5 @@ public interface ProfilerReporter extends AutoCloseable {
     /**
      * @return empty report in case of nonexistent tag
      */
-    ProfilerReport buildReportAndReset(String tagName, String tagValue);
+    ProfilerReport buildReportAndReset(ReportFilter reportFilter);
 }

@@ -1,10 +1,9 @@
 package ru.fix.aggregating.profiler.engine;
 
+import ru.fix.aggregating.profiler.Identity;
 import ru.fix.aggregating.profiler.ProfiledCallReport;
-import ru.fix.aggregating.profiler.Tagged;
 
 import java.util.Comparator;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -17,7 +16,7 @@ import java.util.concurrent.atomic.LongAdder;
 /**
  * @author Kamil Asfandiyarov
  */
-public class CallAggregate implements Tagged {
+public class CallAggregate implements AutoLabelStickerable {
 
     final Identity callIdentity;
 
@@ -39,7 +38,8 @@ public class CallAggregate implements Tagged {
 
     final LongAdder activeCallsSum = new LongAdder();
     final Set<AggregatingCall> activeCalls = ConcurrentHashMap.newKeySet();
-    final Map<String, String> tags = new ConcurrentHashMap<>();
+
+    final Map<String, String> autoLabels = new ConcurrentHashMap<>();
 
     public CallAggregate(
             Identity callIdentity,
@@ -51,20 +51,15 @@ public class CallAggregate implements Tagged {
     }
 
     @Override
-    public Map<String, String> getTags() {
-        return Collections.unmodifiableMap(this.tags);
+    public void setAutoLabel(String name, String value) {
+        this.autoLabels.put(name, value);
     }
 
     @Override
-    public void setTag(String name, String value) {
-        this.tags.put(name, value);
+    public Map<String, String> getAutoLabels() {
+        return this.autoLabels;
     }
 
-    @Override
-    public boolean hasTag(String tagName, String tagValue) {
-        return tags.containsKey(tagName) && tags.get(tagName).equals(tagValue);
-    }
-    
     /**
      * @param currentTimestamp
      * @param latency Ignored in case of -1
@@ -165,7 +160,7 @@ public class CallAggregate implements Tagged {
     public ProfiledCallReport buildReportAndReset(long elapsed) {
         long callsCount = LongAdderDrainer.drain(callsCountSum);
 
-        ProfiledCallReport report = new ProfiledCallReport(callName)
+        ProfiledCallReport report = new ProfiledCallReport(this.callIdentity)
                 .setActiveCallsCountMax(activeCallsSum.sum())
                 .setActiveCallsLatencyMax(activeCallsMaxLatencyAndResetActiveCalls())
                 .setReportingTimeAvg(elapsed);

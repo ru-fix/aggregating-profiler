@@ -186,8 +186,15 @@ User can provide different storages for metrics: graphite, influx, prometheus, o
 All metrics names ends with suffixes: min, max, sum, avg. 
 This suffix could be used as a suggestion to specify how storage could compress cold data.   
 
-## Tags
-Tag is a key-value pair. Similar to lables in Prometheus or tags in InfluxDB 
+## Tags and Labels 
+Tag is a key-value pair defined by user.
+User can define tags during ProfiledCall or IndicationProvider construction. 
+Tags works similar to labels in Prometheus or tags in InfluxDB.
+
+Labels is a key-value pair that is automatically linked with metrics in runtime.
+User can setup RegexpLabelSticker or custom LabelSticker for Profiler instance.
+Then we can use Labels to filter particular metrics in Reporter.
+  
 
 
 ## Metric reporting
@@ -225,7 +232,7 @@ Dropwizard metrics:
 https://github.com/dropwizard/metrics
 
 ## Source guidebook
-There are to type of tags:
+
 * tag as part of idenity of ProfiledCall or Indicator, provided manually by a user during metric construction.
 * auto tag that assigned by Tagger based on Identity name. 
   

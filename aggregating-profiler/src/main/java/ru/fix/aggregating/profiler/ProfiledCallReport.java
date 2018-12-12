@@ -2,7 +2,6 @@ package ru.fix.aggregating.profiler;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -10,7 +9,7 @@ import java.util.stream.Collectors;
  */
 public class ProfiledCallReport {
 
-    final String name;
+    final Identity identity;
 
     long latencyMin;
     long latencyMax;
@@ -33,19 +32,19 @@ public class ProfiledCallReport {
     long activeCallsCountMax;
     long activeCallsLatencyMax;
 
-    public ProfiledCallReport(String name) {
-        this.name = name;
+    public ProfiledCallReport(Identity identity) {
+        this.identity = identity;
     }
 
     @Override
     public String toString() {
         return asMap().entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
-                .collect(Collectors.joining(", ", "" + getName() + ": ", ""));
+                .collect(Collectors.joining(", ", "" + getIdentity() + ": ", ""));
     }
 
-    public String getName() {
-        return name;
+    public Identity getIdentity() {
+        return identity;
     }
 
     public Map<String, Number> asMap() {

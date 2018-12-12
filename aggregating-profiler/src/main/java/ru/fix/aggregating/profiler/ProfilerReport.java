@@ -5,15 +5,15 @@ import java.util.Map;
 
 public class ProfilerReport {
 
-    private final Map<String, Long> indicators;
+    private final Map<Identity, Long> indicators;
     private final List<ProfiledCallReport> profilerCallReports;
 
-    public ProfilerReport(Map<String, Long> indicators, List<ProfiledCallReport> profilerCallReports) {
+    public ProfilerReport(Map<Identity, Long> indicators, List<ProfiledCallReport> profilerCallReports) {
         this.indicators = indicators;
         this.profilerCallReports = profilerCallReports;
     }
 
-    public Map<String, Long> getIndicators() {
+    public Map<Identity, Long> getIndicators() {
         return indicators;
     }
 

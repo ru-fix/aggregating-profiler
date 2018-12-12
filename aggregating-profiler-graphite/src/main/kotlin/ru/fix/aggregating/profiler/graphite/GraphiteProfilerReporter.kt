@@ -3,8 +3,7 @@ package ru.fix.aggregating.profiler.graphite
 import mu.KotlinLogging
 import ru.fix.aggregating.profiler.Profiler
 import ru.fix.aggregating.profiler.ProfilerReport
-import ru.fix.aggregating.profiler.RegexpTagger
-import ru.fix.aggregating.profiler.Tagger
+import ru.fix.aggregating.profiler.RegexpLabelSticker
 import ru.fix.aggregating.profiler.graphite.client.GraphiteWriter
 import ru.fix.dynamic.property.api.DynamicProperty
 import ru.fix.stdlib.concurrency.threads.NamedExecutors
@@ -28,7 +27,7 @@ class GraphiteProfilerReporter(
 
 
     companion object {
-        private const val GRAPHITE_RATE_TAG = "logRate"
+        private const val GRAPHITE_RATE_LABEL = "logRate"
         private const val THREAD_NAME_PREFIX = "graphite-profiler-reporter-"
     }
 
@@ -78,7 +77,7 @@ class GraphiteProfilerReporter(
                 }
                 .toMap()
 
-        this.profiler.setTagger(RegexpTagger(GRAPHITE_RATE_TAG, plainConf))
+        this.profiler.setLabelSticker(RegexpLabelSticker(GRAPHITE_RATE_LABEL, plainConf))
 
 
         synchronized(scheduler) {
@@ -89,7 +88,9 @@ class GraphiteProfilerReporter(
                 scheduler.add(
                         makeScheduler(key.toLong()) {
                             buildAndSaveReportInGraphite {
-                                profilerReporter.buildReportAndReset(GRAPHITE_RATE_TAG, key)
+                                profilerReporter.buildReportAndReset { _, labels ->
+                                    labels[GRAPHITE_RATE_LABEL]?.let { labelValue -> labelValue == key } ?: false
+                                }
                             }
                         })
             }
@@ -97,7 +98,9 @@ class GraphiteProfilerReporter(
             scheduler.add(
                     makeScheduler(config.defaultTimeout) {
                         buildAndSaveReportInGraphite {
-                            profilerReporter.buildReportAndReset(GRAPHITE_RATE_TAG, Tagger.EMPTY_VALUE)
+                            profilerReporter.buildReportAndReset { _, labels ->
+                                !labels.containsKey(GRAPHITE_RATE_LABEL)
+                            }
                         }
                     })
         }

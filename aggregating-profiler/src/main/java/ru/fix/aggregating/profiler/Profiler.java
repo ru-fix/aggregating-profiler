@@ -1,6 +1,5 @@
 package ru.fix.aggregating.profiler;
 
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -15,9 +14,7 @@ public interface Profiler {
      */
     ProfiledCall profiledCall(String name);
 
-    ProfiledCall profiledCall(String name, String...tags);
-
-    ProfiledCall profiledCall(String name, Map<String, String> tags);
+    ProfiledCall profiledCall(Identity identity);
 
     /**
      * Creates and starts profiled call
@@ -91,6 +88,7 @@ public interface Profiler {
      */
     void attachIndicator(String name, IndicationProvider indicationProvider);
 
+    void attachIndicator(Identity identity, IndicationProvider indicationProvider);
     /**
      * Remove indicator
      *
@@ -98,11 +96,13 @@ public interface Profiler {
      */
     void detachIndicator(String name);
 
+    void detachIndicator(Identity identity);
+
     /**
      * Create new instance of reporter.
      * Reporter is closable resource
      */
     ProfilerReporter createReporter();
 
-    void setTagger(Tagger tagger);
+    void setLabelSticker(LabelSticker labelSticker);
 }

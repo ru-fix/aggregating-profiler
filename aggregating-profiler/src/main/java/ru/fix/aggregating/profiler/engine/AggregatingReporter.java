@@ -13,6 +13,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AggregatingReporter implements ProfilerReporter {
     private static final Logger log = LoggerFactory.getLogger(AggregatingReporter.class);
@@ -29,92 +30,108 @@ public class AggregatingReporter implements ProfilerReporter {
 
     private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
     private final ClosingCallback closingCallback;
-    private volatile Tagger tagger;
+    private volatile LabelSticker labelSticker;
 
     public AggregatingReporter(AggregatingProfiler profiler,
                                AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
                                ClosingCallback closingCallback,
-                               Tagger tagger) {
+                               LabelSticker labelSticker) {
         this.profiler = profiler;
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
         this.closingCallback = closingCallback;
-        this.tagger = tagger;
+        this.labelSticker = labelSticker;
         lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
     }
 
-    public void setTagger(Tagger tagger) {
-        Objects.requireNonNull(tagger);
-        this.tagger = tagger;
-        this.sharedCounters.forEach(tagger::assignTag);
+    public void setLabelSticker(LabelSticker labelSticker) {
+        Objects.requireNonNull(labelSticker);
+        this.labelSticker = labelSticker;
+
+        this.sharedCounters.forEach((identity, aggregate) -> {
+            labelSticker.buildLabels(identity.getName()).forEach(aggregate::setAutoLabel);
+        });
     }
 
     public void updateCallAggregates(Identity callIdentity, Consumer<CallAggregate> updateAction) {
         updateAction.accept(
-            sharedCounters.computeIfAbsent(
-                callIdentity,
-                key -> tagger.assignTag(
-                    callIdentity.name,
-                    new CallAggregate(
+                sharedCounters.computeIfAbsent(
                         callIdentity,
-                        numberOfActiveCallsToTrackAndKeepBetweenReports))));
+                        key -> {
+                            CallAggregate aggregate = new CallAggregate(
+                                    callIdentity,
+                                    numberOfActiveCallsToTrackAndKeepBetweenReports);
+                            labelSticker.buildLabels(callIdentity.getName()).forEach(aggregate::setAutoLabel);
+                            return aggregate;
+                        }));
     }
 
     @Override
     public ProfilerReport buildReportAndReset() {
-        return buildReportAndReset(Optional.empty(), Optional.empty());
+        return buildReportAndReset(Optional.empty());
     }
 
     @Override
-    public ProfilerReport buildReportAndReset(String tagName, String tagValue) {
-        return buildReportAndReset(Optional.ofNullable(tagName),
-                                   Optional.ofNullable(tagValue));
+    public ProfilerReport buildReportAndReset(ReportFilter reportFilter) {
+        return buildReportAndReset(Optional.of(reportFilter));
     }
 
-    private ProfilerReport buildReportAndReset(Optional<String> tagName,
-                                               Optional<String> tagValue) {
+
+    private ProfilerReport buildReportAndReset(Optional<ReportFilter> reportFilter) {
         long timestamp = System.currentTimeMillis();
         long spentTime = timestamp - lastReportTimestamp.getAndSet(timestamp);
 
-        Map<String, Long> indicators = profiler.getIndicators()
+
+        Stream<Map.Entry<Identity, AggregatingIndicationProvider>> indicatorsStream = profiler.getIndicators()
                 .entrySet()
-                .stream()
-                .filter(entry -> ! tagName.isPresent()
-                        || entry.getValue().hasTag(tagName.get(), tagValue.orElse(null)))
+                .stream();
+
+        if (reportFilter.isPresent()) {
+            indicatorsStream = indicatorsStream.filter(
+                    entry -> reportFilter.get().filter(
+                            entry.getKey(),
+                            entry.getValue().getAutoLabels()
+                    )
+            );
+        }
+
+        Map<Identity, Long> indicators = indicatorsStream
                 .map(entry -> {
-                        String name = entry.getKey();
-                        if (!name.endsWith(INDICATOR_SUFFIX)) {
-                            name = name.concat(INDICATOR_SUFFIX);
-                        }
-                        try {
-                            return new SimpleEntry(name, entry.getValue().getProvider().get());
-                        } catch (Exception ex) {
-                            log.error("Retrieve value for "
-                                      + entry.getKey()
-                                      + " finished with '"
-                                      + ex.getMessage()
-                                      + "'",
-                                      ex);
-                            return new SimpleEntry(name, null);
-                        }
-                    })
+                    Identity name = entry.getKey();
+                    if (!name.endsWith(INDICATOR_SUFFIX)) {
+                        name = name.concat(INDICATOR_SUFFIX);
+                    }
+                    try {
+                        return new SimpleEntry<>(name, entry.getValue().getProvider().get());
+                    } catch (Exception ex) {
+                        log.error("Retrieve value for "
+                                        + entry.getKey()
+                                        + " finished with '"
+                                        + ex.getMessage()
+                                        + "'",
+                                ex);
+                        return new SimpleEntry(name, null);
+                    }
+                })
                 .filter(entry -> entry.getValue() != null)
                 .collect(
-                    Collectors.toMap(
-                        e -> (String)e.getKey(),
-                        e -> (Long)e.getValue()));
-        
-            List<ProfiledCallReport> collect = new ArrayList<>();
+                        Collectors.toMap(
+                                e -> (String) e.getKey(),
+                                e -> (Long) e.getValue()));
 
-        for (Iterator<Map.Entry<String, CallAggregate>> iterator = sharedCounters.entrySet().iterator();
+        List<ProfiledCallReport> collect = new ArrayList<>();
+
+        for (Iterator<Map.Entry<Identity, CallAggregate>> iterator = sharedCounters.entrySet().iterator();
              iterator.hasNext(); ) {
-            Map.Entry<String, CallAggregate> entry = iterator.next();
-            if (tagName.isPresent() && ! entry.getValue().hasTag(tagName.get(), tagValue.orElse(null))) {
+            Map.Entry<Identity, CallAggregate> entry = iterator.next();
+
+            if(reportFilter.isPresent() && !reportFilter.get().filter(entry.getKey(), entry.getValue().getAutoLabels())){
                 continue;
             }
+
             ProfiledCallReport counterReport = entry.getValue().buildReportAndReset(spentTime);
 
             // Skip and remove empty counter
-            // There are always a lot of ProfiledCalls that are rare active, or active only short period of time
+            // There are always a lot of ProfiledCalls that are rarely active, or active only during short period of time
             // during application startup or scheduled tasks.
             // Removing empty aggregates reduce amount of memory consumed by profiler in such cases.
             //
@@ -133,7 +150,7 @@ public class AggregatingReporter implements ProfilerReporter {
         }
 
 
-        collect.sort(Comparator.comparing(ProfiledCallReport::getName));
+        collect.sort(Comparator.comparing(report -> report.getIdentity().getName()));
 
         return new ProfilerReport(indicators, collect);
     }

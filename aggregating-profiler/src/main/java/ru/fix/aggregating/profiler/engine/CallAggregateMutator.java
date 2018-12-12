@@ -1,5 +1,7 @@
 package ru.fix.aggregating.profiler.engine;
 
+import ru.fix.aggregating.profiler.Identity;
+
 import java.util.function.Consumer;
 
 @FunctionalInterface

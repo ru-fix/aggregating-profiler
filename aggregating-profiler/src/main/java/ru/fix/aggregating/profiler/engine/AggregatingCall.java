@@ -2,11 +2,11 @@ package ru.fix.aggregating.profiler.engine;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.fix.aggregating.profiler.Identity;
 import ru.fix.aggregating.profiler.ProfiledCall;
 import ru.fix.aggregating.profiler.ThrowableRunnable;
 import ru.fix.aggregating.profiler.ThrowableSupplier;
 
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -26,30 +26,9 @@ public class AggregatingCall implements ProfiledCall {
 
     final Identity identity;
 
-    public AggregatingCall(String profiledCallName, CallAggregateMutator aggregateMutator) {
+    public AggregatingCall(Identity identity, CallAggregateMutator aggregateMutator) {
         this.aggregateMutator = aggregateMutator;
-        this.identity = new Identity(profiledCallName);
-    }
-
-    public AggregatingCall(String profiledCallName, String[] tags, CallAggregateMutator aggregateMutator) {
-        this.aggregateMutator = aggregateMutator;
-        this.identity = new Identity(profiledCallName);
-
-        if (tags.length % 2 != 0) {
-            throw new IllegalArgumentException("Invalid tags array size: " + tags.length + ". Expected even size.")
-        }
-        for (int i = 0; i < tags.length - 1; i += 2) {
-            this.identity.setTag(tags[i], tags[i + 1]);
-        }
-    }
-
-    public AggregatingCall(String profiledCallName, Map<String, String> tags, CallAggregateMutator aggregateMutator) {
-        this.aggregateMutator = aggregateMutator;
-        this.identity = new Identity(profiledCallName);
-
-        for (Map.Entry<String, String> tag : tags.entrySet()) {
-            this.identity.setTag(tag.getKey(), tag.getValue());
-        }
+        this.identity = identity;
     }
 
     @Override

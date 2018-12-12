@@ -32,8 +32,8 @@ public class PrefixedProfiler implements Profiler {
     }
 
     @Override
-    public void setTagger(Tagger tagger) {
-        profiler.setTagger(tagger);
+    public void setLabelSticker(LabelSticker labelSticker) {
+        profiler.setLabelSticker(labelSticker);
     }
 
     @Override

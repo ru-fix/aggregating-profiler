@@ -29,12 +29,37 @@ public class SuffixedProfiler implements Profiler {
     }
 
     @Override
-    public void setTagger(Tagger tagger) {
-        profiler.setTagger(tagger);
+    public void setLabelSticker(LabelSticker labelSticker) {
+        profiler.setLabelSticker(labelSticker);
     }
 
     @Override
     public ProfilerReporter createReporter() {
         return profiler.createReporter();
+    }
+
+    private Identity suffixedIdentity(Identity identity){
+        return new Identity(
+                normalizedName + "." + NameNormalizer.trimDots(identity.name),
+                identity.getTags()
+        );
+    }
+
+    @Override
+    public ProfiledCall profiledCall(Identity identity) {
+        return profiler.profiledCall(
+                suffixedIdentity(identity)
+        );
+    }
+
+    @Override
+    public void attachIndicator(Identity identity, IndicationProvider indicationProvider) {
+        profiler.attachIndicator(suffixedIdentity(identity), indicationProvider);
+    }
+
+    @Override
+    public void detachIndicator(Identity identity) {
+        profiler.detachIndicator(suffixedIdentity(identity));
+
     }
 }

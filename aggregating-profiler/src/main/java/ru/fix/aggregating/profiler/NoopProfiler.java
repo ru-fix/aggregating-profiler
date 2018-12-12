@@ -9,12 +9,6 @@ import java.util.function.Supplier;
 public class NoopProfiler implements Profiler {
 
     public static class NoopProfiledCall implements ProfiledCall {
-
-        @Override
-        public ProfiledCall tag(String name, String value) {
-            return this;
-        }
-
         @Override
         public void call() {
         }
@@ -83,6 +77,11 @@ public class NoopProfiler implements Profiler {
     }
 
     @Override
+    public ProfiledCall profiledCall(Identity identity) {
+        return new NoopProfiledCall();
+    }
+
+    @Override
     public void attachIndicator(String name, IndicationProvider indicationProvider) {
     }
 
@@ -90,12 +89,22 @@ public class NoopProfiler implements Profiler {
     public void detachIndicator(String name) {
     }
 
-    public void setTagger(Tagger tagger) {
+    public void setLabelSticker(LabelSticker labelSticker) {
         //no need any changes
     }
 
     @Override
     public ProfilerReporter createReporter() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void attachIndicator(Identity identity, IndicationProvider indicationProvider) {
+
+    }
+
+    @Override
+    public void detachIndicator(Identity identity) {
+
     }
 }
