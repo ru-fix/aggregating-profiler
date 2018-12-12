@@ -19,7 +19,7 @@ public class AggregatingReporter implements ProfilerReporter {
 
     private static final String INDICATOR_SUFFIX = ".indicatorMax";
 
-    private final Map<String, CallAggregate> sharedCounters = new ConcurrentHashMap<>();
+    private final Map<Identity, CallAggregate> sharedCounters = new ConcurrentHashMap<>();
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
@@ -48,14 +48,14 @@ public class AggregatingReporter implements ProfilerReporter {
         this.sharedCounters.forEach(tagger::assignTag);
     }
 
-    public void updateCallAggregates(String profiledCallName, Consumer<CallAggregate> updateAction) {
+    public void updateCallAggregates(Identity callIdentity, Consumer<CallAggregate> updateAction) {
         updateAction.accept(
             sharedCounters.computeIfAbsent(
-                profiledCallName,
+                callIdentity,
                 key -> tagger.assignTag(
-                    profiledCallName,
+                    callIdentity.name,
                     new CallAggregate(
-                        profiledCallName,
+                        callIdentity,
                         numberOfActiveCallsToTrackAndKeepBetweenReports))));
     }
 

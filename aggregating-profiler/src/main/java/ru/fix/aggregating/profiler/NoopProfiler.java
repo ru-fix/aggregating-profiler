@@ -9,6 +9,12 @@ import java.util.function.Supplier;
 public class NoopProfiler implements Profiler {
 
     public static class NoopProfiledCall implements ProfiledCall {
+
+        @Override
+        public ProfiledCall tag(String name, String value) {
+            return this;
+        }
+
         @Override
         public void call() {
         }

@@ -1,5 +1,6 @@
 package ru.fix.aggregating.profiler;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -13,6 +14,10 @@ public interface Profiler {
      *             Method name could be separated by dot '.'
      */
     ProfiledCall profiledCall(String name);
+
+    ProfiledCall profiledCall(String name, String...tags);
+
+    ProfiledCall profiledCall(String name, Map<String, String> tags);
 
     /**
      * Creates and starts profiled call

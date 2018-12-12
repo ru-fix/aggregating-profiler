@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.LongAdder;
  */
 public class CallAggregate implements Tagged {
 
-    final String callName;
+    final Identity callIdentity;
 
     final LongAdder callsCountSum = new LongAdder();
     final LongAdder latencySum = new LongAdder();
@@ -42,10 +42,10 @@ public class CallAggregate implements Tagged {
     final Map<String, String> tags = new ConcurrentHashMap<>();
 
     public CallAggregate(
-            String callName,
+            Identity callIdentity,
             AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports
             ) {
-        this.callName = callName;
+        this.callIdentity = callIdentity;
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
 
     }

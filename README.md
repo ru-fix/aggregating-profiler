@@ -186,6 +186,9 @@ User can provide different storages for metrics: graphite, influx, prometheus, o
 All metrics names ends with suffixes: min, max, sum, avg. 
 This suffix could be used as a suggestion to specify how storage could compress cold data.   
 
+## Tags
+Tag is a key-value pair. Similar to lables in Prometheus or tags in InfluxDB 
+
 
 ## Metric reporting
 How to register Profiler Reporter and start to record metrics to external storage.
@@ -220,3 +223,9 @@ https://github.com/openzipkin/zipkin/
 
 Dropwizard metrics:  
 https://github.com/dropwizard/metrics
+
+## Source guidebook
+There are to type of tags:
+* tag as part of idenity of ProfiledCall or Indicator, provided manually by a user during metric construction.
+* auto tag that assigned by Tagger based on Identity name. 
+  

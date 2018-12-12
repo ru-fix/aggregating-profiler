@@ -6,6 +6,7 @@ import ru.fix.aggregating.profiler.ProfiledCall;
 import ru.fix.aggregating.profiler.ThrowableRunnable;
 import ru.fix.aggregating.profiler.ThrowableSupplier;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -23,24 +24,45 @@ public class AggregatingCall implements ProfiledCall {
 
     final CallAggregateMutator aggregateMutator;
 
-    final String profiledCallName;
+    final Identity identity;
 
     public AggregatingCall(String profiledCallName, CallAggregateMutator aggregateMutator) {
         this.aggregateMutator = aggregateMutator;
-        this.profiledCallName = profiledCallName;
+        this.identity = new Identity(profiledCallName);
+    }
+
+    public AggregatingCall(String profiledCallName, String[] tags, CallAggregateMutator aggregateMutator) {
+        this.aggregateMutator = aggregateMutator;
+        this.identity = new Identity(profiledCallName);
+
+        if (tags.length % 2 != 0) {
+            throw new IllegalArgumentException("Invalid tags array size: " + tags.length + ". Expected even size.")
+        }
+        for (int i = 0; i < tags.length - 1; i += 2) {
+            this.identity.setTag(tags[i], tags[i + 1]);
+        }
+    }
+
+    public AggregatingCall(String profiledCallName, Map<String, String> tags, CallAggregateMutator aggregateMutator) {
+        this.aggregateMutator = aggregateMutator;
+        this.identity = new Identity(profiledCallName);
+
+        for (Map.Entry<String, String> tag : tags.entrySet()) {
+            this.identity.setTag(tag.getKey(), tag.getValue());
+        }
     }
 
     @Override
     public void call() {
         aggregateMutator.updateAggregate(
-                profiledCallName,
+                identity,
                 aggregate -> aggregate.call(System.currentTimeMillis(), 0, 1));
     }
 
     @Override
     public void call(long payload) {
         aggregateMutator.updateAggregate(
-                profiledCallName,
+                identity,
                 aggregate -> aggregate.call(System.currentTimeMillis(), 0, 1));
     }
 
@@ -49,20 +71,20 @@ public class AggregatingCall implements ProfiledCall {
         Long currentTime = System.currentTimeMillis();
 
         aggregateMutator.updateAggregate(
-                profiledCallName,
+                identity,
                 aggregate -> aggregate.call(currentTime, currentTime - startTime, payload));
     }
 
     @Override
     public ProfiledCall start() {
         if (!started.compareAndSet(false, true)) {
-            throw new IllegalArgumentException("Start method was already called." +
-                    " Profiled call: " + profiledCallName);
+            throw new IllegalStateException("Start method was already called." +
+                    " Profiled call: " + identity);
         }
         startNanoTime.set(System.nanoTime());
 
         aggregateMutator.updateAggregate(
-                profiledCallName,
+                identity,
                 aggregate -> aggregate.start(this));
         return this;
     }
@@ -70,7 +92,7 @@ public class AggregatingCall implements ProfiledCall {
     @Override
     public void stop(long payload) {
         if (!started.compareAndSet(true, false)) {
-            log.warn("Stop method called on profiler call that currently is not running: {}", profiledCallName);
+            log.warn("Stop method called on profiler call that currently is not running: {}", identity);
             return;
         }
 
@@ -81,7 +103,7 @@ public class AggregatingCall implements ProfiledCall {
         long latencyValue = (System.nanoTime() - startNanoTime.get()) / 1000000;
 
         aggregateMutator.updateAggregate(
-                profiledCallName,
+                identity,
                 aggregate -> aggregate.stop(this, System.currentTimeMillis(), latencyValue, payload));
     }
 
@@ -194,12 +216,12 @@ public class AggregatingCall implements ProfiledCall {
             return;
         }
         aggregateMutator.updateAggregate(
-                profiledCallName,
+                identity,
                 aggregate -> aggregate.close(this));
     }
 
     @Override
     public String toString() {
-        return profiledCallName;
+        return identity.toString();
     }
 }

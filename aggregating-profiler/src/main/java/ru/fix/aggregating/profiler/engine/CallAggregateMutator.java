@@ -4,5 +4,5 @@ import java.util.function.Consumer;
 
 @FunctionalInterface
 public interface CallAggregateMutator {
-    void updateAggregate(String profiledCallName, Consumer<CallAggregate> updateAction);
+    void updateAggregate(Identity profiledCallName, Consumer<CallAggregate> updateAction);
 }

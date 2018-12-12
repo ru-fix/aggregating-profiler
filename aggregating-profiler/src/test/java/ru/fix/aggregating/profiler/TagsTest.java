@@ -7,10 +7,22 @@ public class TagsTest {
     public void simple_tags() {
 
         AggregatingProfiler profiler = new AggregatingProfiler();
+
+        ProfiledCall secondCall = profiler.profiledCall(
+                "name",
+                "filial", "12",
+                "serviceId", "4",
+                "another", "regular"
+        );
+
+        profiler.profiledCall("name2", tags)
+
+
         ProfiledCall call = profiler.profiledCall("action")
                 .tag("filial", "12")
                 .tag("serviceId", "4")
                 .start();
+
 
         call.stop();
 
