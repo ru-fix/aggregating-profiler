@@ -198,7 +198,14 @@ Tags works similar to labels in Prometheus or tags in InfluxDB.
 Labels is a key-value pair that is automatically linked with metrics in runtime.
 User can setup RegexpLabelSticker or custom LabelSticker for Profiler instance.
 Then we can use Labels to filter particular metrics in Reporter.
-  
+
+Tag is a part of identity of ProfiledCall or Indicator.
+Tag provided manually by a user during metric construction.
+
+Label is a metadata associated with aggregate that is being assigned by LabelSticker.
+User can define LabelSticker for Profiler.
+You can build report only for part of metrics selected by labels.
+This mechanism allows to report and aggregate different types of metrics with different rate and granularity.    
 
 
 ## Metric reporting
@@ -259,9 +266,4 @@ https://github.com/dropwizard/metrics
 
 ## Source guidebook
 
-* tag is a part of identity of ProfiledCall or Indicator. Tag provided manually by a user during metric construction.
-* label is a metadata associated with aggregate that is being assigned by LabelSticker.
-  User can define LabelSticker for Profiler.
-  You can build report only for part of metrics selected by labels.
-  This mechanism allows to report and aggregate different types of metrics with different rate and granularity.  
   
