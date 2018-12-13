@@ -23,7 +23,9 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 import ru.fix.aggregating.profiler.AggregatingProfiler
+import ru.fix.aggregating.profiler.Identity
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -47,8 +49,8 @@ interface PrometheusApi {
     @POST("-/reload")
     fun reload(): Call<ResponseBody>
 
-    @GET("api/v1/query?query=testMetric_indicatorMax")
-    fun query(): Call<ResponseBody>
+    @GET("api/v1/query")
+    fun query(@Query("query") query: String): Call<ResponseBody>
 }
 
 
@@ -57,6 +59,7 @@ class PrometheusIntegrationTest {
     @Test
     fun `prometheus polls metrics and user queries them`() {
         val profiler = AggregatingProfiler()
+
         profiler.attachIndicator("testMetric") { 43L }
 
         val reporter = profiler.createReporter()
@@ -74,6 +77,9 @@ class PrometheusIntegrationTest {
 
                             override fun transform(request: Request?, response: Response?, files: FileSource?, parameters: Parameters?): Response {
                                 metricsRequestedByPrometheusFlag.set(true)
+
+                                profiler.profiledCall(Identity("myCall", mapOf("type" to "hard"))).call()
+
                                 return Response.Builder.like(response)
                                         .but().body(prometheusReporter.buildReportAndReset())
                                         .build()
@@ -97,10 +103,6 @@ class PrometheusIntegrationTest {
             writeText("""
                 |global:
                 |  scrape_interval: 1s
-                |scrape_configs:
-                |- job_name: integrationTest
-                |  static_configs:
-                |  - targets: ['127.0.0.1:${endpont.port()}']
                 """.trimMargin())
         }.absoluteFile
 
@@ -140,7 +142,18 @@ class PrometheusIntegrationTest {
 
         await("Metrics returned from prometheus")
                 .timeout(Duration.FIVE_MINUTES)
-                .until({ prometheusApi.query().execute().body()!!.string() }, Matchers.containsString("43"))
+                .until({ prometheusApi.query("testMetric").execute().body()!!.string() }, Matchers.containsString("43"))
+
+        await("Metrics returned from prometheus")
+                .timeout(Duration.FIVE_MINUTES)
+                .until({ prometheusApi.query("myCall_callsCountSum").execute().body()!!.string() },
+                        Matchers.allOf(
+                                Matchers.containsString("myCall_callsCountSum"),
+                                Matchers.containsString("type"),
+                                Matchers.containsString("hard"),
+                                Matchers.containsString("1")
+                        )
+                )
 
         endpont.stop()
         prometheus.stop()

@@ -34,7 +34,7 @@ public abstract class GraphiteSocket implements AutoCloseable {
                     .append(' ')
                     .append(entity.getValue())
                     .append(' ')
-                    .append(entity.getTimeInSec())
+                    .append(entity.getTimestampSec())
                     .append('\n');
             if (numberMetricsInBatch >= metricBatchSize || !iterator.hasNext()) {
                 write(lines.toString());

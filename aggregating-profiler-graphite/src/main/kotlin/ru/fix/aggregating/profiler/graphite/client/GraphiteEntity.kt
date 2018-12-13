@@ -1,7 +1,7 @@
 package ru.fix.aggregating.profiler.graphite.client
 
 
-class GraphiteEntity(
+data class GraphiteEntity(
         val name: String,
         val value: String,
-        val timeInSec: Long)
+        val timestampSec: Long)

@@ -107,7 +107,7 @@ class GraphiteReporterTest {
 
         await().until(
                 {
-                    graphiteApi.query(target = "metricPrefix.indicator1", from = "-2minutes")
+                    graphiteApi.query(target = "metricPrefix.indicator1.indicatorMax", from = "-2minutes")
                             .execute()
                             .body()?.string()
                 },
@@ -115,7 +115,7 @@ class GraphiteReporterTest {
 
         await().until(
                 {
-                    graphiteApi.query(target = "metricPrefix.indicator2", from = "-2minutes")
+                    graphiteApi.query(target = "metricPrefix.indicator2.indicatorMin", from = "-2minutes")
                             .execute()
                             .body()?.string()
                 },
