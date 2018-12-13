@@ -65,7 +65,7 @@ class GraphiteReporterTest {
         graphiteWriter.connect(GraphiteSettings(
                 graphite.writePort,
                 graphite.writeHost,
-                0,
+                500,
                 ProtocolType.TCP
         ))
 
@@ -107,7 +107,7 @@ class GraphiteReporterTest {
 
         await().until(
                 {
-                    graphiteApi.query(target = "metricPrefix.indicator1.indicatorMax", from = "-2minutes")
+                    graphiteApi.query(target = "metricPrefix.indicator1.indicatorMax", from = "-10minutes")
                             .execute()
                             .body()?.string()
                 },
@@ -115,7 +115,7 @@ class GraphiteReporterTest {
 
         await().until(
                 {
-                    graphiteApi.query(target = "metricPrefix.indicator2.indicatorMin", from = "-2minutes")
+                    graphiteApi.query(target = "metricPrefix.indicator2.indicatorMin", from = "-10minutes")
                             .execute()
                             .body()?.string()
                 },
@@ -123,7 +123,7 @@ class GraphiteReporterTest {
 
         await().until(
                 {
-                    graphiteApi.query(target = "metricPrefix.call1.callsCountSum", from = "-2minutes")
+                    graphiteApi.query(target = "metricPrefix.call1.callsCountSum", from = "-10minutes")
                             .execute()
                             .body()?.string()
                 },
@@ -131,7 +131,7 @@ class GraphiteReporterTest {
 
         await().until(
                 {
-                    graphiteApi.query(target = "metricPrefix.call2.callsThroughputAvg", from = "-2minutes")
+                    graphiteApi.query(target = "metricPrefix.call2.callsThroughputAvg", from = "-10minutes")
                             .execute()
                             .body()?.string()
                 },
