@@ -4,6 +4,7 @@ import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import org.awaitility.Awaitility.await
+import org.awaitility.Duration
 import org.hamcrest.CoreMatchers
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -105,7 +106,7 @@ class GraphiteReporterTest {
         val graphiteApi = retrofit.create(GraphiteApi::class.java)
 
 
-        await().until(
+        await().timeout(Duration.FIVE_MINUTES).until(
                 {
                     graphiteApi.query(target = "metricPrefix.indicator1.indicatorMax", from = "-10minutes")
                             .execute()
@@ -113,15 +114,7 @@ class GraphiteReporterTest {
                 },
                 CoreMatchers.containsString("12.0"))
 
-        await().until(
-                {
-                    graphiteApi.query(target = "metricPrefix.indicator2.indicatorMin", from = "-10minutes")
-                            .execute()
-                            .body()?.string()
-                },
-                CoreMatchers.containsString("42.0"))
-
-        await().until(
+        await().timeout(Duration.FIVE_MINUTES).until(
                 {
                     graphiteApi.query(target = "metricPrefix.call1.callsCountSum", from = "-10minutes")
                             .execute()
@@ -129,7 +122,7 @@ class GraphiteReporterTest {
                 },
                 CoreMatchers.containsString("107.0"))
 
-        await().until(
+        await().timeout(Duration.FIVE_MINUTES).until(
                 {
                     graphiteApi.query(target = "metricPrefix.call2.callsThroughputAvg", from = "-10minutes")
                             .execute()
