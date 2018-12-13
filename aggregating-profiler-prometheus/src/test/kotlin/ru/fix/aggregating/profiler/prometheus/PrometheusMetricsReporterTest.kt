@@ -21,7 +21,7 @@ internal class PrometheusMetricsReporterTest {
         assertThat(report, containsString("TYPE my_first_indicator gauge"))
         assertThat(report, containsString("my_first_indicator 42.0"))
 
-        assertThat(report, containsString("simpleCall_callsCountSum 1.0"))
+        assertThat(report, containsString("simpleCall_stopSum 1.0"))
         println(report)
     }
 
@@ -38,7 +38,7 @@ internal class PrometheusMetricsReporterTest {
         assertThat(report, containsString("TYPE my_first_indicator gauge"))
         assertThat(report, containsString("""my_first_indicator{type="soft"} 42.0"""))
 
-        assertThat(report, containsString("""simpleCall_callsCountSum{rate="fast",type="hard"} 1.0"""))
+        assertThat(report, containsString("""simpleCall_stopSum{rate="fast",type="hard"} 1.0"""))
         println(report)
     }
 }

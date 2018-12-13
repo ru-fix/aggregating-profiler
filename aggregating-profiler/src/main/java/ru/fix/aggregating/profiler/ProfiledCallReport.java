@@ -15,8 +15,8 @@ public class ProfiledCallReport {
     long latencyMax;
     long latencyAvg;
 
-    double callsThroughputAvg;
-    long callsCountSum;
+    double stopThroughputAvg;
+    long stopSum;
 
     long startSum;
     double startThroughputAvg;
@@ -31,7 +31,7 @@ public class ProfiledCallReport {
     long payloadSum;
     double payloadThroughputAvg;
 
-    long throughputPerSecondMax;
+    long stopThroughputPerSecondMax;
     long payloadThroughputPerSecondMax;
 
     long activeCallsCountMax;
@@ -55,24 +55,30 @@ public class ProfiledCallReport {
 
     public Map<String, Number> asMap() {
         HashMap<String, Number> map = new HashMap<>();
-        map.put("latencyMin", latencyMin);
-        map.put("latencyMax", latencyMax);
-        map.put("latencyAvg", latencyAvg);
-        map.put("callsCountSum", callsCountSum);
+        map.put("reportingTimeAvg", reportingTimeAvg);
+
         map.put("startSum", startSum);
         map.put("startThroughputAvg", startThroughputAvg);
         map.put("startThroughputPerSecondMax", startThroughputPerSecondMax);
-        map.put("callsThroughputAvg", callsThroughputAvg);
-        map.put("reportingTimeAvg", reportingTimeAvg);
+
+        map.put("latencyMin", latencyMin);
+        map.put("latencyMax", latencyMax);
+        map.put("latencyAvg", latencyAvg);
+
+        map.put("activeCallsCountMax", activeCallsCountMax);
+        map.put("activeCallsLatencyMax", activeCallsLatencyMax);
+
         map.put("payloadMin", payloadMin);
         map.put("payloadMax", payloadMax);
         map.put("payloadAvg", payloadAvg);
         map.put("payloadSum", payloadSum);
         map.put("payloadThroughputAvg", payloadThroughputAvg);
-        map.put("throughputPerSecondMax", throughputPerSecondMax);
         map.put("payloadThroughputPerSecondMax", payloadThroughputPerSecondMax);
-        map.put("activeCallsCountMax", activeCallsCountMax);
-        map.put("activeCallsLatencyMax", activeCallsLatencyMax);
+
+        map.put("stopSum", stopSum);
+        map.put("stopThroughputAvg", stopThroughputAvg);
+        map.put("stopThroughputPerSecondMax", stopThroughputPerSecondMax);
+
         return map;
     }
 
@@ -176,22 +182,22 @@ public class ProfiledCallReport {
         return this;
     }
 
-    public long getCallsCountSum() {
-        return callsCountSum;
+    public long getStopSum() {
+        return stopSum;
     }
 
-    public ProfiledCallReport setCallsCountSum(long callsCountSum) {
-        this.callsCountSum = callsCountSum;
+    public ProfiledCallReport setStopSum(long stopSum) {
+        this.stopSum = stopSum;
         return this;
     }
 
 
-    public double getCallsThroughputAvg() {
-        return callsThroughputAvg;
+    public double getStopThroughputAvg() {
+        return stopThroughputAvg;
     }
 
-    public ProfiledCallReport setCallsThroughputAvg(double callsThroughputAvg) {
-        this.callsThroughputAvg = callsThroughputAvg;
+    public ProfiledCallReport setStopThroughputAvg(double stopThroughputAvg) {
+        this.stopThroughputAvg = stopThroughputAvg;
         return this;
     }
 
@@ -204,12 +210,12 @@ public class ProfiledCallReport {
         return this;
     }
 
-    public long getThroughputPerSecondMax() {
-        return throughputPerSecondMax;
+    public long getStopThroughputPerSecondMax() {
+        return stopThroughputPerSecondMax;
     }
 
-    public ProfiledCallReport setThroughputPerSecondMax(long throughputPerSecondMax) {
-        this.throughputPerSecondMax = throughputPerSecondMax;
+    public ProfiledCallReport setStopThroughputPerSecondMax(long stopThroughputPerSecondMax) {
+        this.stopThroughputPerSecondMax = stopThroughputPerSecondMax;
         return this;
     }
 

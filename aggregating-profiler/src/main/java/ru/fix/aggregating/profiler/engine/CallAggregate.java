@@ -18,24 +18,24 @@ public class CallAggregate implements AutoLabelStickerable {
 
     final LongAdder startSumAdder = new LongAdder();
 
-    final LongAdder callsCountSum = new LongAdder();
+    final LongAdder stopSumAdder = new LongAdder();
     final LongAdder latencySum = new LongAdder();
 
     final LongAccumulator latencyMin = new LongAccumulator(Math::min, Long.MAX_VALUE);
     final LongAccumulator latencyMax = new LongAccumulator(Math::max, 0L);
 
 
-    final LongAdder payloadSum = new LongAdder();
+    final LongAdder payloadSumAdder = new LongAdder();
     final LongAccumulator payloadMin = new LongAccumulator(Math::min, Long.MAX_VALUE);
     final LongAccumulator payloadMax = new LongAccumulator(Math::max, 0L);
 
-    final MaxThroughputPerSecondAccumulator maxStartThroughputPerSecond = new MaxThroughputPerSecondAccumulator();
-    final MaxThroughputPerSecondAccumulator maxThroughputPerSecond = new MaxThroughputPerSecondAccumulator();
-    final MaxThroughputPerSecondAccumulator maxPayloadThroughputPerSecond = new MaxThroughputPerSecondAccumulator();
+    final MaxThroughputPerSecondAccumulator startMaxThroughputPerSecondAcc = new MaxThroughputPerSecondAccumulator();
+    final MaxThroughputPerSecondAccumulator stopMaxThroughputPerSecondAcc = new MaxThroughputPerSecondAccumulator();
+    final MaxThroughputPerSecondAccumulator payloadMaxThroughputPerSecondAcc = new MaxThroughputPerSecondAccumulator();
 
     final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
 
-    final LongAdder activeCallsSum = new LongAdder();
+    final LongAdder activeCallsCountSumAdder = new LongAdder();
     final Set<AggregatingCall> activeCalls = ConcurrentHashMap.newKeySet();
 
     final Map<String, String> autoLabels = new ConcurrentHashMap<>();
@@ -43,7 +43,7 @@ public class CallAggregate implements AutoLabelStickerable {
     public CallAggregate(
             Identity callIdentity,
             AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports
-            ) {
+    ) {
         this.callIdentity = callIdentity;
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
 
@@ -59,49 +59,45 @@ public class CallAggregate implements AutoLabelStickerable {
         return this.autoLabels;
     }
 
-    /**
-     * @param currentTimestamp
-     * @param latency Ignored in case of -1
-     * @param payload Ignored in case of -1
-     */
-    public void call(long currentTimestamp, long latency, long payload) {
 
-        callsCountSum.increment();
+    public void call(long currentTimestamp, long latency, long payload) {
+        startSumAdder.increment();
+        stopSumAdder.increment();
 
         latencyMin.accumulate(latency);
-        if(latency > 0) {
+        if (latency > 0) {
             latencySum.add(latency);
             latencyMax.accumulate(latency);
         }
 
         payloadMin.accumulate(payload);
-        if(payload > 0) {
-            payloadSum.add(payload);
+        if (payload > 0) {
+            payloadSumAdder.add(payload);
             payloadMax.accumulate(payload);
         }
 
-
-        maxThroughputPerSecond.call(currentTimestamp, 1);
+        startMaxThroughputPerSecondAcc.call(currentTimestamp, 1);
+        stopMaxThroughputPerSecondAcc.call(currentTimestamp, 1);
 
         if (payload > 0) {
-            maxPayloadThroughputPerSecond.call(currentTimestamp, payload);
+            payloadMaxThroughputPerSecondAcc.call(currentTimestamp, payload);
         }
 
     }
 
-    public void start(AggregatingCall profiledCall, long currentTimestamp){
+    public void start(AggregatingCall profiledCall, long currentTimestamp) {
         startSumAdder.increment();
-        maxStartThroughputPerSecond.call(currentTimestamp, 1);
+        startMaxThroughputPerSecondAcc.call(currentTimestamp, 1);
 
-        activeCallsSum.increment();
-        if(numberOfActiveCallsToTrackAndKeepBetweenReports.get() > 0) {
+        activeCallsCountSumAdder.increment();
+        if (numberOfActiveCallsToTrackAndKeepBetweenReports.get() > 0) {
             activeCalls.add(profiledCall);
         }
 
     }
 
     public void stop(AggregatingCall profiledCall, long currentTimestamp, long latency, long payload) {
-        callsCountSum.increment();
+        stopSumAdder.increment();
 
         latencyMin.accumulate(latency);
         if (latency > 0) {
@@ -112,30 +108,30 @@ public class CallAggregate implements AutoLabelStickerable {
         payloadMin.accumulate(payload);
         if (payload > 0) {
             payloadMax.accumulate(payload);
-            payloadSum.add(payload);
+            payloadSumAdder.add(payload);
         }
 
 
-        maxThroughputPerSecond.call(currentTimestamp, 1);
+        stopMaxThroughputPerSecondAcc.call(currentTimestamp, 1);
         if (payload > 0) {
-            maxPayloadThroughputPerSecond.call(currentTimestamp, payload);
+            payloadMaxThroughputPerSecondAcc.call(currentTimestamp, payload);
         }
 
 
         activeCalls.remove(profiledCall);
-        activeCallsSum.decrement();
+        activeCallsCountSumAdder.decrement();
     }
 
-    public void close(AggregatingCall call){
+    public void close(AggregatingCall call) {
         activeCalls.remove(call);
-        activeCallsSum.decrement();
+        activeCallsCountSumAdder.decrement();
     }
 
     public Optional<AggregatingCall> resetActiveCallsAndGetLongest() {
         if (numberOfActiveCallsToTrackAndKeepBetweenReports.get() == 0) {
-            if(!activeCalls.isEmpty()) {
+            if (!activeCalls.isEmpty()) {
                 activeCalls.clear();
-                activeCallsSum.reset();
+                activeCallsCountSumAdder.reset();
             }
             return Optional.empty();
         }
@@ -160,42 +156,41 @@ public class CallAggregate implements AutoLabelStickerable {
     }
 
     public ProfiledCallReport buildReportAndReset(long elapsed) {
-        long callsCount = LongAdderDrainer.drain(callsCountSum);
         long startSum = LongAdderDrainer.drain(startSumAdder);
+        long stopSum = LongAdderDrainer.drain(stopSumAdder);
 
         ProfiledCallReport report = new ProfiledCallReport(this.callIdentity)
-                .setActiveCallsCountMax(activeCallsSum.sum())
-                .setActiveCallsLatencyMax(activeCallsMaxLatencyAndResetActiveCalls())
-                .setReportingTimeAvg(elapsed);
+                .setReportingTimeAvg(elapsed)
 
-        if (callsCount == 0) {
+                .setActiveCallsCountMax(activeCallsCountSumAdder.sum())
+                .setActiveCallsLatencyMax(activeCallsMaxLatencyAndResetActiveCalls());
+
+        if (stopSum == 0) {
             return report;
         }
 
-        long payloadTotal = LongAdderDrainer.drain(payloadSum);
+        long payloadSum = LongAdderDrainer.drain(payloadSumAdder);
 
         return report
+                .setStartSum(startSum)
+                .setStartThroughputPerSecondMax(startMaxThroughputPerSecondAcc.getAndReset(System.currentTimeMillis()))
+                .setStartThroughputAvg(elapsed != 0 ? ((double) startSum * 1000) / elapsed : 0)
+
                 .setLatencyMin(latencyMin.getThenReset())
                 .setLatencyMax(latencyMax.getThenReset())
-                .setLatencyAvg(LongAdderDrainer.drain(latencySum) / callsCount)
-
-                .setCallsThroughputAvg(elapsed != 0 ? ((double)callsCount * 1000) / elapsed : 0)
-
-                .setCallsCountSum(callsCount)
-
-                .setStartSum(startSum)
-                .setStartThroughputPerSecondMax(maxStartThroughputPerSecond.getAndReset(System.currentTimeMillis()))
-                .setStartThroughputAvg(elapsed != 0 ? ((double)startSum * 1000) / elapsed : 0)
+                .setLatencyAvg(LongAdderDrainer.drain(latencySum) / stopSum)
 
                 .setPayloadMin(payloadMin.getThenReset())
                 .setPayloadMax(payloadMax.getThenReset())
-                .setPayloadSum(payloadTotal)
-                .setPayloadAvg(payloadTotal / callsCount)
+                .setPayloadSum(payloadSum)
+                .setPayloadAvg(payloadSum / stopSum)
+                .setPayloadThroughputAvg(elapsed != 0 ? ((double) payloadSum * 1000) / elapsed : 0)
+                .setPayloadThroughputPerSecondMax(payloadMaxThroughputPerSecondAcc.getAndReset(System.currentTimeMillis()))
 
-                .setPayloadThroughputAvg(elapsed != 0 ? ((double)payloadTotal * 1000) / elapsed : 0)
-
-                .setThroughputPerSecondMax(maxThroughputPerSecond.getAndReset(System.currentTimeMillis()))
-                .setPayloadThroughputPerSecondMax(maxPayloadThroughputPerSecond.getAndReset(System.currentTimeMillis()));
+                .setStopSum(stopSum)
+                .setStopThroughputAvg(elapsed != 0 ? ((double) stopSum * 1000) / elapsed : 0)
+                .setStopThroughputPerSecondMax(stopMaxThroughputPerSecondAcc.getAndReset(System.currentTimeMillis()))
+                ;
     }
 
     private long activeCallsMaxLatencyAndResetActiveCalls() {

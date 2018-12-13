@@ -34,13 +34,9 @@ public interface ProfiledCall extends AutoCloseable {
 //TODO: implement stop and stop(value) in different way, so in case of stop() there will be no Paylaod* metrics reported
 
     /**
-     * Same as stop(1)
-     *
-     * @see #stop(long)
+     * Stop profiled call without any payload
      */
-    default void stop() {
-        stop(1);
-    }
+    void stop();
 
     /**
      * Call if profiled code executed normally. Applies all measurement to overall metrics.

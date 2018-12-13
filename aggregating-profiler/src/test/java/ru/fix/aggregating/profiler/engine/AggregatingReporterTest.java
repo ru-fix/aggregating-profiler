@@ -42,8 +42,8 @@ public class AggregatingReporterTest {
 
         ProfiledCallReport report = getCallReport(reporter.buildReportAndReset());
 
-        assertEquals(1, report.getCallsCountSum());
-        assertEquals(1, report.getPayloadSum());
+        assertEquals(1, report.getStopSum());
+        assertEquals(0, report.getPayloadSum());
         assertTrue(report.getReportingTimeAvg() < 1000, "report time is not correct: " + report);
     }
 
@@ -55,7 +55,7 @@ public class AggregatingReporterTest {
 
         ProfiledCallReport report = getCallReport(reporter.buildReportAndReset());
 
-        assertEquals(1, report.getCallsCountSum());
+        assertEquals(1, report.getStopSum());
         assertEquals(30, report.getPayloadSum());
     }
 

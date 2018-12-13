@@ -36,6 +36,11 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
+        public void stop() {
+
+        }
+
+        @Override
         public void stopIfRunning(long payload) {
         }
 

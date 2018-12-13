@@ -73,15 +73,15 @@ class GraphiteReporterTest {
         val reportWriter = GraphiteReportWriter("metricPrefix", graphiteWriter)
 
         val callReport1 = ProfiledCallReport(Identity("call1")).apply {
-            callsCountSum = 107
+            stopSum = 107
             reportingTimeAvg = 60_000
         }
 
 
         val callReport2 = ProfiledCallReport(Identity("call2")).apply {
-            callsCountSum = 108
+            stopSum = 108
             reportingTimeAvg = 60_000
-            callsThroughputAvg = 12.25
+            stopThroughputAvg = 12.25
         }
 
         val profilerReport = ProfilerReport(
@@ -116,7 +116,7 @@ class GraphiteReporterTest {
 
         await().timeout(Duration.FIVE_MINUTES).until(
                 {
-                    graphiteApi.query(target = "metricPrefix.call1.callsCountSum", from = "-10minutes")
+                    graphiteApi.query(target = "metricPrefix.call1.stopSum", from = "-10minutes")
                             .execute()
                             .body()?.string()
                 },
@@ -124,7 +124,7 @@ class GraphiteReporterTest {
 
         await().timeout(Duration.FIVE_MINUTES).until(
                 {
-                    graphiteApi.query(target = "metricPrefix.call2.callsThroughputAvg", from = "-10minutes")
+                    graphiteApi.query(target = "metricPrefix.call2.stopThroughputAvg", from = "-10minutes")
                             .execute()
                             .body()?.string()
                 },

@@ -66,8 +66,8 @@ public class AggregatingProfilerTest {
             ProfiledCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertThat(report.callsThroughputAvg, lessThanOrEqualTo(70.0));
-            assertThat(report.callsThroughputAvg, greaterThanOrEqualTo(40.0));
+            assertThat(report.stopThroughputAvg, lessThanOrEqualTo(70.0));
+            assertThat(report.stopThroughputAvg, greaterThanOrEqualTo(40.0));
         }
     }
 
@@ -264,9 +264,9 @@ public class AggregatingProfilerTest {
         log.info("Report: {}", report);
 
         ProfiledCallReport callReport = report.getProfilerCallReports().get(0);
-        assertEquals(1, callReport.payloadMin);
+        assertEquals(0, callReport.payloadMin);
         assertEquals(12, callReport.payloadMax);
-        assertEquals(1 + 12 + 6, callReport.payloadSum);
+        assertEquals(0 + 12 + 6, callReport.payloadSum);
     }
 
     @Test
@@ -288,9 +288,9 @@ public class AggregatingProfilerTest {
         ProfilerReport report = reporter.buildReportAndReset();
         assertTrue(report.getIndicators().isEmpty());
         assertEquals(2, report.getProfilerCallReports().size());
-        assertEquals(2L, report.getProfilerCallReports().get(0).getCallsCountSum());
+        assertEquals(2L, report.getProfilerCallReports().get(0).getStopSum());
         assertEquals("call_1", report.getProfilerCallReports().get(0).getIdentity().getName());
-        assertEquals(1L, report.getProfilerCallReports().get(1).getCallsCountSum());
+        assertEquals(1L, report.getProfilerCallReports().get(1).getStopSum());
         assertEquals("call_2", report.getProfilerCallReports().get(1).getIdentity().getName());
 
         call2.start();
@@ -303,7 +303,7 @@ public class AggregatingProfilerTest {
         report = reporter.buildReportAndReset();
         assertTrue(report.getIndicators().isEmpty());
         assertEquals(1, report.getProfilerCallReports().size());
-        assertEquals(3L, report.getProfilerCallReports().get(0).getCallsCountSum());
+        assertEquals(3L, report.getProfilerCallReports().get(0).getStopSum());
         assertEquals("call_2", report.getProfilerCallReports().get(0).getIdentity().getName());
     }
 
@@ -349,7 +349,7 @@ public class AggregatingProfilerTest {
 
         long callCountFromReports = reports.stream()
                 .flatMap(profilerReport -> profilerReport.getProfilerCallReports().stream())
-                .map(ProfiledCallReport::getCallsCountSum)
+                .map(ProfiledCallReport::getStopSum)
                 .reduce(0L, Long::sum);
 
 

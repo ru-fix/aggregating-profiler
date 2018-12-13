@@ -124,7 +124,7 @@ Latency is the time in milliseconds between two points: profiledCall start and s
   - latencyAvg = (1000+1000+400+500) / 4 = 725
    
 Total calls count will be 4.  
-  - callsCountSum - 4 - how many times profiledCall was invoked
+  - stopSum - 4 - how many times profiledCall was invoked
 
 Profiled call #6 not started during current reporting period and will be ignored.
 Profiled call #7 started during current reporting period but not stopped yet. 
@@ -139,16 +139,16 @@ Total count of active calls are 2.
  
 ![](docs/metric-example-throughput.png?raw=true "Graph View")
 
-There are two metrics that measure throughput: callsThroughputAvg and throughputPerSecondMax.
+There are two metrics that measure throughput: stopThroughputAvg and stopThroughputPerSecondMax.
 In given example there was  9 invocations during 1 minute:   
 9 / 60  =  0.15 invocation per second
-- callsThroughputAvg - 0.15
+- stopThroughputAvg - 0.15
 
 During reporting period there was time then invocations occurred most often.  
 We can find time interval of size 1 second where were 4 invocations.
 This means that during reporting period there was time when throughput reached 4 invocations per second.  
 And average throughput during reporting period of 1 minute is only 0.15 invocation per second. 
-- throughputPerSecondMax - 4
+- stopThroughputPerSecondMax - 4
  
 
 #### Metrics summary
@@ -158,8 +158,8 @@ And average throughput during reporting period of 1 minute is only 0.15 invocati
    - latencyMax maximum latency
    - latencyMin minimum latency
    - latencyAvg average latency
- - callsCountSum - how many times profiledCall was invoked
- - callsThroughputAvg - average rate of profiledCall invocation per second 
+ - stopSum - how many times profiledCall was invoked
+ - stopThroughputAvg - average rate of profiledCall invocation per second 
  - payload - payload provided via stop method of profiledCall
    - payloadMin - min value of payload
    - payloadMax - max value of payload
@@ -170,7 +170,7 @@ And average throughput during reporting period of 1 minute is only 0.15 invocati
    - startSum - how many times start method was invoked
    - startThroughputAvg - what is an average throughput for start invocation
    - startThroughputPerSecondMax - what is a maximum throughput of start method invocation
- - throughputPerSecondMax - maximum rate within second time interval that was achieved during reporting period 
+ - stopThroughputPerSecondMax - maximum rate within second time interval that was achieved during reporting period 
  (17 means that there was a maximum of 17 invocation within 1 second interval)
  - activeCalls - calls that are still running at the end of reporting period
    - activeCallsCountMax - count of active calls that still running at the end of reporting period  

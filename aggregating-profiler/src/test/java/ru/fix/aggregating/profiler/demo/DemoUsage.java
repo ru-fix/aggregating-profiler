@@ -37,7 +37,7 @@ public class DemoUsage {
 
             // "call.name" was called only once
             assertEquals("call.name", profiledCallReport.getIdentity().getName());
-            assertEquals(1, profiledCallReport.getCallsCountSum());
+            assertEquals(1, profiledCallReport.getStopSum());
         }
     }
 
@@ -72,14 +72,14 @@ public class DemoUsage {
             assertEquals(1, reportContains1.getProfilerCallReports().size());
             ProfiledCallReport profiledCallReport = reportContains1.getProfilerCallReports().get(0);
             assertEquals("call1.name", profiledCallReport.getIdentity().getName());
-            assertEquals(1, profiledCallReport.getCallsCountSum());
+            assertEquals(1, profiledCallReport.getStopSum());
 
             // report for default group
             ProfilerReport reportDefaults = reporter.buildReportAndReset(notContainsLabel(testTag));
             assertEquals(1, reportDefaults.getProfilerCallReports().size());
             ProfiledCallReport profiledCallReportDefault = reportDefaults.getProfilerCallReports().get(0);
             assertEquals("call2.name", profiledCallReportDefault.getIdentity().getName());
-            assertEquals(1, profiledCallReportDefault.getCallsCountSum());
+            assertEquals(1, profiledCallReportDefault.getStopSum());
 
             // report for all, ignore group
             profiler.profiledCall("call1.name").call();

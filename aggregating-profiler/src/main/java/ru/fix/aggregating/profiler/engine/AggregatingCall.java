@@ -35,14 +35,14 @@ public class AggregatingCall implements ProfiledCall {
     public void call() {
         aggregateMutator.updateAggregate(
                 identity,
-                aggregate -> aggregate.call(System.currentTimeMillis(), 0, 1));
+                aggregate -> aggregate.call(System.currentTimeMillis(), 0, 0));
     }
 
     @Override
     public void call(long payload) {
         aggregateMutator.updateAggregate(
                 identity,
-                aggregate -> aggregate.call(System.currentTimeMillis(), 0, 1));
+                aggregate -> aggregate.call(System.currentTimeMillis(), 0, payload));
     }
 
     @Override
@@ -78,6 +78,16 @@ public class AggregatingCall implements ProfiledCall {
         updateCountersOnStop(payload);
     }
 
+    @Override
+    public void stop() {
+        if (!started.compareAndSet(true, false)) {
+            log.warn("Stop method called on profiler call that currently is not running: {}", identity);
+            return;
+        }
+
+        updateCountersOnStop(0);
+    }
+
     private void updateCountersOnStop(long payload) {
         long latencyValue = (System.nanoTime() - startNanoTime.get()) / 1000000;
 
@@ -85,6 +95,8 @@ public class AggregatingCall implements ProfiledCall {
                 identity,
                 aggregate -> aggregate.stop(this, System.currentTimeMillis(), latencyValue, payload));
     }
+
+
 
     public long startNanoTime() {
         return startNanoTime.get();

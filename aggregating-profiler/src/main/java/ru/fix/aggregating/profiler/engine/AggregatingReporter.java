@@ -138,7 +138,7 @@ public class AggregatingReporter implements ProfilerReporter {
             // but not yet incremented counters in it.
             // ProfiledCall will increment counters in CallAggregate that will be destroyed by GC,
             // and will never be accessed by ProfilerReporter
-            if (counterReport.getCallsCountSum() == 0 && counterReport.getActiveCallsCountMax() == 0) {
+            if (counterReport.getStopSum() == 0 && counterReport.getActiveCallsCountMax() == 0) {
                 iterator.remove();
                 continue;
             }

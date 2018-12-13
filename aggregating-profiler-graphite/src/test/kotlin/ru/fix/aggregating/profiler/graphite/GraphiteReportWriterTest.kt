@@ -59,7 +59,7 @@ class GraphiteReportWriterTest {
         assertEntryExist { name == "indicator1.indicatorMin" && value =="42" }
         assertEntryExist { name == "indicator2.type.hard.indicatorMax" && value =="43" }
         assertEntryExist { name == "indicator2.type.hard.indicatorMin" && value =="43" }
-        assertEntryExist { name == "call1.callsCountSum" && value == "1" }
-        assertEntryExist { name == "call2.type.soft.callsCountSum" && value == "1" }
+        assertEntryExist { name == "call1.stopSum" && value == "1" }
+        assertEntryExist { name == "call2.type.soft.stopSum" && value == "1" }
     }
 }

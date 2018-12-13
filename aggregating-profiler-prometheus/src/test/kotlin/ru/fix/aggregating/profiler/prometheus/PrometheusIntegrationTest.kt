@@ -146,9 +146,9 @@ class PrometheusIntegrationTest {
 
         await("Metrics returned from prometheus")
                 .timeout(Duration.FIVE_MINUTES)
-                .until({ prometheusApi.query("myCall_callsCountSum").execute().body()!!.string() },
+                .until({ prometheusApi.query("myCall_stopSum").execute().body()!!.string() },
                         Matchers.allOf(
-                                Matchers.containsString("myCall_callsCountSum"),
+                                Matchers.containsString("myCall_stopSum"),
                                 Matchers.containsString("type"),
                                 Matchers.containsString("hard"),
                                 Matchers.containsString("1")
