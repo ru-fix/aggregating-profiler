@@ -259,6 +259,9 @@ https://github.com/dropwizard/metrics
 
 ## Source guidebook
 
-* tag as part of idenity of ProfiledCall or Indicator, provided manually by a user during metric construction.
-* auto tag that assigned by Tagger based on Identity name. 
+* tag is a part of identity of ProfiledCall or Indicator. Tag provided manually by a user during metric construction.
+* label is a metadata associated with aggregate that is being assigned by LabelSticker.
+  User can define LabelSticker for Profiler.
+  You can build report only for part of metrics selected by labels.
+  This mechanism allows to report and aggregate different types of metrics with different rate and granularity.  
   
