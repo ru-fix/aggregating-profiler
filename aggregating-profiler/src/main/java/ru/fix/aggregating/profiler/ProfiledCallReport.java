@@ -1,11 +1,15 @@
 package ru.fix.aggregating.profiler;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 /**
  * @author Kamil Asfandiyarov
  */
 public class ProfiledCallReport {
 
-    final String name;
+    final Identity identity;
 
     long latencyMin;
     long latencyMax;
@@ -13,6 +17,11 @@ public class ProfiledCallReport {
 
     double callsThroughputAvg;
     long callsCountSum;
+
+    long startSum;
+    double startThroughputAvg;
+    long startThroughputPerSecondMax;
+
 
     long reportingTimeAvg;
 
@@ -28,32 +37,43 @@ public class ProfiledCallReport {
     long activeCallsCountMax;
     long activeCallsLatencyMax;
 
-    public ProfiledCallReport(String name) {
-        this.name = name;
+
+    public ProfiledCallReport(Identity identity) {
+        this.identity = identity;
     }
 
     @Override
     public String toString() {
-        return "" + getName() + ":" +
-                " LatMin: " + latencyMin +
-                ", LatMax: " + latencyMax +
-                ", LatAvg: " + latencyAvg +
-                ", CallsCntSum: " + callsCountSum +
-                ", CallsThrptAvg: " + callsThroughputAvg +
-                ", RepTimeAvg: " + reportingTimeAvg +
-                ", PldMin " + payloadMin +
-                ", PldMax " + payloadMax +
-                ", PldAvg " + payloadAvg +
-                ", PldSum: " + payloadSum +
-                ", PldThrptAvg: " + payloadThroughputAvg +
-                ", ThrptPerSecMax: " + throughputPerSecondMax +
-                ", PldThrptPerSecMax: " + payloadThroughputPerSecondMax +
-                ", ActCallsCnt: " + activeCallsCountMax +
-                ", ActCallsLatMax: " + activeCallsLatencyMax;
+        return asMap().entrySet().stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .collect(Collectors.joining(", ", "" + getIdentity() + ": ", ""));
     }
 
-    public String getName() {
-        return name;
+    public Identity getIdentity() {
+        return identity;
+    }
+
+    public Map<String, Number> asMap() {
+        HashMap<String, Number> map = new HashMap<>();
+        map.put("latencyMin", latencyMin);
+        map.put("latencyMax", latencyMax);
+        map.put("latencyAvg", latencyAvg);
+        map.put("callsCountSum", callsCountSum);
+        map.put("startSum", startSum);
+        map.put("startThroughputAvg", startThroughputAvg);
+        map.put("startThroughputPerSecondMax", startThroughputPerSecondMax);
+        map.put("callsThroughputAvg", callsThroughputAvg);
+        map.put("reportingTimeAvg", reportingTimeAvg);
+        map.put("payloadMin", payloadMin);
+        map.put("payloadMax", payloadMax);
+        map.put("payloadAvg", payloadAvg);
+        map.put("payloadSum", payloadSum);
+        map.put("payloadThroughputAvg", payloadThroughputAvg);
+        map.put("throughputPerSecondMax", throughputPerSecondMax);
+        map.put("payloadThroughputPerSecondMax", payloadThroughputPerSecondMax);
+        map.put("activeCallsCountMax", activeCallsCountMax);
+        map.put("activeCallsLatencyMax", activeCallsLatencyMax);
+        return map;
     }
 
     public long getLatencyMin() {
@@ -68,6 +88,32 @@ public class ProfiledCallReport {
         return latencyAvg;
     }
 
+    public long getStartSum() {
+        return startSum;
+    }
+
+    public ProfiledCallReport setStartSum(long startSum) {
+        this.startSum = startSum;
+        return this;
+    }
+
+    public double getStartThroughputAvg() {
+        return startThroughputAvg;
+    }
+
+    public ProfiledCallReport setStartThroughputAvg(double startThroughputAvg) {
+        this.startThroughputAvg = startThroughputAvg;
+        return this;
+    }
+
+    public long getStartThroughputPerSecondMax() {
+        return startThroughputPerSecondMax;
+    }
+
+    public ProfiledCallReport setStartThroughputPerSecondMax(long startThroughputPerSecondMax) {
+        this.startThroughputPerSecondMax = startThroughputPerSecondMax;
+        return this;
+    }
 
     public long getReportingTimeAvg() {
         return reportingTimeAvg;

@@ -3,10 +3,7 @@ package ru.fix.aggregating.profiler.engine;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.fix.aggregating.profiler.AggregatingProfiler;
-import ru.fix.aggregating.profiler.ProfiledCall;
-import ru.fix.aggregating.profiler.ProfiledCallReport;
-import ru.fix.aggregating.profiler.ProfilerReport;
+import ru.fix.aggregating.profiler.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -102,7 +99,7 @@ public class AggregatingReporterActiveCallsTest {
 
         reporter.buildReportAndReset();
 
-        reporter.updateCallAggregates("Test", counters -> {
+        reporter.updateCallAggregates(new Identity("Test"), counters -> {
             assertEquals(numberOfActiveCallsToTrackAndKeepBetweenReports, counters.activeCalls.size());
             assertTrue(counters.activeCalls.containsAll(longestCalls));
         });
@@ -122,7 +119,7 @@ public class AggregatingReporterActiveCallsTest {
 
         reporter.buildReportAndReset();
 
-        reporter.updateCallAggregates("Test", counters -> {
+        reporter.updateCallAggregates(new Identity("Test"), counters -> {
             assertEquals(numberOfActiveCallsToTrackAndKeepBetweenReports, counters.activeCalls.size());
             assertTrue(counters.activeCalls.containsAll(longestCalls));
         });
@@ -138,7 +135,7 @@ public class AggregatingReporterActiveCallsTest {
         reporter.buildReportAndReset();
 
 
-        reporter.updateCallAggregates("Test", counters ->
+        reporter.updateCallAggregates(new Identity("Test"), counters ->
                 assertTrue(counters.activeCalls.isEmpty())
         );
     }

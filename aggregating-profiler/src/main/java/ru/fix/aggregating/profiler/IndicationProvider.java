@@ -5,5 +5,6 @@ package ru.fix.aggregating.profiler;
  */
 @FunctionalInterface
 public interface IndicationProvider {
+    //TODO: change indicator value to double
     Long get() throws Exception;
 }

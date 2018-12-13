@@ -1,14 +1,9 @@
 package ru.fix.aggregating.profiler.engine;
 
+import ru.fix.aggregating.profiler.Identity;
 import ru.fix.aggregating.profiler.ProfiledCallReport;
-import ru.fix.aggregating.profiler.Tagged;
 
-import java.util.Comparator;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAccumulator;
@@ -17,9 +12,11 @@ import java.util.concurrent.atomic.LongAdder;
 /**
  * @author Kamil Asfandiyarov
  */
-public class CallAggregate implements Tagged {
+public class CallAggregate implements AutoLabelStickerable {
 
-    final String callName;
+    final Identity callIdentity;
+
+    final LongAdder startSumAdder = new LongAdder();
 
     final LongAdder callsCountSum = new LongAdder();
     final LongAdder latencySum = new LongAdder();
@@ -32,6 +29,7 @@ public class CallAggregate implements Tagged {
     final LongAccumulator payloadMin = new LongAccumulator(Math::min, Long.MAX_VALUE);
     final LongAccumulator payloadMax = new LongAccumulator(Math::max, 0L);
 
+    final MaxThroughputPerSecondAccumulator maxStartThroughputPerSecond = new MaxThroughputPerSecondAccumulator();
     final MaxThroughputPerSecondAccumulator maxThroughputPerSecond = new MaxThroughputPerSecondAccumulator();
     final MaxThroughputPerSecondAccumulator maxPayloadThroughputPerSecond = new MaxThroughputPerSecondAccumulator();
 
@@ -39,32 +37,28 @@ public class CallAggregate implements Tagged {
 
     final LongAdder activeCallsSum = new LongAdder();
     final Set<AggregatingCall> activeCalls = ConcurrentHashMap.newKeySet();
-    final Map<String, String> tags = new ConcurrentHashMap<>();
+
+    final Map<String, String> autoLabels = new ConcurrentHashMap<>();
 
     public CallAggregate(
-            String callName,
+            Identity callIdentity,
             AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports
             ) {
-        this.callName = callName;
+        this.callIdentity = callIdentity;
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
 
     }
 
     @Override
-    public Map<String, String> getTags() {
-        return Collections.unmodifiableMap(this.tags);
+    public void setAutoLabel(String name, String value) {
+        this.autoLabels.put(name, value);
     }
 
     @Override
-    public void setTag(String name, String value) {
-        this.tags.put(name, value);
+    public Map<String, String> getAutoLabels() {
+        return this.autoLabels;
     }
 
-    @Override
-    public boolean hasTag(String tagName, String tagValue) {
-        return tags.containsKey(tagName) && tags.get(tagName).equals(tagValue);
-    }
-    
     /**
      * @param currentTimestamp
      * @param latency Ignored in case of -1
@@ -95,7 +89,10 @@ public class CallAggregate implements Tagged {
 
     }
 
-    public void start(AggregatingCall profiledCall){
+    public void start(AggregatingCall profiledCall, long currentTimestamp){
+        startSumAdder.increment();
+        maxStartThroughputPerSecond.call(currentTimestamp, 1);
+
         activeCallsSum.increment();
         if(numberOfActiveCallsToTrackAndKeepBetweenReports.get() > 0) {
             activeCalls.add(profiledCall);
@@ -164,8 +161,9 @@ public class CallAggregate implements Tagged {
 
     public ProfiledCallReport buildReportAndReset(long elapsed) {
         long callsCount = LongAdderDrainer.drain(callsCountSum);
+        long startSum = LongAdderDrainer.drain(startSumAdder);
 
-        ProfiledCallReport report = new ProfiledCallReport(callName)
+        ProfiledCallReport report = new ProfiledCallReport(this.callIdentity)
                 .setActiveCallsCountMax(activeCallsSum.sum())
                 .setActiveCallsLatencyMax(activeCallsMaxLatencyAndResetActiveCalls())
                 .setReportingTimeAvg(elapsed);
@@ -184,6 +182,10 @@ public class CallAggregate implements Tagged {
                 .setCallsThroughputAvg(elapsed != 0 ? ((double)callsCount * 1000) / elapsed : 0)
 
                 .setCallsCountSum(callsCount)
+
+                .setStartSum(startSum)
+                .setStartThroughputPerSecondMax(maxStartThroughputPerSecond.getAndReset(System.currentTimeMillis()))
+                .setStartThroughputAvg(elapsed != 0 ? ((double)startSum * 1000) / elapsed : 0)
 
                 .setPayloadMin(payloadMin.getThenReset())
                 .setPayloadMax(payloadMax.getThenReset())

@@ -31,6 +31,20 @@ object Libs {
     val jmhGeneratorAnn = "org.openjdk.jmh:jmh-generator-annprocess:${Vers.jmh}"
     val jmhGeneratorBytecode = "org.openjdk.jmh:jmh-generator-bytecode:${Vers.jmh}"
     val shadowPlugin = "com.github.jengelman.gradle.plugins:shadow:2.0.4"
+
+    val testcontainers_core = "org.testcontainers:testcontainers:1.10.2"
+    val lombok = "org.projectlombok:lombok:1.18.4"
+
+    val retrofit = "com.squareup.retrofit2:retrofit:2.5.0"
+    val okhttp_logging = "com.squareup.okhttp3:logging-interceptor:3.12.0"
+    val awaitility = "org.awaitility:awaitility:3.1.4"
+
+    val dynamicPropertyApi = "ru.fix:dynamic-property-api:1.0.5"
+    val jfixStdlibConcurrency = "ru.fix:jfix-stdlib-concurrency:1.0.13"
+    val wiremock = "com.github.tomakehurst:wiremock:2.19.0"
+
+    val mockk = "io.mockk:mockk:1.8.13"
+
 }
 
 

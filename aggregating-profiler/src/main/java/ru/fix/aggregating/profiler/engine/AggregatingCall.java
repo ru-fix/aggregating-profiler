@@ -2,7 +2,9 @@ package ru.fix.aggregating.profiler.engine;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.fix.aggregating.profiler.Identity;
 import ru.fix.aggregating.profiler.ProfiledCall;
+import ru.fix.aggregating.profiler.ThrowableRunnable;
 import ru.fix.aggregating.profiler.ThrowableSupplier;
 
 import java.util.concurrent.CompletableFuture;
@@ -22,24 +24,24 @@ public class AggregatingCall implements ProfiledCall {
 
     final CallAggregateMutator aggregateMutator;
 
-    final String profiledCallName;
+    final Identity identity;
 
-    public AggregatingCall(String profiledCallName, CallAggregateMutator aggregateMutator) {
+    public AggregatingCall(Identity identity, CallAggregateMutator aggregateMutator) {
         this.aggregateMutator = aggregateMutator;
-        this.profiledCallName = profiledCallName;
+        this.identity = identity;
     }
 
     @Override
     public void call() {
         aggregateMutator.updateAggregate(
-                profiledCallName,
+                identity,
                 aggregate -> aggregate.call(System.currentTimeMillis(), 0, 1));
     }
 
     @Override
     public void call(long payload) {
         aggregateMutator.updateAggregate(
-                profiledCallName,
+                identity,
                 aggregate -> aggregate.call(System.currentTimeMillis(), 0, 1));
     }
 
@@ -48,28 +50,28 @@ public class AggregatingCall implements ProfiledCall {
         Long currentTime = System.currentTimeMillis();
 
         aggregateMutator.updateAggregate(
-                profiledCallName,
+                identity,
                 aggregate -> aggregate.call(currentTime, currentTime - startTime, payload));
     }
 
     @Override
     public ProfiledCall start() {
         if (!started.compareAndSet(false, true)) {
-            throw new IllegalArgumentException("Start method was already called." +
-                    " Profiled call: " + profiledCallName);
+            throw new IllegalStateException("Start method was already called." +
+                    " Profiled call: " + identity);
         }
         startNanoTime.set(System.nanoTime());
 
         aggregateMutator.updateAggregate(
-                profiledCallName,
-                aggregate -> aggregate.start(this));
+                identity,
+                aggregate -> aggregate.start(this, System.currentTimeMillis()));
         return this;
     }
 
     @Override
     public void stop(long payload) {
         if (!started.compareAndSet(true, false)) {
-            log.warn("Stop method called on profiler call that currently is not running: {}", profiledCallName);
+            log.warn("Stop method called on profiler call that currently is not running: {}", identity);
             return;
         }
 
@@ -80,7 +82,7 @@ public class AggregatingCall implements ProfiledCall {
         long latencyValue = (System.nanoTime() - startNanoTime.get()) / 1000000;
 
         aggregateMutator.updateAggregate(
-                profiledCallName,
+                identity,
                 aggregate -> aggregate.stop(this, System.currentTimeMillis(), latencyValue, payload));
     }
 
@@ -119,6 +121,17 @@ public class AggregatingCall implements ProfiledCall {
             R r = block.get();
             stop();
             return r;
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public <T extends Throwable> void profileThrowable(ThrowableRunnable<T> block) throws T {
+        try {
+            start();
+            block.run();
+            stop();
         } finally {
             close();
         }
@@ -182,12 +195,12 @@ public class AggregatingCall implements ProfiledCall {
             return;
         }
         aggregateMutator.updateAggregate(
-                profiledCallName,
+                identity,
                 aggregate -> aggregate.close(this));
     }
 
     @Override
     public String toString() {
-        return profiledCallName;
+        return identity.toString();
     }
 }

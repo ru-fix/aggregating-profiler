@@ -3,6 +3,7 @@ package ru.fix.aggregating.profiler.jmh;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import ru.fix.aggregating.profiler.Identity;
 import ru.fix.aggregating.profiler.engine.AggregatingCall;
 import ru.fix.aggregating.profiler.engine.CallAggregate;
 
@@ -15,12 +16,12 @@ public class CallAggregateJmh {
     final long timestamp = System.currentTimeMillis();
 
     final CallAggregate callAggregate = new CallAggregate(
-            "name",
+            new Identity("name"),
             new AtomicInteger(0)
     );
 
     final AggregatingCall call = new AggregatingCall(
-            "name",
+            new Identity("name"),
             (profiledCallName, updateAction) -> updateAction.accept(callAggregate));
 
 

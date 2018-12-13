@@ -31,6 +31,7 @@ public interface ProfiledCall extends AutoCloseable {
      * @throws IllegalStateException if method start called twice
      */
     ProfiledCall start();
+//TODO: implement stop and stop(value) in different way, so in case of stop() there will be no Paylaod* metrics reported
 
     /**
      * Same as stop(1)
@@ -67,6 +68,11 @@ public interface ProfiledCall extends AutoCloseable {
      * Profile provided block of code which returns some result or can throw an exception
      */
     <R, T extends Throwable> R profileThrowable(ThrowableSupplier<R, T> block) throws T;
+
+    /**
+     * Profile provided block of code which returns some result or can throw an exception
+     */
+    <T extends Throwable> void profileThrowable(ThrowableRunnable<T> block) throws T;
 
     /**
      * Profile provided block of code without result

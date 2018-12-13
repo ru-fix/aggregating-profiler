@@ -5,7 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.fix.aggregating.profiler.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,12 +65,12 @@ public class AggregatingReporterTest {
         String testTag = "testTag";
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*test.*"));
-        profiler.setTagger(new RegexpTagger(testTag, separator));
+        profiler.setLabelSticker(new RegexpLabelSticker(testTag, separator));
         reporter = profiler.createReporter();
         ProfiledCall call = profiler.start("test");
         call.stop(30);
 
-        ProfilerReport profilerReport = reporter.buildReportAndReset(testTag, "tag");
+        ProfilerReport profilerReport = reporter.buildReportAndReset(ReportFilters.containsLabel(testTag, "tag"));
         assertNotNull(profilerReport.getProfilerCallReports());
         assertEquals(1, profilerReport.getProfilerCallReports().size());
     }
@@ -78,13 +81,13 @@ public class AggregatingReporterTest {
         String testTag = "testTag";
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*nop.*"));
-        profiler.setTagger(new RegexpTagger(testTag, separator));
+        profiler.setLabelSticker(new RegexpLabelSticker(testTag, separator));
         profiler.attachIndicator("nop", () -> new Long(10));
         ProfiledCall call = profiler.start("test");
         call.stop(30);
         
         reporter = profiler.createReporter();
-        ProfilerReport profilerReport = reporter.buildReportAndReset(testTag, "tag");
+        ProfilerReport profilerReport = reporter.buildReportAndReset(ReportFilters.containsLabel(testTag, "tag"));
 
         assertNotNull(profilerReport.getProfilerCallReports());
         assertEquals(0, profilerReport.getProfilerCallReports().size());
@@ -97,7 +100,7 @@ public class AggregatingReporterTest {
         String testTag = "testTag";
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*nop.*"));
-        profiler.setTagger(new RegexpTagger(testTag, separator));
+        profiler.setLabelSticker(new RegexpLabelSticker(testTag, separator));
         profiler.attachIndicator("nop", () -> new Long(10));
         ProfiledCall call = profiler.start("test");
         call.stop(30);
@@ -105,9 +108,9 @@ public class AggregatingReporterTest {
         separator = new HashMap<>();
         separator.put("tag1", new HashSet<Pattern>());
         separator.get("tag1").add(Pattern.compile(".*nop.*"));
-        profiler.setTagger(new RegexpTagger(testTag, separator));
+        profiler.setLabelSticker(new RegexpLabelSticker(testTag, separator));
         reporter = profiler.createReporter();
-        ProfilerReport profilerReport = reporter.buildReportAndReset(testTag, "tag1");
+        ProfilerReport profilerReport = reporter.buildReportAndReset(ReportFilters.containsLabel(testTag, "tag1"));
 
         assertNotNull(profilerReport.getProfilerCallReports());
         assertEquals(0, profilerReport.getProfilerCallReports().size());
