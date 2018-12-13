@@ -213,10 +213,17 @@ To simplify aggregation rules all metric names ends with suffix
 * *.*Avg
 * *.*Sum
 
+ProfiledCall tags saved as part of metric name separated by dot `.`   
+ProfiledCall labels not stored in Graphite.
+
 ### Prometheus
+ProfiledCall tags saved as Prometheus labels.  
+ProfiledCall labels not stored in Prometheus.
+
 
 ### InfluxDB
-
+ProfiledCall tags saved as InfluxDB tags.  
+ProfiledCall labels not stored in InfluxDB.
 
 
 ## How to mock profiler in Tests
