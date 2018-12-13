@@ -1,6 +1,7 @@
 package ru.fix.aggregating.profiler.graphite
 
 import mu.KotlinLogging
+import ru.fix.aggregating.profiler.Identity
 import ru.fix.aggregating.profiler.ProfiledCallReport
 import ru.fix.aggregating.profiler.ProfilerReport
 import ru.fix.aggregating.profiler.graphite.client.GraphiteEntity
@@ -20,6 +21,11 @@ private val log = KotlinLogging.logger {}
 class GraphiteReportWriter(
         private val metricPrefix: String,
         private val graphiteWriter: GraphiteWriter) {
+
+    companion object {
+        private const val INDICATOR_SUFFIX_MAX = ".indicatorMax"
+        private const val INDICATOR_SUFFIX_MIN = ".indicatorMin"
+    }
 
     private val reportFieldExtractor = HashMap<String, Method>()
 
@@ -48,23 +54,41 @@ class GraphiteReportWriter(
         graphiteWriter.write(metricPrefix, metrics)
     }
 
+    private fun convertIdentityToMetricName(identity: Identity): String {
+        val name = identity.name.replace(' ', '.')
+
+        if (identity.tags.isNotEmpty()) {
+
+            return "$name." + identity.tags.asSequence()
+                    .sortedBy { tag -> tag.key }
+                    .map { tag -> "${tag.key}.${tag.value}" }
+                    .joinToString(separator = ".")
+
+        }
+        return name
+    }
+
     private fun convertReportToGraphiteEntity(report: ProfilerReport): List<GraphiteEntity> {
         val metrics = ArrayList<GraphiteEntity>()
 
         val curTime = System.currentTimeMillis() / 1000
         report.indicators.forEach { key, value ->
-            metrics.add(
-                    GraphiteEntity(
-                            key.replace(' ', '.'),
-                            "$value",
-                            curTime
-                    )
-            )
+
+            val indicatorName = convertIdentityToMetricName(key)
+
+            listOf(INDICATOR_SUFFIX_MAX, INDICATOR_SUFFIX_MIN).forEach { suffix ->
+                metrics.add(
+                        GraphiteEntity(
+                                indicatorName + suffix,
+                                "$value",
+                                curTime
+                        )
+                )
+            }
         }
 
         for (profilerCallReport in report.profilerCallReports) {
-            val reportName = profilerCallReport.name
-
+            val callName = convertIdentityToMetricName(profilerCallReport.identity)
 
             reportFieldExtractor.forEach { metric, fieldExtractor ->
                 var value: Any? = null
@@ -76,7 +100,7 @@ class GraphiteReportWriter(
 
                 if (value is Number) {
                     metrics.add(GraphiteEntity(
-                            reportName + '.'.toString() + metric,
+                            callName + '.'.toString() + metric,
                             value.toString(),
                             curTime
                     ))

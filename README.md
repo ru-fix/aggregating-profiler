@@ -200,6 +200,21 @@ Then we can use Labels to filter particular metrics in Reporter.
 ## Metric reporting
 How to register Profiler Reporter and start to record metrics to external storage.
 
+
+### Graphite
+Graphite uses aggregation rules to compact metric storage.
+To simplify aggregation rules all metric names ends with suffix
+* *.*Max
+* *.*Min
+* *.*Avg
+* *.*Sum
+
+### Prometheus
+
+### InfluxDB
+
+
+
 ## How to mock profiler in Tests
 `NoopProfiler` is a stub that you can use as a dependency in tests. This stub does not do anything.
 ```kotlin

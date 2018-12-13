@@ -14,6 +14,7 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Query
+import ru.fix.aggregating.profiler.Identity
 import ru.fix.aggregating.profiler.ProfiledCallReport
 import ru.fix.aggregating.profiler.ProfilerReport
 import ru.fix.aggregating.profiler.graphite.client.GraphiteSettings
@@ -70,13 +71,13 @@ class GraphiteReporterTest {
 
         val reportWriter = GraphiteReportWriter("metricPrefix", graphiteWriter)
 
-        val callReport1 = ProfiledCallReport("call1").apply {
+        val callReport1 = ProfiledCallReport(Identity("call1")).apply {
             callsCountSum = 107
             reportingTimeAvg = 60_000
         }
 
 
-        val callReport2 = ProfiledCallReport("call2").apply {
+        val callReport2 = ProfiledCallReport(Identity("call2")).apply {
             callsCountSum = 108
             reportingTimeAvg = 60_000
             callsThroughputAvg = 12.25
@@ -84,8 +85,8 @@ class GraphiteReporterTest {
 
         val profilerReport = ProfilerReport(
                 mapOf(
-                        "indicator1" to 12L,
-                        "indicator2" to 42L
+                        Identity("indicator1") to 12L,
+                        Identity("indicator2") to 42L
                 ),
                 listOf(callReport1, callReport2))
 

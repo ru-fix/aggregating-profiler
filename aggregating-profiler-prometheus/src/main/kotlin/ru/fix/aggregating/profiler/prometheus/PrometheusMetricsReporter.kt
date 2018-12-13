@@ -1,5 +1,6 @@
 package ru.fix.aggregating.profiler.prometheus
 
+import ru.fix.aggregating.profiler.Identity
 import ru.fix.aggregating.profiler.ProfilerReport
 import ru.fix.aggregating.profiler.ProfilerReporter
 import java.io.StringWriter
@@ -22,28 +23,56 @@ class PrometheusMetricsReporter(private val reporter: ProfilerReporter) {
 
         val writer = StringWriter()
 
-        report.indicators.forEach { name, value ->
-            writer.appendGaugeType(name)
-            writer.appendGaugeValue(name, value.toDouble())
+        report.indicators.forEach { identity, value ->
+            writer.appendGaugeType(identity)
+            writer.appendGaugeValue(identity, value.toDouble())
         }
 
         report.profilerCallReports.forEach { report ->
-            report.asMap().forEach { key, value ->
-                val name = "${report.name}_$key"
-                writer.appendGaugeType(name)
-                writer.appendGaugeValue(name, value.toDouble())
+            report.asMap().forEach { metric, value ->
+
+                val identity = Identity(report.identity.name + "_$metric", report.identity.tags)
+                writer.appendGaugeType(identity)
+                writer.appendGaugeValue(identity, value.toDouble())
             }
         }
         return writer.toString()
     }
 
-    private fun Writer.appendGaugeType(name: String) {
-        this.appendln("# TYPE ${normalizeName(name)} gauge")
+    private fun Writer.appendGaugeType(identity: Identity) {
+        this.appendln("# TYPE ${normalizeName(identity.name)} gauge")
     }
 
-    private fun Writer.appendGaugeValue(name: String, value: Double) {
-        this.appendln("${normalizeName(name)} ${serializeDouble(value)}")
+    private fun Writer.appendGaugeValue(identity: Identity, value: Double) {
+        this.appendln("${convertIdentityToMetricName(identity)} ${serializeDouble(value)}")
     }
+
+    private fun convertIdentityToMetricName(identity: Identity): String{
+        val metricName = normalizeName(identity.name)
+        if (identity.tags.isNotEmpty()) {
+
+            return "$metricName" + identity.tags.asSequence()
+                    .sortedBy { tag -> tag.key }
+                    .map { tag -> """${tag.key}="${escapeTagValue(tag.value)}"""" }
+                    .joinToString(separator = ",", prefix = "{", postfix = "}")
+        }
+        return metricName
+    }
+
+    private fun escapeTagValue(value: String): String {
+        val result = StringBuilder()
+
+        for (char in value ) {
+            when (char) {
+                '\\' -> result.append("\\\\")
+                '\"' -> result.append("\\\"")
+                '\n' -> result.append("\\n")
+                else -> result.append(char)
+            }
+        }
+        return result.toString()
+    }
+
 
     private fun serializeDouble(doubleValue: Double): String {
         if (doubleValue == java.lang.Double.POSITIVE_INFINITY) {

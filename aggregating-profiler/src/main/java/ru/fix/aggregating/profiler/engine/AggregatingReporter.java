@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 public class AggregatingReporter implements ProfilerReporter {
     private static final Logger log = LoggerFactory.getLogger(AggregatingReporter.class);
 
-    private static final String INDICATOR_SUFFIX = ".indicatorMax";
+
 
     private final Map<Identity, CallAggregate> sharedCounters = new ConcurrentHashMap<>();
 
@@ -97,26 +97,23 @@ public class AggregatingReporter implements ProfilerReporter {
         Map<Identity, Long> indicators = indicatorsStream
                 .map(entry -> {
                     Identity name = entry.getKey();
-                    if (!name.endsWith(INDICATOR_SUFFIX)) {
-                        name = name.concat(INDICATOR_SUFFIX);
-                    }
                     try {
-                        return new SimpleEntry<>(name, entry.getValue().getProvider().get());
+                        return new SimpleEntry<Identity, Long>(name, entry.getValue().getProvider().get());
                     } catch (Exception ex) {
                         log.error("Retrieve value for "
                                         + entry.getKey()
-                                        + " finished with '"
+                                        + " failed with '"
                                         + ex.getMessage()
                                         + "'",
                                 ex);
-                        return new SimpleEntry(name, null);
+                        return new SimpleEntry<Identity, Long>(name, null);
                     }
                 })
                 .filter(entry -> entry.getValue() != null)
                 .collect(
                         Collectors.toMap(
-                                e -> (String) e.getKey(),
-                                e -> (Long) e.getValue()));
+                                SimpleEntry::getKey,
+                                SimpleEntry::getValue));
 
         List<ProfiledCallReport> collect = new ArrayList<>();
 

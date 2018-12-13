@@ -15,9 +15,9 @@ class IdentityTest {
 
     @Test
     fun `single tag via array`(){
-        val identity = Identity("name", arrayOf("foo", "bar"))
+        val identity = Identity("name", "foo", "bar")
         assertThat(identity.name, equalTo("name"))
-        assertThat(identity.getTags().size, equalTo(1))
+        assertThat(identity.tags.size, equalTo(1))
         assertThat(identity.tags["foo"], equalTo("bar"))
     }
 
@@ -25,7 +25,7 @@ class IdentityTest {
     fun `single tag via map`(){
         val identity = Identity("name", mapOf("foo" to "bar"))
         assertThat(identity.name, equalTo("name"))
-        assertThat(identity.getTags().size, equalTo(1))
+        assertThat(identity.tags.size, equalTo(1))
         assertThat(identity.tags["foo"], equalTo("bar"))
     }
 
