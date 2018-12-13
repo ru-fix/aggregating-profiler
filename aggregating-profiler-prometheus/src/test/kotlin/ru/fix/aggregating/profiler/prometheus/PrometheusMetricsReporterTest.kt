@@ -18,8 +18,8 @@ internal class PrometheusMetricsReporterTest {
 
 
         val report = reporter.buildReportAndReset()
-        assertThat(report, containsString("TYPE my_first_indicator_indicatorMax gauge"))
-        assertThat(report, containsString("my_first_indicator_indicatorMax 42.0"))
+        assertThat(report, containsString("TYPE my_first_indicator gauge"))
+        assertThat(report, containsString("my_first_indicator 42.0"))
 
         assertThat(report, containsString("simpleCall_callsCountSum 1.0"))
         println(report)
@@ -35,10 +35,10 @@ internal class PrometheusMetricsReporterTest {
 
 
         val report = reporter.buildReportAndReset()
-        assertThat(report, containsString("TYPE my_first_indicator_indicatorMax gauge"))
-        assertThat(report, containsString("""my_first_indicator_indicatorMax{type="soft"} 42.0"""))
+        assertThat(report, containsString("TYPE my_first_indicator gauge"))
+        assertThat(report, containsString("""my_first_indicator{type="soft"} 42.0"""))
 
-        assertThat(report, containsString("""simpleCall_callsCountSum 1.0{type="hard",rate="fast"}"""))
+        assertThat(report, containsString("""simpleCall_callsCountSum{rate="fast",type="hard"} 1.0"""))
         println(report)
     }
 }

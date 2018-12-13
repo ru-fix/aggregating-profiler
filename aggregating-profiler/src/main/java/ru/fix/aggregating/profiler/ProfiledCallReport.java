@@ -18,6 +18,11 @@ public class ProfiledCallReport {
     double callsThroughputAvg;
     long callsCountSum;
 
+    long startSum;
+    double startThroughputAvg;
+    long startThroughputPerSecondMax;
+
+
     long reportingTimeAvg;
 
     long payloadMin;
@@ -31,6 +36,7 @@ public class ProfiledCallReport {
 
     long activeCallsCountMax;
     long activeCallsLatencyMax;
+
 
     public ProfiledCallReport(Identity identity) {
         this.identity = identity;
@@ -53,6 +59,9 @@ public class ProfiledCallReport {
         map.put("latencyMax", latencyMax);
         map.put("latencyAvg", latencyAvg);
         map.put("callsCountSum", callsCountSum);
+        map.put("startSum", startSum);
+        map.put("startThroughputAvg", startThroughputAvg);
+        map.put("startThroughputPerSecondMax", startThroughputPerSecondMax);
         map.put("callsThroughputAvg", callsThroughputAvg);
         map.put("reportingTimeAvg", reportingTimeAvg);
         map.put("payloadMin", payloadMin);
@@ -79,6 +88,32 @@ public class ProfiledCallReport {
         return latencyAvg;
     }
 
+    public long getStartSum() {
+        return startSum;
+    }
+
+    public ProfiledCallReport setStartSum(long startSum) {
+        this.startSum = startSum;
+        return this;
+    }
+
+    public double getStartThroughputAvg() {
+        return startThroughputAvg;
+    }
+
+    public ProfiledCallReport setStartThroughputAvg(double startThroughputAvg) {
+        this.startThroughputAvg = startThroughputAvg;
+        return this;
+    }
+
+    public long getStartThroughputPerSecondMax() {
+        return startThroughputPerSecondMax;
+    }
+
+    public ProfiledCallReport setStartThroughputPerSecondMax(long startThroughputPerSecondMax) {
+        this.startThroughputPerSecondMax = startThroughputPerSecondMax;
+        return this;
+    }
 
     public long getReportingTimeAvg() {
         return reportingTimeAvg;

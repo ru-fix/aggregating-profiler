@@ -166,6 +166,10 @@ And average throughput during reporting period of 1 minute is only 0.15 invocati
    - payloadAvg - avg value of payload
    - payloadSum - total sum of payload provided within reporting interval
    - payloadThroughputAvg - payload rate invocation per second
+ - start - start metrics provide information about throughput and count of start invocation of ProfiledCall  
+   - startSum - how many times start method was invoked
+   - startThroughputAvg - what is an average throughput for start invocation
+   - startThroughputPerSecondMax - what is a maximum throughput of start method invocation
  - throughputPerSecondMax - maximum rate within second time interval that was achieved during reporting period 
  (17 means that there was a maximum of 17 invocation within 1 second interval)
  - activeCalls - calls that are still running at the end of reporting period

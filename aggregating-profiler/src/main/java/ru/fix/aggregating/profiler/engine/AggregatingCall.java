@@ -64,7 +64,7 @@ public class AggregatingCall implements ProfiledCall {
 
         aggregateMutator.updateAggregate(
                 identity,
-                aggregate -> aggregate.start(this));
+                aggregate -> aggregate.start(this, System.currentTimeMillis()));
         return this;
     }
 
