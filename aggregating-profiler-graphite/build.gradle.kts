@@ -43,6 +43,8 @@ dependencies {
     testCompile(Libs.hamcrest)
     testCompile(Libs.awaitility)
 
+    testCompile(Libs.mockk)
+
 
 }
 

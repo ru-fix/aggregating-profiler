@@ -811,8 +811,8 @@ public class AggregatingProfilerTest {
         profiler.attachIndicator("my.indicator", () -> 147L);
         ProfilerReporter reporter = profiler.createReporter();
         Map<Identity, Long> indicators = reporter.buildReportAndReset().getIndicators();
-        assertTrue(indicators.containsKey(new Identity("my.indicator.indicatorMax")));
-        assertEquals(147L, indicators.get(new Identity("my.indicator.indicatorMax")).longValue());
+        assertTrue(indicators.containsKey(new Identity("my.indicator")));
+        assertEquals(147L, indicators.get(new Identity("my.indicator")).longValue());
     }
 
     @Test
@@ -821,6 +821,6 @@ public class AggregatingProfilerTest {
         profiler.attachIndicator("my.indicator", () -> null);
         ProfilerReporter reporter = profiler.createReporter();
         Map<Identity, Long> indicators = reporter.buildReportAndReset().getIndicators();
-        assertFalse(indicators.containsKey(new Identity("my.indicator.indicatorMax")));
+        assertFalse(indicators.containsKey(new Identity("my.indicator")));
     }
 }

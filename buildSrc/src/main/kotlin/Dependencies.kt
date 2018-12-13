@@ -42,6 +42,9 @@ object Libs {
     val dynamicPropertyApi = "ru.fix:dynamic-property-api:1.0.5"
     val jfixStdlibConcurrency = "ru.fix:jfix-stdlib-concurrency:1.0.13"
     val wiremock = "com.github.tomakehurst:wiremock:2.19.0"
+
+    val mockk = "io.mockk:mockk:1.8.13"
+
 }
 
 

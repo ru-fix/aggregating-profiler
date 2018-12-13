@@ -14,7 +14,7 @@ public class Identity {
         this.name = name;
     }
 
-    public Identity(String name, String...tags) {
+    public Identity(String name, String... tags) {
         this.name = name;
         if (tags.length % 2 != 0) {
             throw new IllegalArgumentException("Invalid tags array size: " + tags.length + ". Expected even size.");
@@ -41,7 +41,7 @@ public class Identity {
         return tags.containsKey(tagName) && tags.get(tagName).equals(tagValue);
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
@@ -61,11 +61,15 @@ public class Identity {
 
     @Override
     public String toString() {
-        return name +
-                tags.entrySet()
-                        .stream()
-                        .map(entry -> entry.getKey() + "=" + entry.getValue())
-                        .collect(Collectors.joining(",", "{", "}"));
+        if (tags.isEmpty()) {
+            return name;
+        } else {
+            return name +
+                    tags.entrySet()
+                            .stream()
+                            .map(entry -> entry.getKey() + "=" + entry.getValue())
+                            .collect(Collectors.joining(",", "{", "}"));
+        }
     }
 }
 
