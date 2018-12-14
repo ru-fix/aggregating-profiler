@@ -15,7 +15,7 @@ public class MaxThroughputPerSecondAccumulator {
         long start = startOfSecondTimestamp.get();
         if (start + ONE_SECOND_MS <= currentTimestamp) {
             if (startOfSecondTimestamp.compareAndSet(start, currentTimestamp)) {
-                long sum = LongAdderDrainer.drain(eventCountSum);
+                long sum = AdderDrainer.drain(eventCountSum);
                 maxEventCountPerSecond.accumulate(sum);
             }
         }

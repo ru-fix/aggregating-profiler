@@ -117,8 +117,8 @@ public class AggregatingProfilerTest {
 
             assertThat(report.latencyMin, greaterThanOrEqualTo(90L));
             assertThat(report.latencyMin, lessThanOrEqualTo(120L));
-            assertThat(report.payloadMax, equalTo(49L));
-            assertThat(report.payloadMin, equalTo(0L));
+            assertThat(report.payloadMax, equalTo(49.0));
+            assertThat(report.payloadMin, equalTo(0.0));
         }
     }
 

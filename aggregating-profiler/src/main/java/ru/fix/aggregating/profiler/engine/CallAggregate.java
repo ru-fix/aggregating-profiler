@@ -5,9 +5,7 @@ import ru.fix.aggregating.profiler.ProfiledCallReport;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.LongAccumulator;
-import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.atomic.*;
 
 /**
  * @author Kamil Asfandiyarov
@@ -25,13 +23,12 @@ public class CallAggregate implements AutoLabelStickerable {
     final LongAccumulator latencyMax = new LongAccumulator(Math::max, 0L);
 
 
-    final LongAdder payloadSumAdder = new LongAdder();
-    final LongAccumulator payloadMin = new LongAccumulator(Math::min, Long.MAX_VALUE);
-    final LongAccumulator payloadMax = new LongAccumulator(Math::max, 0L);
+    final DoubleAdder payloadSumAdder = new DoubleAdder();
+    final DoubleAccumulator payloadMin = new DoubleAccumulator(Math::min, Long.MAX_VALUE);
+    final DoubleAccumulator payloadMax = new DoubleAccumulator(Math::max, 0L);
 
     final MaxThroughputPerSecondAccumulator startMaxThroughputPerSecondAcc = new MaxThroughputPerSecondAccumulator();
     final MaxThroughputPerSecondAccumulator stopMaxThroughputPerSecondAcc = new MaxThroughputPerSecondAccumulator();
-    final MaxThroughputPerSecondAccumulator payloadMaxThroughputPerSecondAcc = new MaxThroughputPerSecondAccumulator();
 
     final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
 
@@ -60,7 +57,7 @@ public class CallAggregate implements AutoLabelStickerable {
     }
 
 
-    public void call(long currentTimestamp, long latency, long payload) {
+    public void call(long currentTimestamp, long latency, double payload) {
         startSumAdder.increment();
         stopSumAdder.increment();
 
@@ -78,10 +75,6 @@ public class CallAggregate implements AutoLabelStickerable {
 
         startMaxThroughputPerSecondAcc.call(currentTimestamp, 1);
         stopMaxThroughputPerSecondAcc.call(currentTimestamp, 1);
-
-        if (payload > 0) {
-            payloadMaxThroughputPerSecondAcc.call(currentTimestamp, payload);
-        }
 
     }
 
@@ -96,7 +89,7 @@ public class CallAggregate implements AutoLabelStickerable {
 
     }
 
-    public void stop(AggregatingCall profiledCall, long currentTimestamp, long latency, long payload) {
+    public void stop(AggregatingCall profiledCall, long currentTimestamp, long latency, double payload) {
         stopSumAdder.increment();
 
         latencyMin.accumulate(latency);
@@ -113,9 +106,6 @@ public class CallAggregate implements AutoLabelStickerable {
 
 
         stopMaxThroughputPerSecondAcc.call(currentTimestamp, 1);
-        if (payload > 0) {
-            payloadMaxThroughputPerSecondAcc.call(currentTimestamp, payload);
-        }
 
 
         activeCalls.remove(profiledCall);
@@ -156,8 +146,8 @@ public class CallAggregate implements AutoLabelStickerable {
     }
 
     public ProfiledCallReport buildReportAndReset(long elapsed) {
-        long startSum = LongAdderDrainer.drain(startSumAdder);
-        long stopSum = LongAdderDrainer.drain(stopSumAdder);
+        long startSum = AdderDrainer.drain(startSumAdder);
+        long stopSum = AdderDrainer.drain(stopSumAdder);
 
         ProfiledCallReport report = new ProfiledCallReport(this.callIdentity)
                 .setReportingTimeAvg(elapsed)
@@ -169,7 +159,7 @@ public class CallAggregate implements AutoLabelStickerable {
             return report;
         }
 
-        long payloadSum = LongAdderDrainer.drain(payloadSumAdder);
+        double payloadSum = AdderDrainer.drain(payloadSumAdder);
 
         return report
                 .setStartSum(startSum)
@@ -178,14 +168,13 @@ public class CallAggregate implements AutoLabelStickerable {
 
                 .setLatencyMin(latencyMin.getThenReset())
                 .setLatencyMax(latencyMax.getThenReset())
-                .setLatencyAvg(LongAdderDrainer.drain(latencySum) / stopSum)
+                .setLatencyAvg(AdderDrainer.drain(latencySum) / stopSum)
 
                 .setPayloadMin(payloadMin.getThenReset())
                 .setPayloadMax(payloadMax.getThenReset())
                 .setPayloadSum(payloadSum)
                 .setPayloadAvg(payloadSum / stopSum)
                 .setPayloadThroughputAvg(elapsed != 0 ? ((double) payloadSum * 1000) / elapsed : 0)
-                .setPayloadThroughputPerSecondMax(payloadMaxThroughputPerSecondAcc.getAndReset(System.currentTimeMillis()))
 
                 .setStopSum(stopSum)
                 .setStopThroughputAvg(elapsed != 0 ? ((double) stopSum * 1000) / elapsed : 0)

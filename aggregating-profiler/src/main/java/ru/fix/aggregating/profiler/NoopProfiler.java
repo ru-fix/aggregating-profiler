@@ -14,11 +14,11 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
-        public void call(long payload) {
+        public void call(double payload) {
         }
 
         @Override
-        public void call(long startTime, long payload) {
+        public void call(long startTime, double payload) {
 
         }
 
@@ -28,7 +28,7 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
-        public void stop(long payload) {
+        public void stop(double payload) {
         }
 
         @Override
@@ -41,7 +41,7 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
-        public void stopIfRunning(long payload) {
+        public void stopIfRunning(double payload) {
         }
 
         @Override

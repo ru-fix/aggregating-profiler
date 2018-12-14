@@ -25,14 +25,13 @@ public class ProfiledCallReport {
 
     long reportingTimeAvg;
 
-    long payloadMin;
-    long payloadMax;
-    long payloadAvg;
-    long payloadSum;
+    double payloadMin;
+    double payloadMax;
+    double payloadAvg;
+    double payloadSum;
     double payloadThroughputAvg;
 
     long stopThroughputPerSecondMax;
-    long payloadThroughputPerSecondMax;
 
     long activeCallsCountMax;
     long activeCallsLatencyMax;
@@ -73,7 +72,6 @@ public class ProfiledCallReport {
         map.put("payloadAvg", payloadAvg);
         map.put("payloadSum", payloadSum);
         map.put("payloadThroughputAvg", payloadThroughputAvg);
-        map.put("payloadThroughputPerSecondMax", payloadThroughputPerSecondMax);
 
         map.put("stopSum", stopSum);
         map.put("stopThroughputAvg", stopThroughputAvg);
@@ -146,38 +144,38 @@ public class ProfiledCallReport {
         return this;
     }
 
-    public long getPayloadMin() {
+    public double getPayloadMin() {
         return payloadMin;
     }
 
-    public ProfiledCallReport setPayloadMin(long payloadMin) {
+    public ProfiledCallReport setPayloadMin(double payloadMin) {
         this.payloadMin = payloadMin;
         return this;
     }
 
-    public long getPayloadMax() {
+    public double getPayloadMax() {
         return payloadMax;
     }
 
-    public ProfiledCallReport setPayloadMax(long payloadMax) {
+    public ProfiledCallReport setPayloadMax(double payloadMax) {
         this.payloadMax = payloadMax;
         return this;
     }
 
-    public long getPayloadAvg() {
+    public double getPayloadAvg() {
         return payloadAvg;
     }
 
-    public ProfiledCallReport setPayloadAvg(long payloadAvg) {
+    public ProfiledCallReport setPayloadAvg(double payloadAvg) {
         this.payloadAvg = payloadAvg;
         return this;
     }
 
-    public long getPayloadSum() {
+    public double getPayloadSum() {
         return payloadSum;
     }
 
-    public ProfiledCallReport setPayloadSum(long payloadSum) {
+    public ProfiledCallReport setPayloadSum(double payloadSum) {
         this.payloadSum = payloadSum;
         return this;
     }
@@ -219,14 +217,6 @@ public class ProfiledCallReport {
         return this;
     }
 
-    public long getPayloadThroughputPerSecondMax() {
-        return payloadThroughputPerSecondMax;
-    }
-
-    public ProfiledCallReport setPayloadThroughputPerSecondMax(long payloadThroughputPerSecondMax) {
-        this.payloadThroughputPerSecondMax = payloadThroughputPerSecondMax;
-        return this;
-    }
 
     public long getActiveCallsCountMax() {
         return activeCallsCountMax;
