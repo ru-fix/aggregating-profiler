@@ -37,7 +37,7 @@ public class CallAggregateJmh {
 
     @Benchmark
     public void start_stop() {
-        callAggregate.start(call);
+        callAggregate.start(call, timestamp);
         callAggregate.stop(call, timestamp, 27L, 1);
     }
 }

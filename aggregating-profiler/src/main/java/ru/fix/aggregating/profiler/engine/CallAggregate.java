@@ -1,6 +1,7 @@
 package ru.fix.aggregating.profiler.engine;
 
 import ru.fix.aggregating.profiler.Identity;
+import ru.fix.aggregating.profiler.PercentileSettings;
 import ru.fix.aggregating.profiler.ProfiledCallReport;
 
 import java.util.*;
@@ -19,8 +20,8 @@ public class CallAggregate implements AutoLabelStickerable {
     final LongAdder stopSumAdder = new LongAdder();
     final LongAdder latencySum = new LongAdder();
 
-    final LongAccumulator latencyMin = new LongAccumulator(Math::min, Long.MAX_VALUE);
-    final LongAccumulator latencyMax = new LongAccumulator(Math::max, 0L);
+    final LongAccumulator latencyMinAcc = new LongAccumulator(Math::min, Long.MAX_VALUE);
+    final LongAccumulator latencyMaxAcc = new LongAccumulator(Math::max, 0L);
 
 
     final DoubleAdder payloadSumAdder = new DoubleAdder();
@@ -36,6 +37,8 @@ public class CallAggregate implements AutoLabelStickerable {
     final Set<AggregatingCall> activeCalls = ConcurrentHashMap.newKeySet();
 
     final Map<String, String> autoLabels = new ConcurrentHashMap<>();
+
+    final PercentileAccumulator latencyPercentile = new PercentileAccumulator(new PercentileSettings());
 
     public CallAggregate(
             Identity callIdentity,
@@ -61,10 +64,11 @@ public class CallAggregate implements AutoLabelStickerable {
         startSumAdder.increment();
         stopSumAdder.increment();
 
-        latencyMin.accumulate(latency);
+        latencyMinAcc.accumulate(latency);
         if (latency > 0) {
             latencySum.add(latency);
-            latencyMax.accumulate(latency);
+            latencyMaxAcc.accumulate(latency);
+            latencyPercentile.accumulate(latency);
         }
 
         payloadMin.accumulate(payload);
@@ -92,10 +96,11 @@ public class CallAggregate implements AutoLabelStickerable {
     public void stop(AggregatingCall profiledCall, long currentTimestamp, long latency, double payload) {
         stopSumAdder.increment();
 
-        latencyMin.accumulate(latency);
+        latencyMinAcc.accumulate(latency);
         if (latency > 0) {
             latencySum.add(latency);
-            latencyMax.accumulate(latency);
+            latencyMaxAcc.accumulate(latency);
+            latencyPercentile.accumulate(latency);
         }
 
         payloadMin.accumulate(payload);
@@ -161,14 +166,19 @@ public class CallAggregate implements AutoLabelStickerable {
 
         double payloadSum = AdderDrainer.drain(payloadSumAdder);
 
+        long latencyMin = latencyMinAcc.getThenReset();
+        long latencyMax = latencyMaxAcc.getThenReset();
+
         return report
                 .setStartSum(startSum)
                 .setStartThroughputPerSecondMax(startMaxThroughputPerSecondAcc.getAndReset(System.currentTimeMillis()))
                 .setStartThroughputAvg(elapsed != 0 ? ((double) startSum * 1000) / elapsed : 0)
 
-                .setLatencyMin(latencyMin.getThenReset())
-                .setLatencyMax(latencyMax.getThenReset())
+                .setLatencyMin(latencyMin)
+                .setLatencyMax(latencyMax)
                 .setLatencyAvg(AdderDrainer.drain(latencySum) / stopSum)
+
+                .setLatencyPercentile(latencyPercentile.buildAndReset(latencyMin, latencyMax))
 
                 .setPayloadMin(payloadMin.getThenReset())
                 .setPayloadMax(payloadMax.getThenReset())

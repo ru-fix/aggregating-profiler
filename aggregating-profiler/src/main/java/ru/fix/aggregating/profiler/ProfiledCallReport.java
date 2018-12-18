@@ -15,6 +15,8 @@ public class ProfiledCallReport {
     long latencyMax;
     long latencyAvg;
 
+    Map<String, Long> latencyPercentile;
+
     double stopThroughputAvg;
     long stopSum;
 
@@ -233,6 +235,15 @@ public class ProfiledCallReport {
 
     public ProfiledCallReport setActiveCallsLatencyMax(long activeCallsLatencyMax) {
         this.activeCallsLatencyMax = activeCallsLatencyMax;
+        return this;
+    }
+
+    public Map<String, Long> getLatencyPercentile() {
+        return latencyPercentile;
+    }
+
+    public ProfiledCallReport setLatencyPercentile(Map<String, Long> latencyPercentile) {
+        this.latencyPercentile = latencyPercentile;
         return this;
     }
 }
