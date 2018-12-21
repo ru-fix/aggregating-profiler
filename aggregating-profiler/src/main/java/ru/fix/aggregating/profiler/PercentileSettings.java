@@ -35,8 +35,13 @@ public class PercentileSettings {
         this.bucketCount = bucketCount;
         return this;
     }
-//
-//    public Map<Double, String> build(){
-//
-//    }
+
+    public long getHistorySize() {
+        return historySize;
+    }
+
+    public PercentileSettings setHistorySize(long historySize) {
+        this.historySize = historySize;
+        return this;
+    }
 }
