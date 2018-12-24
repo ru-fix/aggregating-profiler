@@ -2,65 +2,78 @@ package ru.fix.aggregating.profiler.engine;
 
 import ru.fix.aggregating.profiler.PercentileSettings;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAdder;
 
 public class PercentileAccumulator {
 
-    final HistoricalMinMax historicalMinMax;
     final PercentileSettings settings;
 
-    final AtomicReference<TreeMap<Long, LongAdder>> currentBuckets = new AtomicReference<>(null);
+    final TreeMap<Long, LongAdder> buckets;
+
 
     public PercentileAccumulator(PercentileSettings settings) {
         this.settings = settings;
-        historicalMinMax = new HistoricalMinMax(settings);
+        buckets = buildBuckets(settings);
     }
 
     public void accumulate(long latency) {
-        TreeMap<Long, LongAdder> buckets = currentBuckets.get();
-        if (buckets != null) {
-            buckets.ceilingEntry(latency).getValue().add(latency);
+        Map.Entry<Long, LongAdder> ceilingBucket = buckets.ceilingEntry(latency);
+        if (ceilingBucket != null) {
+            ceilingBucket.getValue().increment();
         }
     }
 
-    private TreeMap<Long, LongAdder> buildBuckets(long max) {
+    private TreeMap<Long, LongAdder> buildBuckets(PercentileSettings settings) {
         TreeMap<Long, LongAdder> buckets = new TreeMap<>();
-        buckets.put(Long.MAX_VALUE, new LongAdder());
 
-        long bucketSize = max / settings.getBucketCount();
-        long level = bucketSize;
-
-        for (int bucket = 0; bucket < settings.getBucketCount(); bucket++) {
-            buckets.put(level, new LongAdder());
-            level += bucketSize;
+        for (int level : settings.getBuckets()) {
+            buckets.put((long) level, new LongAdder());
         }
-
         return buckets;
     }
 
-    public Map<String, Long> buildAndReset(long min, long max) {
+    public Map<String, Long> buildAndReset(long currentMaximum) {
 
-        historicalMinMax.updateMinMax(min, max);
+        TreeMap<Long, Long> counts = new TreeMap<>();
 
-        TreeMap<Long, LongAdder> buckets = currentBuckets.getAndSet(buildBuckets(max));
-
-        long aboveMax = AdderDrainer.drain(buckets.remove(Long.MAX_VALUE));
-        long sum = buckets.values().stream().mapToLong(AdderDrainer::drain).sum();
-
-        for (int p : settings.getPercentiles()) {
-            Double.valueOf("0."+p) * sum
+        for (Map.Entry<Long, LongAdder> level : buckets.entrySet()) {
+            long count = AdderDrainer.drain(level.getValue());
+            if (count > 0) {
+                counts.put(level.getKey(), count);
+            }
         }
 
+        double sum = counts.values().stream().mapToLong(it -> it).sum();
 
-        for(Map.Entry<Long, LongAdder> level : buckets.entrySet()){
-            values[][level.getKey()] = AdderDrainer.drain(level.getValue());
 
+        int[] percentiles = settings.getPercentiles().stream().mapToInt(it -> it).sorted().toArray();
+        double[] percentileCounts = Arrays.stream(percentiles)
+                .mapToDouble(it -> sum * it / 100)
+                .toArray();
+
+        double currentCounts = 0;
+        int percentileIndex = 0;
+
+        Map<String, Long> report = new HashMap<>();
+
+        for (Map.Entry<Long, Long> level : counts.entrySet()) {
+            currentCounts += level.getValue();
+
+            while (percentileIndex < percentiles.length && currentCounts >= percentileCounts[percentileIndex]) {
+                report.put("p" + percentiles[percentileIndex], level.getKey());
+                percentileIndex++;
+            }
         }
 
-        settings.getPercentiles()
+        while (percentileIndex < percentiles.length) {
+            report.put("p" + percentiles[percentileIndex], currentMaximum);
+            percentileIndex++;
+        }
 
+        return report;
     }
 }

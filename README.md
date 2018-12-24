@@ -266,4 +266,6 @@ https://github.com/dropwizard/metrics
 
 ## Source guidebook
 
-  
+Reporter method buildReportAndReset is not thread safe and must not be invoked concurrently from different threads.
+Optimization was made taking in mind that buildReportAndReset will be rarely invoked in a way such effects of first invocation will be visible to second one.     
+

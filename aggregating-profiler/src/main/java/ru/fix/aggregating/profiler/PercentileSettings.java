@@ -5,17 +5,38 @@ import java.util.List;
 
 public class PercentileSettings {
     /**
-     * metric name and percentile value, like 98 -> 0.98
+     * (1 - 100)
+     * 50 means median 50%
+     * 98 means 98%
      */
     List<Integer> percentiles;
+    List<Integer> buckets;
 
-    int bucketCount;
-
-    long historySize = 3;
 
     public PercentileSettings() {
-        percentiles = Arrays.asList(95, 98, 99);
-        bucketCount = 10;
+        percentiles = Arrays.asList(94, 97, 99);
+        buckets = Arrays.asList(
+                3,
+                5,
+                10,
+                25,
+                50,
+                100,
+                250,
+                375,
+                500,
+                750,
+                1_000,
+                3_000,
+                6_000,
+                12_000,
+                20_000,
+                40_000,
+                60_000,
+                300_000,
+                600_000,
+                900_000
+        );
     }
 
     public List<Integer> getPercentiles() {
@@ -27,21 +48,12 @@ public class PercentileSettings {
         return this;
     }
 
-    public int getBucketCount() {
-        return bucketCount;
+    public List<Integer> getBuckets() {
+        return buckets;
     }
 
-    public PercentileSettings setBucketCount(int bucketCount) {
-        this.bucketCount = bucketCount;
-        return this;
-    }
-
-    public long getHistorySize() {
-        return historySize;
-    }
-
-    public PercentileSettings setHistorySize(long historySize) {
-        this.historySize = historySize;
+    public PercentileSettings setBuckets(List<Integer> buckets) {
+        this.buckets = buckets;
         return this;
     }
 }

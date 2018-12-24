@@ -178,13 +178,13 @@ public class CallAggregate implements AutoLabelStickerable {
                 .setLatencyMax(latencyMax)
                 .setLatencyAvg(AdderDrainer.drain(latencySum) / stopSum)
 
-                .setLatencyPercentile(latencyPercentile.buildAndReset(latencyMin, latencyMax))
+                .setLatencyPercentile(latencyPercentile.buildAndReset(latencyMax))
 
                 .setPayloadMin(payloadMin.getThenReset())
                 .setPayloadMax(payloadMax.getThenReset())
                 .setPayloadSum(payloadSum)
                 .setPayloadAvg(payloadSum / stopSum)
-                .setPayloadThroughputAvg(elapsed != 0 ? ((double) payloadSum * 1000) / elapsed : 0)
+                .setPayloadThroughputAvg(elapsed != 0 ? (payloadSum * 1000) / elapsed : 0)
 
                 .setStopSum(stopSum)
                 .setStopThroughputAvg(elapsed != 0 ? ((double) stopSum * 1000) / elapsed : 0)
