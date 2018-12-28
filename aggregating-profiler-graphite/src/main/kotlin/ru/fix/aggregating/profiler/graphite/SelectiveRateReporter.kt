@@ -20,7 +20,7 @@ class SelectiveRateReporter(
         private val storeMetrics: (ProfilerReport) -> Unit) : AutoCloseable {
 
     companion object {
-        private const val THREAD_NAME_PREFIX = "selective-reporter-"
+        private const val THREAD_NAME_PREFIX = "profiler-selective-reporter"
         private const val RATE_LABEL = "logRate"
     }
 
