@@ -46,6 +46,15 @@ public class AggregatingCall implements ProfiledCall {
     }
 
     @Override
+    public void call(long startTime) {
+        Long currentTime = System.currentTimeMillis();
+
+        aggregateMutator.updateAggregate(
+                identity,
+                aggregate -> aggregate.call(currentTime, currentTime - startTime, 0));
+    }
+
+    @Override
     public void call(long startTime, double payload) {
         Long currentTime = System.currentTimeMillis();
 

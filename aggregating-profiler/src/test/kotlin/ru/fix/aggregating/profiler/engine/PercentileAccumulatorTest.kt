@@ -31,9 +31,9 @@ class PercentileAccumulatorTest {
 
         Assertions.assertEquals(
                 mapOf(
-                        "p50" to 750L,
-                        "p90" to 1000L,
-                        "p99" to 60_000L
+                        50 to 750L,
+                        90 to 1000L,
+                        99 to 60_000L
                 ),
                 report)
     }

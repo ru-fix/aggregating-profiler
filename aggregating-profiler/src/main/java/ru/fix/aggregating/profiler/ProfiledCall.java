@@ -19,6 +19,12 @@ public interface ProfiledCall extends AutoCloseable {
     void call(double payload);
 
     /**
+     * Call when measured time span just finished and it is known at what time it was started
+     * @param startTime
+     */
+    void call(long startTime);
+
+    /**
      * @param startTime when call started in ms.
      *                  Latency will be calculated as time span between {@link System#currentTimeMillis()} and startTime
      * @param payload

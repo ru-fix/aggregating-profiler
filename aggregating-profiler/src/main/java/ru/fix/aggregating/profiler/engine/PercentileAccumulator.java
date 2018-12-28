@@ -36,7 +36,7 @@ public class PercentileAccumulator {
         return buckets;
     }
 
-    public Map<String, Long> buildAndReset(long currentMaximum) {
+    public Map<Integer, Long> buildAndReset(long currentMaximum) {
 
         TreeMap<Long, Long> counts = new TreeMap<>();
 
@@ -58,19 +58,19 @@ public class PercentileAccumulator {
         double currentCounts = 0;
         int percentileIndex = 0;
 
-        Map<String, Long> report = new HashMap<>();
+        Map<Integer, Long> report = new HashMap<>();
 
         for (Map.Entry<Long, Long> level : counts.entrySet()) {
             currentCounts += level.getValue();
 
             while (percentileIndex < percentiles.length && currentCounts >= percentileCounts[percentileIndex]) {
-                report.put("p" + percentiles[percentileIndex], level.getKey());
+                report.put(percentiles[percentileIndex], level.getKey());
                 percentileIndex++;
             }
         }
 
         while (percentileIndex < percentiles.length) {
-            report.put("p" + percentiles[percentileIndex], currentMaximum);
+            report.put(percentiles[percentileIndex], currentMaximum);
             percentileIndex++;
         }
 

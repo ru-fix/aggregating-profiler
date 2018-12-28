@@ -15,7 +15,7 @@ public class ProfiledCallReport {
     long latencyMax;
     long latencyAvg;
 
-    Map<String, Long> latencyPercentile;
+    Map<Integer, Long> latencyPercentile;
 
     double stopThroughputAvg;
     long stopSum;
@@ -78,6 +78,10 @@ public class ProfiledCallReport {
         map.put("stopSum", stopSum);
         map.put("stopThroughputAvg", stopThroughputAvg);
         map.put("stopThroughputPerSecondMax", stopThroughputPerSecondMax);
+
+        if(latencyPercentile != null) {
+            latencyPercentile.forEach((percentile, value) -> map.put("latencyPercentile" + percentile, value));
+        }
 
         return map;
     }
@@ -238,11 +242,11 @@ public class ProfiledCallReport {
         return this;
     }
 
-    public Map<String, Long> getLatencyPercentile() {
+    public Map<Integer, Long> getLatencyPercentile() {
         return latencyPercentile;
     }
 
-    public ProfiledCallReport setLatencyPercentile(Map<String, Long> latencyPercentile) {
+    public ProfiledCallReport setLatencyPercentile(Map<Integer, Long> latencyPercentile) {
         this.latencyPercentile = latencyPercentile;
         return this;
     }

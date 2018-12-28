@@ -14,6 +14,11 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
+        public void call(long startTime) {
+
+        }
+
+        @Override
         public void call(double payload) {
         }
 

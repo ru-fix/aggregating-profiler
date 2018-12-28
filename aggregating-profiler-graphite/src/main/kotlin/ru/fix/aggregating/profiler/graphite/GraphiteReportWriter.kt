@@ -2,12 +2,9 @@ package ru.fix.aggregating.profiler.graphite
 
 import mu.KotlinLogging
 import ru.fix.aggregating.profiler.Identity
-import ru.fix.aggregating.profiler.ProfiledCallReport
 import ru.fix.aggregating.profiler.ProfilerReport
 import ru.fix.aggregating.profiler.graphite.client.GraphiteEntity
 import ru.fix.aggregating.profiler.graphite.client.GraphiteWriter
-import java.beans.Introspector
-import java.lang.reflect.Method
 import java.util.*
 
 
@@ -26,27 +23,6 @@ class GraphiteReportWriter(
         private const val INDICATOR_SUFFIX_MAX = ".indicatorMax"
         private const val INDICATOR_SUFFIX_MIN = ".indicatorMin"
     }
-
-    private val reportFieldExtractor = HashMap<String, Method>()
-
-    init {
-        initReportFieldExtractors()
-    }
-
-
-    private fun initReportFieldExtractors() {
-        try {
-            val propertyDescriptors = Introspector.getBeanInfo(ProfiledCallReport::class.java).propertyDescriptors
-            for (descriptor in propertyDescriptors) {
-                if (descriptor.propertyType.isPrimitive) {
-                    reportFieldExtractor[descriptor.name] = descriptor.readMethod
-                }
-            }
-        } catch (exc: Exception) {
-            log.error(exc) { "Failed to initialize field getters for ${ProfiledCallReport::class.qualifiedName} ." }
-        }
-    }
-
 
     fun saveProfilingReportToGraphite(report: ProfilerReport) {
         val metrics = convertReportToGraphiteEntity(report)
@@ -90,21 +66,16 @@ class GraphiteReportWriter(
         for (profilerCallReport in report.profilerCallReports) {
             val callName = convertIdentityToMetricName(profilerCallReport.identity)
 
-            reportFieldExtractor.forEach { metric, fieldExtractor ->
-                var value: Any? = null
-                try {
-                    value = fieldExtractor.invoke(profilerCallReport)
-                } catch (exc: Exception) {
-                    log.error(exc) { "Failed to extract report field $metric from $profilerCallReport" }
-                }
 
-                if (value is Number) {
-                    metrics.add(GraphiteEntity(
-                            callName + '.'.toString() + metric,
-                            value.toString(),
-                            curTime
-                    ))
-                }
+
+            profilerCallReport.asMap().forEach { metricName, value ->
+
+                metrics.add(GraphiteEntity(
+                        callName + '.'.toString() + metricName,
+                        value.toString(),
+                        curTime
+                ))
+
             }
         }
 
