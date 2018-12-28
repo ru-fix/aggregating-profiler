@@ -6,7 +6,7 @@ import ru.fix.aggregating.profiler.ProfilerReporter
 import java.io.StringWriter
 import java.io.Writer
 
-class PrometheusMetricsReporter(private val reporter: ProfilerReporter) {
+class PrometheusMetricsReporter(private val reporter: ProfilerReporter): AutoCloseable {
 
     companion object {
         const val CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8"
@@ -86,4 +86,7 @@ class PrometheusMetricsReporter(private val reporter: ProfilerReporter) {
         } else java.lang.Double.toString(doubleValue)
     }
 
+    override fun close() {
+        reporter.close()
+    }
 }
