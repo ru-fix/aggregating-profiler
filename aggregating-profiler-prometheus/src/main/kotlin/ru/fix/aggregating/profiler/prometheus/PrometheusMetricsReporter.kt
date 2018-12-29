@@ -40,7 +40,7 @@ class PrometheusMetricsReporter(private val reporter: ProfilerReporter): AutoClo
     }
 
     private fun Writer.appendGaugeType(identity: Identity) {
-        this.appendln("# HELP ${normalizeName(identity.name)} ")
+        this.appendln("# HELP ${normalizeName(identity.name)} none")
         this.appendln("# TYPE ${normalizeName(identity.name)} gauge")
     }
 
