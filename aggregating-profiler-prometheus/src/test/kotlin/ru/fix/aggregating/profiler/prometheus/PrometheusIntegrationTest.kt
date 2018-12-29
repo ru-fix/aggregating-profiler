@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 private val log = KotlinLogging.logger { }
 
-class Prometheus(configFile: File) : GenericContainer<Prometheus>("prom/prometheus") {
+class Prometheus(configFile: File) : GenericContainer<Prometheus>("prom/prometheus:v2.6.0") {
     init {
         withExposedPorts(9090)
         withFileSystemBind(
