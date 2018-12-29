@@ -6,7 +6,7 @@ import ru.fix.aggregating.profiler.ProfilerReporter
 import java.io.StringWriter
 import java.io.Writer
 
-class PrometheusMetricsReporter(private val reporter: ProfilerReporter): AutoCloseable {
+class PrometheusMetricsReporter(private val reporter: ProfilerReporter) : AutoCloseable {
 
     companion object {
         const val CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8"
@@ -17,7 +17,27 @@ class PrometheusMetricsReporter(private val reporter: ProfilerReporter): AutoClo
         return serializeReport(report)
     }
 
-    private fun normalizeName(name: String) = name.replace('.', '_')
+    private fun isLatinLetterOrDigit(char: Char): Boolean {
+        return char in 'A'..'Z' || char in 'a'..'z' || char in '0'..'9'
+    }
+
+    private fun normalizeName(name: String): String {
+        val result = StringBuilder()
+        for (symbol in name) {
+            if (isLatinLetterOrDigit(symbol)) {
+                result.append(symbol)
+            } else {
+                if (result.isEmpty() || result.last() != '_') {
+                    result.append('_')
+                }
+            }
+        }
+        return if (result.endsWith('_'))
+            result.substring(0, result.length - 1)
+        else
+            result.toString()
+    }
+
 
     private fun serializeReport(report: ProfilerReport): String {
 
@@ -40,7 +60,6 @@ class PrometheusMetricsReporter(private val reporter: ProfilerReporter): AutoClo
     }
 
     private fun Writer.appendGaugeType(identity: Identity) {
-        this.appendln("# HELP ${normalizeName(identity.name)} none")
         this.appendln("# TYPE ${normalizeName(identity.name)} gauge")
     }
 
@@ -48,7 +67,7 @@ class PrometheusMetricsReporter(private val reporter: ProfilerReporter): AutoClo
         this.appendln("${convertIdentityToMetricName(identity)} ${serializeDouble(value)}")
     }
 
-    private fun convertIdentityToMetricName(identity: Identity): String{
+    private fun convertIdentityToMetricName(identity: Identity): String {
         val metricName = normalizeName(identity.name)
         if (identity.tags.isNotEmpty()) {
 
@@ -63,7 +82,7 @@ class PrometheusMetricsReporter(private val reporter: ProfilerReporter): AutoClo
     private fun escapeTagValue(value: String): String {
         val result = StringBuilder()
 
-        for (char in value ) {
+        for (char in value) {
             when (char) {
                 '\\' -> result.append("\\\\")
                 '\"' -> result.append("\\\"")

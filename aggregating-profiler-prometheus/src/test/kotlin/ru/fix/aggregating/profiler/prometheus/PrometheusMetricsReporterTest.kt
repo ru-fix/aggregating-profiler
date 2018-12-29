@@ -41,4 +41,25 @@ internal class PrometheusMetricsReporterTest {
         assertThat(report, containsString("""simpleCall_stopSum{rate="fast",type="hard"} 1.0"""))
         println(report)
     }
+
+    @Test
+    fun `convert wrong names`() {
+        val profiler = AggregatingProfiler()
+        val reporter = PrometheusMetricsReporter(profiler.createReporter())
+
+        profiler.call("my.simple.call")
+        profiler.call("my other invocation")
+        profiler.call("percentile98")
+        profiler.call("wrong-metric.name")
+        profiler.call("another.name.")
+
+
+        val report = reporter.buildReportAndReset()
+        assertThat(report, containsString("my_simple_call_stopSum 1.0"))
+        assertThat(report, containsString("my_other_invocation_stopSum 1.0"))
+        assertThat(report, containsString("percentile98_stopSum 1.0"))
+        assertThat(report, containsString("wrong_metric_name_stopSum 1.0"))
+        assertThat(report, containsString("another_name_stopSum 1.0"))
+        println(report)
+    }
 }
