@@ -21,7 +21,13 @@ class PrometheusMetricsReporter(private val reporter: ProfilerReporter) : AutoCl
         return char in 'A'..'Z' || char in 'a'..'z' || char in '0'..'9'
     }
 
+    private fun isLatinLetter(char: Char): Boolean {
+        return char in 'A'..'Z' || char in 'a'..'z'
+    }
+
     private fun normalizeName(name: String): String {
+        require(name.isNotEmpty())
+
         val result = StringBuilder()
         for (symbol in name) {
             if (isLatinLetterOrDigit(symbol)) {
@@ -32,6 +38,11 @@ class PrometheusMetricsReporter(private val reporter: ProfilerReporter) : AutoCl
                 }
             }
         }
+
+        if (!isLatinLetter(result[0])) {
+            result.insert(0, '_')
+        }
+
         return if (result.endsWith('_'))
             result.substring(0, result.length - 1)
         else
