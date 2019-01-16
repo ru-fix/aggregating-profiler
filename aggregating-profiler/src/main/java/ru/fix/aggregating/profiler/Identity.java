@@ -45,6 +45,19 @@ public class Identity {
         return name;
     }
 
+    public String identityString() {
+        if (tags.isEmpty()) {
+            return name;
+        } else {
+            return name +
+                    tags.entrySet()
+                            .stream()
+                            .map(entry -> entry.getKey() + "=" + entry.getValue())
+                            .sorted()
+                            .collect(Collectors.joining(",", "{", "}"));
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -61,15 +74,7 @@ public class Identity {
 
     @Override
     public String toString() {
-        if (tags.isEmpty()) {
-            return name;
-        } else {
-            return name +
-                    tags.entrySet()
-                            .stream()
-                            .map(entry -> entry.getKey() + "=" + entry.getValue())
-                            .collect(Collectors.joining(",", "{", "}"));
-        }
+        return identityString();
     }
 }
 
