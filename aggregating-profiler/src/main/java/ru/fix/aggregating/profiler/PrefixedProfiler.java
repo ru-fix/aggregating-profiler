@@ -21,6 +21,18 @@ public class PrefixedProfiler implements Profiler {
         return profiler.profiledCall(profilerPrefix + "." + NameNormalizer.trimDots(name));
     }
 
+    private Identity prefixedIdentity(Identity identity){
+        return new Identity(
+                profilerPrefix + "." + NameNormalizer.trimDots(identity.name),
+                identity.getTags()
+        );
+    }
+
+    @Override
+    public ProfiledCall profiledCall(Identity identity) {
+        return profiler.profiledCall(prefixedIdentity(identity));
+    }
+
     @Override
     public void attachIndicator(String name, IndicationProvider indicationProvider) {
         profiler.attachIndicator(profilerPrefix + "." + NameNormalizer.trimDots(name), indicationProvider);
@@ -32,12 +44,19 @@ public class PrefixedProfiler implements Profiler {
     }
 
     @Override
-    public void setTagger(Tagger tagger) {
-        profiler.setTagger(tagger);
+    public ProfilerReporter createReporter() {
+        return profiler.createReporter();
+    }
+
+
+
+    @Override
+    public void attachIndicator(Identity identity, IndicationProvider indicationProvider) {
+
     }
 
     @Override
-    public ProfilerReporter createReporter() {
-        return profiler.createReporter();
+    public void detachIndicator(Identity identity) {
+
     }
 }

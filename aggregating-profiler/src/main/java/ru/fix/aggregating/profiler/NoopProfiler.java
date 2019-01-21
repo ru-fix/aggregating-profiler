@@ -14,11 +14,16 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
-        public void call(long payload) {
+        public void call(long startTime) {
+
         }
 
         @Override
-        public void call(long startTime, long payload) {
+        public void call(double payload) {
+        }
+
+        @Override
+        public void call(long startTime, double payload) {
 
         }
 
@@ -28,7 +33,7 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
-        public void stop(long payload) {
+        public void stop(double payload) {
         }
 
         @Override
@@ -36,7 +41,12 @@ public class NoopProfiler implements Profiler {
         }
 
         @Override
-        public void stopIfRunning(long payload) {
+        public void stop() {
+
+        }
+
+        @Override
+        public void stopIfRunning(double payload) {
         }
 
         @Override
@@ -52,6 +62,11 @@ public class NoopProfiler implements Profiler {
         @Override
         public <R, T extends Throwable> R profileThrowable(ThrowableSupplier<R, T> block) throws T {
             return block.get();
+        }
+
+        @Override
+        public <T extends Throwable> void profileThrowable(ThrowableRunnable<T> block) throws T {
+            block.run();
         }
 
         @Override
@@ -72,6 +87,11 @@ public class NoopProfiler implements Profiler {
     }
 
     @Override
+    public ProfiledCall profiledCall(Identity identity) {
+        return new NoopProfiledCall();
+    }
+
+    @Override
     public void attachIndicator(String name, IndicationProvider indicationProvider) {
     }
 
@@ -79,12 +99,22 @@ public class NoopProfiler implements Profiler {
     public void detachIndicator(String name) {
     }
 
-    public void setTagger(Tagger tagger) {
+    public void setLabelSticker(LabelSticker labelSticker) {
         //no need any changes
     }
 
     @Override
     public ProfilerReporter createReporter() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void attachIndicator(Identity identity, IndicationProvider indicationProvider) {
+
+    }
+
+    @Override
+    public void detachIndicator(Identity identity) {
+
     }
 }

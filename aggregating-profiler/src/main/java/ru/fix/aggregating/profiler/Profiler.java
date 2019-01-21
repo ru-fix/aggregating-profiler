@@ -14,6 +14,8 @@ public interface Profiler {
      */
     ProfiledCall profiledCall(String name);
 
+    ProfiledCall profiledCall(Identity identity);
+
     /**
      * Creates and starts profiled call
      * shortcut of {@code profiledCall(<name>).start()}
@@ -38,6 +40,10 @@ public interface Profiler {
      */
     default <R, T extends Throwable> R profileThrowable(String name, ThrowableSupplier<R, T> block) throws T {
         return profiledCall(name).profileThrowable(block);
+    }
+
+    default <R, T extends Throwable> void profileThrowable(String name, ThrowableRunnable<T> block) throws T {
+        profiledCall(name).profileThrowable(block);
     }
 
     /**
@@ -82,6 +88,7 @@ public interface Profiler {
      */
     void attachIndicator(String name, IndicationProvider indicationProvider);
 
+    void attachIndicator(Identity identity, IndicationProvider indicationProvider);
     /**
      * Remove indicator
      *
@@ -89,11 +96,11 @@ public interface Profiler {
      */
     void detachIndicator(String name);
 
+    void detachIndicator(Identity identity);
+
     /**
      * Create new instance of reporter.
      * Reporter is closable resource
      */
     ProfilerReporter createReporter();
-
-    void setTagger(Tagger tagger);
 }

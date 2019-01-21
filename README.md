@@ -124,7 +124,7 @@ Latency is the time in milliseconds between two points: profiledCall start and s
   - latencyAvg = (1000+1000+400+500) / 4 = 725
    
 Total calls count will be 4.  
-  - callsCountSum - 4 - how many times profiledCall was invoked
+  - stopSum - 4 - how many times profiledCall was invoked
 
 Profiled call #6 not started during current reporting period and will be ignored.
 Profiled call #7 started during current reporting period but not stopped yet. 
@@ -139,16 +139,16 @@ Total count of active calls are 2.
  
 ![](docs/metric-example-throughput.png?raw=true "Graph View")
 
-There are two metrics that measure throughput: callsThroughputAvg and throughputPerSecondMax.
+There are two metrics that measure throughput: stopThroughputAvg and stopThroughputPerSecondMax.
 In given example there was  9 invocations during 1 minute:   
 9 / 60  =  0.15 invocation per second
-- callsThroughputAvg - 0.15
+- stopThroughputAvg - 0.15
 
 During reporting period there was time then invocations occurred most often.  
 We can find time interval of size 1 second where were 4 invocations.
 This means that during reporting period there was time when throughput reached 4 invocations per second.  
 And average throughput during reporting period of 1 minute is only 0.15 invocation per second. 
-- throughputPerSecondMax - 4
+- stopThroughputPerSecondMax - 4
  
 
 #### Metrics summary
@@ -158,15 +158,19 @@ And average throughput during reporting period of 1 minute is only 0.15 invocati
    - latencyMax maximum latency
    - latencyMin minimum latency
    - latencyAvg average latency
- - callsCountSum - how many times profiledCall was invoked
- - callsThroughputAvg - average rate of profiledCall invocation per second 
+ - stopSum - how many times profiledCall was invoked
+ - stopThroughputAvg - average rate of profiledCall invocation per second 
  - payload - payload provided via stop method of profiledCall
    - payloadMin - min value of payload
    - payloadMax - max value of payload
    - payloadAvg - avg value of payload
    - payloadSum - total sum of payload provided within reporting interval
    - payloadThroughputAvg - payload rate invocation per second
- - throughputPerSecondMax - maximum rate within second time interval that was achieved during reporting period 
+ - start - start metrics provide information about throughput and count of start invocation of ProfiledCall  
+   - startSum - how many times start method was invoked
+   - startThroughputAvg - what is an average throughput for start invocation
+   - startThroughputPerSecondMax - what is a maximum throughput of start method invocation
+ - stopThroughputPerSecondMax - maximum rate within second time interval that was achieved during reporting period 
  (17 means that there was a maximum of 17 invocation within 1 second interval)
  - activeCalls - calls that are still running at the end of reporting period
    - activeCallsCountMax - count of active calls that still running at the end of reporting period  
@@ -186,9 +190,48 @@ User can provide different storages for metrics: graphite, influx, prometheus, o
 All metrics names ends with suffixes: min, max, sum, avg. 
 This suffix could be used as a suggestion to specify how storage could compress cold data.   
 
+## Tags and Labels 
+Tag is a key-value pair defined by user.
+User can define tags during ProfiledCall or IndicationProvider construction. 
+Tags works similar to labels in Prometheus or tags in InfluxDB.
+
+Labels is a key-value pair that is automatically linked with metrics in runtime.
+User can setup RegexpLabelSticker or custom LabelSticker for Profiler instance.
+Then we can use Labels to filter particular metrics in Reporter.
+
+Tag is a part of identity of ProfiledCall or Indicator.
+Tag provided manually by a user during metric construction.
+
+Label is a metadata associated with aggregate that is being assigned by LabelSticker.
+User can define LabelSticker for Profiler.
+You can build report only for part of metrics selected by labels.
+This mechanism allows to report and aggregate different types of metrics with different rate and granularity.    
+
 
 ## Metric reporting
 How to register Profiler Reporter and start to record metrics to external storage.
+
+
+### Graphite
+Graphite uses aggregation rules to compact metric storage.
+To simplify aggregation rules all metric names ends with suffix
+* *.*Max
+* *.*Min
+* *.*Avg
+* *.*Sum
+
+ProfiledCall tags saved as part of metric name separated by dot `.`   
+ProfiledCall labels not stored in Graphite.
+
+### Prometheus
+ProfiledCall tags saved as Prometheus labels.  
+ProfiledCall labels not stored in Prometheus.
+
+
+### InfluxDB
+ProfiledCall tags saved as InfluxDB tags.  
+ProfiledCall labels not stored in InfluxDB.
+
 
 ## How to mock profiler in Tests
 `NoopProfiler` is a stub that you can use as a dependency in tests. This stub does not do anything.
@@ -220,3 +263,9 @@ https://github.com/openzipkin/zipkin/
 
 Dropwizard metrics:  
 https://github.com/dropwizard/metrics
+
+## Source guidebook
+
+Reporter method buildReportAndReset is not thread safe and must not be invoked concurrently from different threads.
+Optimization was made taking in mind that buildReportAndReset will be rarely invoked in a way such effects of first invocation will be visible to second one.     
+

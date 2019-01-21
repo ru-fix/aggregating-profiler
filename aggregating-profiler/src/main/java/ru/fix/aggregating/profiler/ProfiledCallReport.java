@@ -1,59 +1,89 @@
 package ru.fix.aggregating.profiler;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 /**
  * @author Kamil Asfandiyarov
  */
 public class ProfiledCallReport {
 
-    final String name;
+    final Identity identity;
 
     long latencyMin;
     long latencyMax;
     long latencyAvg;
 
-    double callsThroughputAvg;
-    long callsCountSum;
+    Map<Integer, Long> latencyPercentile;
+
+    double stopThroughputAvg;
+    long stopSum;
+
+    long startSum;
+    double startThroughputAvg;
+    long startThroughputPerSecondMax;
+
 
     long reportingTimeAvg;
 
-    long payloadMin;
-    long payloadMax;
-    long payloadAvg;
-    long payloadSum;
+    double payloadMin;
+    double payloadMax;
+    double payloadAvg;
+    double payloadSum;
     double payloadThroughputAvg;
 
-    long throughputPerSecondMax;
-    long payloadThroughputPerSecondMax;
+    long stopThroughputPerSecondMax;
 
     long activeCallsCountMax;
     long activeCallsLatencyMax;
 
-    public ProfiledCallReport(String name) {
-        this.name = name;
+
+    public ProfiledCallReport(Identity identity) {
+        this.identity = identity;
     }
 
     @Override
     public String toString() {
-        return "" + getName() + ":" +
-                " LatMin: " + latencyMin +
-                ", LatMax: " + latencyMax +
-                ", LatAvg: " + latencyAvg +
-                ", CallsCntSum: " + callsCountSum +
-                ", CallsThrptAvg: " + callsThroughputAvg +
-                ", RepTimeAvg: " + reportingTimeAvg +
-                ", PldMin " + payloadMin +
-                ", PldMax " + payloadMax +
-                ", PldAvg " + payloadAvg +
-                ", PldSum: " + payloadSum +
-                ", PldThrptAvg: " + payloadThroughputAvg +
-                ", ThrptPerSecMax: " + throughputPerSecondMax +
-                ", PldThrptPerSecMax: " + payloadThroughputPerSecondMax +
-                ", ActCallsCnt: " + activeCallsCountMax +
-                ", ActCallsLatMax: " + activeCallsLatencyMax;
+        return asMap().entrySet().stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .collect(Collectors.joining(", ", "" + getIdentity() + ": ", ""));
     }
 
-    public String getName() {
-        return name;
+    public Identity getIdentity() {
+        return identity;
+    }
+
+    public Map<String, Number> asMap() {
+        HashMap<String, Number> map = new HashMap<>();
+        map.put("reportingTimeAvg", reportingTimeAvg);
+
+        map.put("startSum", startSum);
+        map.put("startThroughputAvg", startThroughputAvg);
+        map.put("startThroughputPerSecondMax", startThroughputPerSecondMax);
+
+        map.put("latencyMin", latencyMin);
+        map.put("latencyMax", latencyMax);
+        map.put("latencyAvg", latencyAvg);
+
+        map.put("activeCallsCountMax", activeCallsCountMax);
+        map.put("activeCallsLatencyMax", activeCallsLatencyMax);
+
+        map.put("payloadMin", payloadMin);
+        map.put("payloadMax", payloadMax);
+        map.put("payloadAvg", payloadAvg);
+        map.put("payloadSum", payloadSum);
+        map.put("payloadThroughputAvg", payloadThroughputAvg);
+
+        map.put("stopSum", stopSum);
+        map.put("stopThroughputAvg", stopThroughputAvg);
+        map.put("stopThroughputPerSecondMax", stopThroughputPerSecondMax);
+
+        if(latencyPercentile != null) {
+            latencyPercentile.forEach((percentile, value) -> map.put("latencyPercentile" + percentile, value));
+        }
+
+        return map;
     }
 
     public long getLatencyMin() {
@@ -68,6 +98,32 @@ public class ProfiledCallReport {
         return latencyAvg;
     }
 
+    public long getStartSum() {
+        return startSum;
+    }
+
+    public ProfiledCallReport setStartSum(long startSum) {
+        this.startSum = startSum;
+        return this;
+    }
+
+    public double getStartThroughputAvg() {
+        return startThroughputAvg;
+    }
+
+    public ProfiledCallReport setStartThroughputAvg(double startThroughputAvg) {
+        this.startThroughputAvg = startThroughputAvg;
+        return this;
+    }
+
+    public long getStartThroughputPerSecondMax() {
+        return startThroughputPerSecondMax;
+    }
+
+    public ProfiledCallReport setStartThroughputPerSecondMax(long startThroughputPerSecondMax) {
+        this.startThroughputPerSecondMax = startThroughputPerSecondMax;
+        return this;
+    }
 
     public long getReportingTimeAvg() {
         return reportingTimeAvg;
@@ -94,58 +150,58 @@ public class ProfiledCallReport {
         return this;
     }
 
-    public long getPayloadMin() {
+    public double getPayloadMin() {
         return payloadMin;
     }
 
-    public ProfiledCallReport setPayloadMin(long payloadMin) {
+    public ProfiledCallReport setPayloadMin(double payloadMin) {
         this.payloadMin = payloadMin;
         return this;
     }
 
-    public long getPayloadMax() {
+    public double getPayloadMax() {
         return payloadMax;
     }
 
-    public ProfiledCallReport setPayloadMax(long payloadMax) {
+    public ProfiledCallReport setPayloadMax(double payloadMax) {
         this.payloadMax = payloadMax;
         return this;
     }
 
-    public long getPayloadAvg() {
+    public double getPayloadAvg() {
         return payloadAvg;
     }
 
-    public ProfiledCallReport setPayloadAvg(long payloadAvg) {
+    public ProfiledCallReport setPayloadAvg(double payloadAvg) {
         this.payloadAvg = payloadAvg;
         return this;
     }
 
-    public long getPayloadSum() {
+    public double getPayloadSum() {
         return payloadSum;
     }
 
-    public ProfiledCallReport setPayloadSum(long payloadSum) {
+    public ProfiledCallReport setPayloadSum(double payloadSum) {
         this.payloadSum = payloadSum;
         return this;
     }
 
-    public long getCallsCountSum() {
-        return callsCountSum;
+    public long getStopSum() {
+        return stopSum;
     }
 
-    public ProfiledCallReport setCallsCountSum(long callsCountSum) {
-        this.callsCountSum = callsCountSum;
+    public ProfiledCallReport setStopSum(long stopSum) {
+        this.stopSum = stopSum;
         return this;
     }
 
 
-    public double getCallsThroughputAvg() {
-        return callsThroughputAvg;
+    public double getStopThroughputAvg() {
+        return stopThroughputAvg;
     }
 
-    public ProfiledCallReport setCallsThroughputAvg(double callsThroughputAvg) {
-        this.callsThroughputAvg = callsThroughputAvg;
+    public ProfiledCallReport setStopThroughputAvg(double stopThroughputAvg) {
+        this.stopThroughputAvg = stopThroughputAvg;
         return this;
     }
 
@@ -158,23 +214,15 @@ public class ProfiledCallReport {
         return this;
     }
 
-    public long getThroughputPerSecondMax() {
-        return throughputPerSecondMax;
+    public long getStopThroughputPerSecondMax() {
+        return stopThroughputPerSecondMax;
     }
 
-    public ProfiledCallReport setThroughputPerSecondMax(long throughputPerSecondMax) {
-        this.throughputPerSecondMax = throughputPerSecondMax;
+    public ProfiledCallReport setStopThroughputPerSecondMax(long stopThroughputPerSecondMax) {
+        this.stopThroughputPerSecondMax = stopThroughputPerSecondMax;
         return this;
     }
 
-    public long getPayloadThroughputPerSecondMax() {
-        return payloadThroughputPerSecondMax;
-    }
-
-    public ProfiledCallReport setPayloadThroughputPerSecondMax(long payloadThroughputPerSecondMax) {
-        this.payloadThroughputPerSecondMax = payloadThroughputPerSecondMax;
-        return this;
-    }
 
     public long getActiveCallsCountMax() {
         return activeCallsCountMax;
@@ -191,6 +239,15 @@ public class ProfiledCallReport {
 
     public ProfiledCallReport setActiveCallsLatencyMax(long activeCallsLatencyMax) {
         this.activeCallsLatencyMax = activeCallsLatencyMax;
+        return this;
+    }
+
+    public Map<Integer, Long> getLatencyPercentile() {
+        return latencyPercentile;
+    }
+
+    public ProfiledCallReport setLatencyPercentile(Map<Integer, Long> latencyPercentile) {
+        this.latencyPercentile = latencyPercentile;
         return this;
     }
 }

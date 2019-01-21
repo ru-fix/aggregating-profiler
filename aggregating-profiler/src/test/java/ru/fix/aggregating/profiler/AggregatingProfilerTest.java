@@ -43,7 +43,7 @@ public class AggregatingProfilerTest {
 
             ProfilerReport report = reporter.buildReportAndReset();
             assertEquals(1, report.getProfilerCallReports().size());
-            assertEquals("call.name", report.getProfilerCallReports().get(0).getName());
+            assertEquals("call.name", report.getProfilerCallReports().get(0).getIdentity().getName());
         }
     }
 
@@ -66,8 +66,8 @@ public class AggregatingProfilerTest {
             ProfiledCallReport report = reporter.buildReportAndReset().getProfilerCallReports().get(0);
             log.info(report.toString());
 
-            assertThat(report.callsThroughputAvg, lessThanOrEqualTo(70.0));
-            assertThat(report.callsThroughputAvg, greaterThanOrEqualTo(40.0));
+            assertThat(report.stopThroughputAvg, lessThanOrEqualTo(70.0));
+            assertThat(report.stopThroughputAvg, greaterThanOrEqualTo(40.0));
         }
     }
 
@@ -117,8 +117,8 @@ public class AggregatingProfilerTest {
 
             assertThat(report.latencyMin, greaterThanOrEqualTo(90L));
             assertThat(report.latencyMin, lessThanOrEqualTo(120L));
-            assertThat(report.payloadMax, equalTo(49L));
-            assertThat(report.payloadMin, equalTo(0L));
+            assertThat(report.payloadMax, equalTo(49.0));
+            assertThat(report.payloadMin, equalTo(0.0));
         }
     }
 
@@ -264,9 +264,9 @@ public class AggregatingProfilerTest {
         log.info("Report: {}", report);
 
         ProfiledCallReport callReport = report.getProfilerCallReports().get(0);
-        assertEquals(1, callReport.payloadMin);
+        assertEquals(0, callReport.payloadMin);
         assertEquals(12, callReport.payloadMax);
-        assertEquals(1 + 12 + 6, callReport.payloadSum);
+        assertEquals(0 + 12 + 6, callReport.payloadSum);
     }
 
     @Test
@@ -288,10 +288,10 @@ public class AggregatingProfilerTest {
         ProfilerReport report = reporter.buildReportAndReset();
         assertTrue(report.getIndicators().isEmpty());
         assertEquals(2, report.getProfilerCallReports().size());
-        assertEquals(2L, report.getProfilerCallReports().get(0).getCallsCountSum());
-        assertEquals("call_1", report.getProfilerCallReports().get(0).getName());
-        assertEquals(1L, report.getProfilerCallReports().get(1).getCallsCountSum());
-        assertEquals("call_2", report.getProfilerCallReports().get(1).getName());
+        assertEquals(2L, report.getProfilerCallReports().get(0).getStopSum());
+        assertEquals("call_1", report.getProfilerCallReports().get(0).getIdentity().getName());
+        assertEquals(1L, report.getProfilerCallReports().get(1).getStopSum());
+        assertEquals("call_2", report.getProfilerCallReports().get(1).getIdentity().getName());
 
         call2.start();
         call2.stop();
@@ -303,8 +303,8 @@ public class AggregatingProfilerTest {
         report = reporter.buildReportAndReset();
         assertTrue(report.getIndicators().isEmpty());
         assertEquals(1, report.getProfilerCallReports().size());
-        assertEquals(3L, report.getProfilerCallReports().get(0).getCallsCountSum());
-        assertEquals("call_2", report.getProfilerCallReports().get(0).getName());
+        assertEquals(3L, report.getProfilerCallReports().get(0).getStopSum());
+        assertEquals("call_2", report.getProfilerCallReports().get(0).getIdentity().getName());
     }
 
     @Test
@@ -349,7 +349,7 @@ public class AggregatingProfilerTest {
 
         long callCountFromReports = reports.stream()
                 .flatMap(profilerReport -> profilerReport.getProfilerCallReports().stream())
-                .map(ProfiledCallReport::getCallsCountSum)
+                .map(ProfiledCallReport::getStopSum)
                 .reduce(0L, Long::sum);
 
 
@@ -376,7 +376,7 @@ public class AggregatingProfilerTest {
         assertNotNull(reports);
         assertEquals(1, reports.size());
         ProfiledCallReport report = reports.get(0);
-        assertEquals("call", report.name);
+        assertEquals("call", report.identity.name);
         assertEquals(0L, report.activeCallsCountMax);
     }
 
@@ -573,7 +573,7 @@ public class AggregatingProfilerTest {
         assertNotNull(reports);
         assertEquals(4, reports.size());
         Set<String> names = reports.stream()
-                .map(ProfiledCallReport::getName)
+                .map(report -> report.getIdentity().getName())
                 .collect(Collectors.toSet());
         assertEquals(
                 new HashSet<>(Arrays.asList("profile.1", "profile.2", "profile.5", "profile.6")),
@@ -618,7 +618,7 @@ public class AggregatingProfilerTest {
         assertNotNull(reports);
         assertEquals(2, reports.size());
         Set<String> names = reports.stream()
-                .map(ProfiledCallReport::getName)
+                .map(report -> report.getIdentity().getName())
                 .collect(Collectors.toSet());
         assertEquals(
                 new HashSet<>(Arrays.asList("profile.1", "profile.5")),
@@ -738,7 +738,7 @@ public class AggregatingProfilerTest {
         assertNotNull(reports);
         assertEquals(2, reports.size());
         Set<String> names = reports.stream()
-                .map(ProfiledCallReport::getName)
+                .map(report -> report.getIdentity().getName())
                 .collect(Collectors.toSet());
         assertEquals(
                 new HashSet<>(Arrays.asList("profile.1", "profile.5")),
@@ -810,9 +810,9 @@ public class AggregatingProfilerTest {
         Profiler profiler = new AggregatingProfiler();
         profiler.attachIndicator("my.indicator", () -> 147L);
         ProfilerReporter reporter = profiler.createReporter();
-        Map<String, Long> indicators = reporter.buildReportAndReset().getIndicators();
-        assertTrue(indicators.containsKey("my.indicator.indicatorMax"));
-        assertEquals(147L, indicators.get("my.indicator.indicatorMax").longValue());
+        Map<Identity, Long> indicators = reporter.buildReportAndReset().getIndicators();
+        assertTrue(indicators.containsKey(new Identity("my.indicator")));
+        assertEquals(147L, indicators.get(new Identity("my.indicator")).longValue());
     }
 
     @Test
@@ -820,7 +820,7 @@ public class AggregatingProfilerTest {
         Profiler profiler = new AggregatingProfiler();
         profiler.attachIndicator("my.indicator", () -> null);
         ProfilerReporter reporter = profiler.createReporter();
-        Map<String, Long> indicators = reporter.buildReportAndReset().getIndicators();
-        assertFalse(indicators.containsKey("my.indicator.indicatorMax"));
+        Map<Identity, Long> indicators = reporter.buildReportAndReset().getIndicators();
+        assertFalse(indicators.containsKey(new Identity("my.indicator")));
     }
 }

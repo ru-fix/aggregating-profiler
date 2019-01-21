@@ -5,7 +5,6 @@ import ru.fix.aggregating.profiler.engine.AggregatingReporter;
 import ru.fix.aggregating.profiler.engine.NameNormalizer;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,15 +17,18 @@ public class AggregatingProfiler implements Profiler {
 
     private final CopyOnWriteArrayList<AggregatingReporter> profilerReporters = new CopyOnWriteArrayList<>();
 
-    private final Map<String, TaggedIndicationProvider> indicators = new ConcurrentHashMap<>();
-    private volatile Tagger tagger;
+    //TODO: move indicators to reporters, each reporter will set is's own auto tags
+    private final Map<Identity, AggregatingIndicationProvider> indicators = new ConcurrentHashMap<>();
+    private volatile LabelSticker labelSticker = new NoopLabelSticker();
 
-    public AggregatingProfiler(Tagger tagger) {
-        this.tagger = tagger;
+    private final PercentileSettings percentileSettings;
+
+    public AggregatingProfiler(PercentileSettings percentileSettings) {
+        this.percentileSettings = percentileSettings;
     }
 
     public AggregatingProfiler() {
-        this(new NoopTagger());
+        this(new PercentileSettings());
     }
 
     /**
@@ -34,10 +36,13 @@ public class AggregatingProfiler implements Profiler {
      */
     private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports = new AtomicInteger(10);
 
-
     public ProfiledCall profiledCall(String name) {
+        return profiledCall(new Identity(name));
+    }
+
+    public ProfiledCall profiledCall(Identity identity) {
         return new AggregatingCall(
-                name,
+                identity,
                 (profiledCallName, updateAction) ->
                         profilerReporters.forEach(
                                 reporter ->
@@ -46,15 +51,6 @@ public class AggregatingProfiler implements Profiler {
         );
     }
 
-    @Override
-    public void setTagger(Tagger tagger) {
-        Objects.requireNonNull(tagger);
-        this.tagger = tagger;
-        profilerReporters.forEach(
-            reporter -> reporter.setTagger(tagger));
-        indicators.forEach(tagger::assignTag);
-    }
-    
     private void registerReporter(AggregatingReporter reporter) {
         profilerReporters.add(reporter);
     }
@@ -66,20 +62,35 @@ public class AggregatingProfiler implements Profiler {
     @Override
     public void attachIndicator(String name, IndicationProvider indicationProvider) {
         String normalizedName = NameNormalizer.trimDots(name);
-        indicators.put(
-            normalizedName,
-            tagger.assignTag(
-                normalizedName,
-                new TaggedIndicationProvider(
-                    indicationProvider)));
+        attachIndicator(new Identity(normalizedName), indicationProvider);
+    }
+
+    @Override
+    public void attachIndicator(Identity identity, IndicationProvider indicationProvider) {
+        AggregatingIndicationProvider provider = new AggregatingIndicationProvider(indicationProvider);
+        indicators.put(identity, provider);
+
+        //TODO: call back will be replaced by direct Reporter::attachIndicator invocation
+        // Each report will have it's own indicator provider with populated auto labels.
+        for (AggregatingReporter reporter : profilerReporters){
+            reporter.onIndicatorAttached(identity, provider);
+        }
     }
 
     @Override
     public void detachIndicator(String name) {
-        indicators.remove(NameNormalizer.trimDots(name));
+        String normalizedName = NameNormalizer.trimDots(name);
+        detachIndicator(new Identity(normalizedName));
     }
 
-    public Map<String, TaggedIndicationProvider> getIndicators() {
+    @Override
+    public void detachIndicator(Identity identity) {
+        indicators.remove(identity);
+    }
+
+
+
+    public Map<Identity, AggregatingIndicationProvider> getIndicators() {
         return indicators;
     }
 
@@ -89,9 +100,10 @@ public class AggregatingProfiler implements Profiler {
         reporter[0] = new AggregatingReporter(
                 this,
                 numberOfActiveCallsToTrackAndKeepBetweenReports,
+                percentileSettings,
                 () -> this.unregisterReporter(reporter[0]),
-                new NoopTagger());
-        reporter[0].setTagger(tagger);
+                new NoopLabelSticker());
+        reporter[0].setLabelSticker(labelSticker);
         this.registerReporter(reporter[0]);
         return reporter[0];
     }

@@ -16,14 +16,20 @@ public interface ProfiledCall extends AutoCloseable {
     /**
      * Call with payload
      */
-    void call(long payload);
+    void call(double payload);
+
+    /**
+     * Call when measured time span just finished and it is known at what time it was started
+     * @param startTime
+     */
+    void call(long startTime);
 
     /**
      * @param startTime when call started in ms.
      *                  Latency will be calculated as time span between {@link System#currentTimeMillis()} and startTime
      * @param payload
      */
-    void call(long startTime, long payload);
+    void call(long startTime, double payload);
 
     /**
      * if you want to know some metrics then you should start and stop profiled call
@@ -31,20 +37,17 @@ public interface ProfiledCall extends AutoCloseable {
      * @throws IllegalStateException if method start called twice
      */
     ProfiledCall start();
+//TODO: implement stop and stop(value) in different way, so in case of stop() there will be no Paylaod* metrics reported
 
     /**
-     * Same as stop(1)
-     *
-     * @see #stop(long)
+     * Stop profiled call without any payload
      */
-    default void stop() {
-        stop(1);
-    }
+    void stop();
 
     /**
      * Call if profiled code executed normally. Applies all measurement to overall metrics.
      */
-    void stop(long payload);
+    void stop(double payload);
 
     /**
      * Stopping profiler unconditionally (without warnings or exceptions)
@@ -56,7 +59,7 @@ public interface ProfiledCall extends AutoCloseable {
     /**
      * Stopping profiler unconditionally with payload (without warnings or exceptions)
      */
-    void stopIfRunning(long payload);
+    void stopIfRunning(double payload);
 
     /**
      * Profile provided block of code which returns some result
@@ -67,6 +70,11 @@ public interface ProfiledCall extends AutoCloseable {
      * Profile provided block of code which returns some result or can throw an exception
      */
     <R, T extends Throwable> R profileThrowable(ThrowableSupplier<R, T> block) throws T;
+
+    /**
+     * Profile provided block of code which returns some result or can throw an exception
+     */
+    <T extends Throwable> void profileThrowable(ThrowableRunnable<T> block) throws T;
 
     /**
      * Profile provided block of code without result

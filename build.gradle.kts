@@ -62,7 +62,7 @@ repositories {
 }
 
 plugins {
-    kotlin("jvm") version "${Vers.kotlin}" apply false
+    kotlin("jvm") version Vers.kotlin apply false
     signing
     `maven-publish`
 }
@@ -183,11 +183,17 @@ subprojects {
             useJUnitPlatform()
 
             maxParallelForks = 10
-
+            
             testLogging {
                 events(TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.SKIPPED)
                 showStandardStreams = true
                 exceptionFormat = TestExceptionFormat.FULL
+            }
+        }
+
+        withType<KotlinCompile>{
+            kotlinOptions {
+                jvmTarget = "1.8"
             }
         }
     }

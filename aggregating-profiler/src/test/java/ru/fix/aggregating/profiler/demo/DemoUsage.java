@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static ru.fix.aggregating.profiler.ReportFilters.containsLabel;
+import static ru.fix.aggregating.profiler.ReportFilters.notContainsLabel;
 
 /**
  * This example shows how to use profiler and how to collect data
@@ -34,8 +36,8 @@ public class DemoUsage {
             ProfiledCallReport profiledCallReport = report.getProfilerCallReports().get(0);
 
             // "call.name" was called only once
-            assertEquals("call.name", profiledCallReport.getName());
-            assertEquals(1, profiledCallReport.getCallsCountSum());
+            assertEquals("call.name", profiledCallReport.getIdentity().getName());
+            assertEquals(1, profiledCallReport.getStopSum());
         }
     }
 
@@ -43,6 +45,7 @@ public class DemoUsage {
      * This example shows us how to deal with tags.
      * Tags allows us group calls and when we build report it build reports only for
      * metrics in this group
+     *
      * @throws Exception
      */
     @Test
@@ -52,31 +55,31 @@ public class DemoUsage {
         Map<String, Set<Pattern>> tagRules = new HashMap<>();
         tagRules.put("contains_number_1", new HashSet<>());
         tagRules.get("contains_number_1").add(Pattern.compile(".*1.*"));
-        Tagger tagger = new RegexpTagger(testTag, tagRules);
+        LabelSticker labelSticker = new RegexpLabelSticker(testTag, tagRules);
 
         Profiler profiler = new AggregatingProfiler();
-        profiler.setTagger(tagger);
 
         try (ProfilerReporter reporter = profiler.createReporter()) {
+            reporter.setLabelSticker(labelSticker);
 
             // first call must go to special group
             // second call must go to default group
             profiler.profiledCall("call1.name").call();
             profiler.profiledCall("call2.name").call();
-           
+
             // report for special group
-            ProfilerReport reportContains1 = reporter.buildReportAndReset(testTag, "contains_number_1");
+            ProfilerReport reportContains1 = reporter.buildReportAndReset(containsLabel(testTag, "contains_number_1"));
             assertEquals(1, reportContains1.getProfilerCallReports().size());
             ProfiledCallReport profiledCallReport = reportContains1.getProfilerCallReports().get(0);
-            assertEquals("call1.name", profiledCallReport.getName());
-            assertEquals(1, profiledCallReport.getCallsCountSum());
+            assertEquals("call1.name", profiledCallReport.getIdentity().getName());
+            assertEquals(1, profiledCallReport.getStopSum());
 
             // report for default group
-            ProfilerReport reportDefaults = reporter.buildReportAndReset(testTag, Tagger.EMPTY_VALUE);
+            ProfilerReport reportDefaults = reporter.buildReportAndReset(notContainsLabel(testTag));
             assertEquals(1, reportDefaults.getProfilerCallReports().size());
             ProfiledCallReport profiledCallReportDefault = reportDefaults.getProfilerCallReports().get(0);
-            assertEquals("call2.name", profiledCallReportDefault.getName());
-            assertEquals(1, profiledCallReportDefault.getCallsCountSum());
+            assertEquals("call2.name", profiledCallReportDefault.getIdentity().getName());
+            assertEquals(1, profiledCallReportDefault.getStopSum());
 
             // report for all, ignore group
             profiler.profiledCall("call1.name").call();
