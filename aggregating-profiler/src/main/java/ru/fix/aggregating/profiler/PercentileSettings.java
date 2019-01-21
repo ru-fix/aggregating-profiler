@@ -7,14 +7,14 @@ public class PercentileSettings {
     /**
      * (1 - 100)
      * 50 means median 50%
-     * 98 means 98%
+     * 95 means 95%
      */
     List<Integer> percentiles;
     List<Integer> buckets;
 
 
     public PercentileSettings() {
-        percentiles = Arrays.asList(94, 97, 99);
+        percentiles = Arrays.asList(90, 95, 99);
         buckets = Arrays.asList(
                 3,
                 5,
@@ -27,15 +27,12 @@ public class PercentileSettings {
                 500,
                 750,
                 1_000,
+                1_500,
                 3_000,
                 6_000,
                 12_000,
-                20_000,
-                40_000,
-                60_000,
-                300_000,
-                600_000,
-                900_000
+                30_000,
+                60_000
         );
     }
 

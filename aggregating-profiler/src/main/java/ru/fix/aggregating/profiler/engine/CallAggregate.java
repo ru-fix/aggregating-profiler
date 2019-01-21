@@ -38,14 +38,16 @@ public class CallAggregate implements AutoLabelStickerable {
 
     final Map<String, String> autoLabels = new ConcurrentHashMap<>();
 
-    final PercentileAccumulator latencyPercentile = new PercentileAccumulator(new PercentileSettings());
+    final PercentileAccumulator latencyPercentile;
 
     public CallAggregate(
             Identity callIdentity,
-            AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports
+            AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
+            PercentileSettings percentileSettings
     ) {
         this.callIdentity = callIdentity;
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
+        this.latencyPercentile = new PercentileAccumulator(percentileSettings);
 
     }
 

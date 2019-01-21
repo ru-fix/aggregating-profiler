@@ -30,16 +30,19 @@ public class AggregatingReporter implements ProfilerReporter {
 
     private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
     private final ClosingCallback closingCallback;
+    private final PercentileSettings percentileSettings;
     private volatile LabelSticker labelSticker;
 
     public AggregatingReporter(AggregatingProfiler profiler,
                                AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
+                               PercentileSettings percentileSettings,
                                ClosingCallback closingCallback,
                                LabelSticker labelSticker) {
         this.profiler = profiler;
         this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
         this.closingCallback = closingCallback;
         this.labelSticker = labelSticker;
+        this.percentileSettings = percentileSettings;
         lastReportTimestamp = new AtomicLong(System.currentTimeMillis());
     }
 
@@ -59,7 +62,8 @@ public class AggregatingReporter implements ProfilerReporter {
                         key -> {
                             CallAggregate aggregate = new CallAggregate(
                                     callIdentity,
-                                    numberOfActiveCallsToTrackAndKeepBetweenReports);
+                                    numberOfActiveCallsToTrackAndKeepBetweenReports,
+                                    percentileSettings);
                             labelSticker.buildLabels(callIdentity.getName()).forEach(aggregate::setAutoLabel);
                             return aggregate;
                         }));

@@ -40,7 +40,7 @@ class SelectiveRateReporter(
                 scheduler.clear()
                 scheduler.add(
                         makeScheduler(config.defaultTimeout) {
-                            buildAndSaveReportInGraphite { profilerReporter.buildReportAndReset() }
+                            buildAndSaveReportInStore { profilerReporter.buildReportAndReset() }
                         }
                 )
             }
@@ -65,7 +65,7 @@ class SelectiveRateReporter(
             plainConf.keys.forEach { key ->
                 scheduler.add(
                         makeScheduler(key.toLong()) {
-                            buildAndSaveReportInGraphite {
+                            buildAndSaveReportInStore {
                                 profilerReporter.buildReportAndReset { _, labels ->
                                     labels[RATE_LABEL]?.let { labelValue -> labelValue == key } ?: false
                                 }
@@ -75,7 +75,7 @@ class SelectiveRateReporter(
 
             scheduler.add(
                     makeScheduler(config.defaultTimeout) {
-                        buildAndSaveReportInGraphite {
+                        buildAndSaveReportInStore {
                             profilerReporter.buildReportAndReset { _, labels ->
                                 !labels.containsKey(RATE_LABEL)
                             }
@@ -91,7 +91,7 @@ class SelectiveRateReporter(
         return newScheduler
     }
 
-    private fun buildAndSaveReportInGraphite(buildReport: () -> ProfilerReport) {
+    private fun buildAndSaveReportInStore(buildReport: () -> ProfilerReport) {
         val report = buildReport()
 
         if (settings.get().enableReporting) {

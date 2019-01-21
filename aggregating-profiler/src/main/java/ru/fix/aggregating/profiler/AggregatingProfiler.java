@@ -19,14 +19,16 @@ public class AggregatingProfiler implements Profiler {
     private final CopyOnWriteArrayList<AggregatingReporter> profilerReporters = new CopyOnWriteArrayList<>();
 
     private final Map<Identity, AggregatingIndicationProvider> indicators = new ConcurrentHashMap<>();
-    private volatile LabelSticker labelSticker;
+    private volatile LabelSticker labelSticker = new NoopLabelSticker();
 
-    public AggregatingProfiler(LabelSticker labelSticker) {
-        this.labelSticker = labelSticker;
+    private final PercentileSettings percentileSettings;
+
+    public AggregatingProfiler(PercentileSettings percentileSettings) {
+        this.percentileSettings = percentileSettings;
     }
 
     public AggregatingProfiler() {
-        this(new NoopLabelSticker());
+        this(new PercentileSettings());
     }
 
     /**
@@ -107,6 +109,7 @@ public class AggregatingProfiler implements Profiler {
         reporter[0] = new AggregatingReporter(
                 this,
                 numberOfActiveCallsToTrackAndKeepBetweenReports,
+                percentileSettings,
                 () -> this.unregisterReporter(reporter[0]),
                 new NoopLabelSticker());
         reporter[0].setLabelSticker(labelSticker);
