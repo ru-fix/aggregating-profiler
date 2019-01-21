@@ -58,9 +58,9 @@ public class DemoUsage {
         LabelSticker labelSticker = new RegexpLabelSticker(testTag, tagRules);
 
         Profiler profiler = new AggregatingProfiler();
-        profiler.setLabelSticker(labelSticker);
 
         try (ProfilerReporter reporter = profiler.createReporter()) {
+            reporter.setLabelSticker(labelSticker);
 
             // first call must go to special group
             // second call must go to default group

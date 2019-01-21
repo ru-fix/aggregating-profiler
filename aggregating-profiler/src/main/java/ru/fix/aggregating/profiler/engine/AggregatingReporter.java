@@ -9,8 +9,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,10 +17,7 @@ public class AggregatingReporter implements ProfilerReporter {
     private static final Logger log = LoggerFactory.getLogger(AggregatingReporter.class);
 
 
-
     private final Map<Identity, CallAggregate> sharedCounters = new ConcurrentHashMap<>();
-
-    private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
     private final AggregatingProfiler profiler;
 
@@ -52,6 +47,10 @@ public class AggregatingReporter implements ProfilerReporter {
 
         this.sharedCounters.forEach((identity, aggregate) -> {
             labelSticker.buildLabels(identity.getName()).forEach(aggregate::setAutoLabel);
+        });
+
+        profiler.getIndicators().forEach((indicatorIdentity, indicatorProvider) -> {
+            labelSticker.buildLabels(indicatorIdentity.getName()).forEach(indicatorProvider::setAutoLabel);
         });
     }
 
@@ -125,7 +124,7 @@ public class AggregatingReporter implements ProfilerReporter {
              iterator.hasNext(); ) {
             Map.Entry<Identity, CallAggregate> entry = iterator.next();
 
-            if(reportFilter.isPresent() && !reportFilter.get().filter(entry.getKey(), entry.getValue().getAutoLabels())){
+            if (reportFilter.isPresent() && !reportFilter.get().filter(entry.getKey(), entry.getValue().getAutoLabels())) {
                 continue;
             }
 
@@ -159,5 +158,9 @@ public class AggregatingReporter implements ProfilerReporter {
     @Override
     public void close() {
         closingCallback.closed();
+    }
+
+    public void onIndicatorAttached(Identity identity, AggregatingIndicationProvider provider) {
+        labelSticker.buildLabels(identity.getName()).forEach(provider::setAutoLabel);
     }
 }

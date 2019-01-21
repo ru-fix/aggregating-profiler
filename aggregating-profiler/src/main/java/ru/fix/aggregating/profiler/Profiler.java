@@ -103,6 +103,4 @@ public interface Profiler {
      * Reporter is closable resource
      */
     ProfilerReporter createReporter();
-
-    void setLabelSticker(LabelSticker labelSticker);
 }

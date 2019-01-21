@@ -55,7 +55,7 @@ class SelectiveRateReporter(
                 }
                 .toMap()
 
-        this.profiler.setLabelSticker(RegexpLabelSticker(RATE_LABEL, plainConf))
+        this.profilerReporter.setLabelSticker(RegexpLabelSticker(RATE_LABEL, plainConf))
 
 
         synchronized(scheduler) {

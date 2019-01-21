@@ -65,8 +65,7 @@ public class AggregatingReporterTest {
         String testTag = "testTag";
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*test.*"));
-        profiler.setLabelSticker(new RegexpLabelSticker(testTag, separator));
-        reporter = profiler.createReporter();
+        reporter.setLabelSticker(new RegexpLabelSticker(testTag, separator));
         ProfiledCall call = profiler.start("test");
         call.stop(30);
 
@@ -81,12 +80,11 @@ public class AggregatingReporterTest {
         String testTag = "testTag";
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*nop.*"));
-        profiler.setLabelSticker(new RegexpLabelSticker(testTag, separator));
         profiler.attachIndicator("nop", () -> new Long(10));
         ProfiledCall call = profiler.start("test");
         call.stop(30);
-        
-        reporter = profiler.createReporter();
+
+        reporter.setLabelSticker(new RegexpLabelSticker(testTag, separator));
         ProfilerReport profilerReport = reporter.buildReportAndReset(ReportFilters.containsLabel(testTag, "tag"));
 
         assertNotNull(profilerReport.getProfilerCallReports());
@@ -100,7 +98,7 @@ public class AggregatingReporterTest {
         String testTag = "testTag";
         separator.put("tag", new HashSet<Pattern>());
         separator.get("tag").add(Pattern.compile(".*nop.*"));
-        profiler.setLabelSticker(new RegexpLabelSticker(testTag, separator));
+        reporter.setLabelSticker(new RegexpLabelSticker(testTag, separator));
         profiler.attachIndicator("nop", () -> new Long(10));
         ProfiledCall call = profiler.start("test");
         call.stop(30);
@@ -108,8 +106,8 @@ public class AggregatingReporterTest {
         separator = new HashMap<>();
         separator.put("tag1", new HashSet<Pattern>());
         separator.get("tag1").add(Pattern.compile(".*nop.*"));
-        profiler.setLabelSticker(new RegexpLabelSticker(testTag, separator));
-        reporter = profiler.createReporter();
+        reporter.setLabelSticker(new RegexpLabelSticker(testTag, separator));
+
         ProfilerReport profilerReport = reporter.buildReportAndReset(ReportFilters.containsLabel(testTag, "tag1"));
 
         assertNotNull(profilerReport.getProfilerCallReports());

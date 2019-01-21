@@ -44,11 +44,6 @@ public class PrefixedProfiler implements Profiler {
     }
 
     @Override
-    public void setLabelSticker(LabelSticker labelSticker) {
-        profiler.setLabelSticker(labelSticker);
-    }
-
-    @Override
     public ProfilerReporter createReporter() {
         return profiler.createReporter();
     }

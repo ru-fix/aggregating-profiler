@@ -5,7 +5,6 @@ import ru.fix.aggregating.profiler.engine.AggregatingReporter;
 import ru.fix.aggregating.profiler.engine.NameNormalizer;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,6 +17,7 @@ public class AggregatingProfiler implements Profiler {
 
     private final CopyOnWriteArrayList<AggregatingReporter> profilerReporters = new CopyOnWriteArrayList<>();
 
+    //TODO: move indicators to reporters, each reporter will set is's own auto tags
     private final Map<Identity, AggregatingIndicationProvider> indicators = new ConcurrentHashMap<>();
     private volatile LabelSticker labelSticker = new NoopLabelSticker();
 
@@ -51,19 +51,6 @@ public class AggregatingProfiler implements Profiler {
         );
     }
 
-    @Override
-    public void setLabelSticker(LabelSticker labelSticker) {
-        Objects.requireNonNull(labelSticker);
-        this.labelSticker = labelSticker;
-
-        profilerReporters.forEach(
-            reporter -> reporter.setLabelSticker(labelSticker));
-
-        indicators.forEach((indicatorIdentity, indicatorProvider) -> {
-            labelSticker.buildLabels(indicatorIdentity.name).forEach(indicatorProvider::setAutoLabel);
-        });
-    }
-    
     private void registerReporter(AggregatingReporter reporter) {
         profilerReporters.add(reporter);
     }
@@ -81,9 +68,13 @@ public class AggregatingProfiler implements Profiler {
     @Override
     public void attachIndicator(Identity identity, IndicationProvider indicationProvider) {
         AggregatingIndicationProvider provider = new AggregatingIndicationProvider(indicationProvider);
-        labelSticker.buildLabels(identity.name).forEach(provider::setAutoLabel);
-
         indicators.put(identity, provider);
+
+        //TODO: call back will be replaced by direct Reporter::attachIndicator invocation
+        // Each report will have it's own indicator provider with populated auto labels.
+        for (AggregatingReporter reporter : profilerReporters){
+            reporter.onIndicatorAttached(identity, provider);
+        }
     }
 
     @Override

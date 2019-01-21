@@ -7,4 +7,6 @@ public interface ProfilerReporter extends AutoCloseable {
      * @return empty report in case of nonexistent tag
      */
     ProfilerReport buildReportAndReset(ReportFilter reportFilter);
+
+    void setLabelSticker(LabelSticker labelSticker);
 }
