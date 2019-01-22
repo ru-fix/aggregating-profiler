@@ -180,7 +180,7 @@ public class CallAggregate implements AutoLabelStickerable {
                 .setLatencyMax(latencyMax)
                 .setLatencyAvg(AdderDrainer.drain(latencySum) / stopSum)
 
-                .setLatencyPercentile(latencyPercentile.buildAndReset(latencyMax))
+                .setLatencyPercentile(latencyPercentile.buildAndReset(latencyMax, stopSum))
 
                 .setPayloadMin(payloadMin.getThenReset())
                 .setPayloadMax(payloadMax.getThenReset())

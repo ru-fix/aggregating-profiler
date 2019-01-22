@@ -37,10 +37,13 @@ public class PercentileAccumulator {
     }
 
     /**
-     * @param currentMaximum maximum value of the metric that Reporter saw during reporting period
+     * @param reportingPeriodMaximum maximum value of the metric that Reporter saw during reporting period
      *                       minor optimization so PercentileAccumulator do not need to track this value by itself
+     * @param reportingPeriodMeasurementCount how many measurements reporter saw during reporting period.
+     *                     Measurements with latency bigger than largest bucket level are discarded.
+     *                     To calculate percentiles we have to know how many measurements was in total.
      */
-    public Map<Integer, Long> buildAndReset(long currentMaximum) {
+    public Map<Integer, Long> buildAndReset(long reportingPeriodMaximum, long reportingPeriodMeasurementCount) {
 
         TreeMap<Long, Long> counts = new TreeMap<>();
 
@@ -51,12 +54,9 @@ public class PercentileAccumulator {
             }
         }
 
-        double sum = counts.values().stream().mapToLong(it -> it).sum();
-
-
         int[] percentiles = settings.getPercentiles().stream().mapToInt(it -> it).sorted().toArray();
         double[] percentileCounts = Arrays.stream(percentiles)
-                .mapToDouble(it -> sum * it / 100)
+                .mapToDouble(it -> ((double) reportingPeriodMeasurementCount) * it / 100)
                 .toArray();
 
         double currentCounts = 0;
@@ -99,7 +99,7 @@ public class PercentileAccumulator {
         }
 
         while (percentileIndex < percentiles.length) {
-            report.put(percentiles[percentileIndex], currentMaximum);
+            report.put(percentiles[percentileIndex], reportingPeriodMaximum);
             percentileIndex++;
         }
 
