@@ -39,7 +39,7 @@ class PercentileAccumulatorTest {
         )
         measurements.forEach { accumulator.accumulate(it) }
 
-        val report = accumulator.buildAndReset(measurements.max()!!, measurements.size.toLong())
+        val report = accumulator.buildAndReset(measurements.max()!!)
 
         Assertions.assertEquals(
                 mapOf(
@@ -75,7 +75,7 @@ class PercentileAccumulatorTest {
 
         measurements.forEach { accumulator.accumulate(it) }
 
-        val report = accumulator.buildAndReset(measurements.max()!!, measurements.size.toLong())
+        val report = accumulator.buildAndReset(measurements.max()!!)
 
         Assertions.assertEquals(
                 mapOf(
@@ -116,7 +116,7 @@ class PercentileAccumulatorTest {
         )
         measurements.forEach { accumulator.accumulate(it) }
 
-        val report = accumulator.buildAndReset(measurements.max()!!, measurements.size.toLong())
+        val report = accumulator.buildAndReset(measurements.max()!!)
 
         Assertions.assertEquals(
                 mapOf(

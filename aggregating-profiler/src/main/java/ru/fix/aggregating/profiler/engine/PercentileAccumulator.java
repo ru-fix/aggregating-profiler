@@ -13,6 +13,7 @@ public class PercentileAccumulator {
     final PercentileSettings settings;
 
     final TreeMap<Long, LongAdder> buckets;
+    final LongAdder bucketMiss = new LongAdder();
 
 
     public PercentileAccumulator(PercentileSettings settings) {
@@ -24,6 +25,8 @@ public class PercentileAccumulator {
         Map.Entry<Long, LongAdder> ceilingBucket = buckets.ceilingEntry(latency);
         if (ceilingBucket != null) {
             ceilingBucket.getValue().increment();
+        } else {
+            bucketMiss.increment();
         }
     }
 
@@ -38,25 +41,26 @@ public class PercentileAccumulator {
 
     /**
      * @param reportingPeriodMaximum maximum value of the metric that Reporter saw during reporting period
-     *                       minor optimization so PercentileAccumulator do not need to track this value by itself
-     * @param reportingPeriodMeasurementCount how many measurements reporter saw during reporting period.
-     *                     Measurements with latency bigger than largest bucket level are discarded.
-     *                     To calculate percentiles we have to know how many measurements was in total.
+     *                               minor optimization so PercentileAccumulator do not need to track this value by itself
      */
-    public Map<Integer, Long> buildAndReset(long reportingPeriodMaximum, long reportingPeriodMeasurementCount) {
+    public Map<Integer, Long> buildAndReset(long reportingPeriodMaximum) {
+
+        long reportingPeriodMeasurementCount = AdderDrainer.drain(bucketMiss);
 
         TreeMap<Long, Long> counts = new TreeMap<>();
-
         for (Map.Entry<Long, LongAdder> level : buckets.entrySet()) {
             long count = AdderDrainer.drain(level.getValue());
             if (count > 0) {
                 counts.put(level.getKey(), count);
+                reportingPeriodMeasurementCount += count;
             }
         }
 
         int[] percentiles = settings.getPercentiles().stream().mapToInt(it -> it).sorted().toArray();
+        double measurementsCount = (double) reportingPeriodMeasurementCount;
+
         double[] percentileCounts = Arrays.stream(percentiles)
-                .mapToDouble(it -> ((double) reportingPeriodMeasurementCount) * it / 100)
+                .mapToDouble(it -> measurementsCount * it / 100)
                 .toArray();
 
         double currentCounts = 0;
