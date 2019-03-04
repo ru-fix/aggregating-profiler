@@ -21,13 +21,6 @@ public class PrefixedProfiler implements Profiler {
         return profiler.profiledCall(profilerPrefix + "." + NameNormalizer.trimDots(name));
     }
 
-    private Identity prefixedIdentity(Identity identity){
-        return new Identity(
-                profilerPrefix + "." + NameNormalizer.trimDots(identity.name),
-                identity.getTags()
-        );
-    }
-
     @Override
     public ProfiledCall profiledCall(Identity identity) {
         return profiler.profiledCall(prefixedIdentity(identity));
@@ -39,8 +32,18 @@ public class PrefixedProfiler implements Profiler {
     }
 
     @Override
+    public void attachIndicator(Identity identity, IndicationProvider indicationProvider) {
+        profiler.attachIndicator(prefixedIdentity(identity), indicationProvider);
+    }
+
+    @Override
     public void detachIndicator(String name) {
         profiler.detachIndicator(profilerPrefix + "." + NameNormalizer.trimDots(name));
+    }
+
+    @Override
+    public void detachIndicator(Identity identity) {
+        profiler.detachIndicator(prefixedIdentity(identity));
     }
 
     @Override
@@ -48,15 +51,10 @@ public class PrefixedProfiler implements Profiler {
         return profiler.createReporter();
     }
 
-
-
-    @Override
-    public void attachIndicator(Identity identity, IndicationProvider indicationProvider) {
-
-    }
-
-    @Override
-    public void detachIndicator(Identity identity) {
-
+    private Identity prefixedIdentity(Identity identity){
+        return new Identity(
+                profilerPrefix + "." + NameNormalizer.trimDots(identity.name),
+                identity.getTags()
+        );
     }
 }
