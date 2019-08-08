@@ -6,7 +6,8 @@ import ru.fix.aggregating.profiler.ProfilerReporter
 import java.io.StringWriter
 import java.io.Writer
 
-class PrometheusMetricsReporter(private val reporter: ProfilerReporter) : AutoCloseable {
+class PrometheusMetricsReporter(private val reporter: ProfilerReporter,
+                                private val reportTags: Map<String, String> = emptyMap()) : AutoCloseable {
 
     companion object {
         const val CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8"
@@ -54,16 +55,21 @@ class PrometheusMetricsReporter(private val reporter: ProfilerReporter) : AutoCl
 
         val writer = StringWriter()
 
+        val reportedGaugeType = HashSet<String>()
+
         report.indicators.forEach { identity, value ->
-            writer.appendGaugeType(identity)
+            if (reportedGaugeType.add(identity.name)) {
+                writer.appendGaugeType(identity)
+            }
             writer.appendGaugeValue(identity, value.toDouble())
         }
 
         report.profilerCallReports.forEach { report ->
             report.asMap().forEach { metric, value ->
-
                 val identity = Identity(report.identity.name + "_$metric", report.identity.tags)
-                writer.appendGaugeType(identity)
+                if (reportedGaugeType.add(identity.name)) {
+                    writer.appendGaugeType(identity)
+                }
                 writer.appendGaugeValue(identity, value.toDouble())
             }
         }
@@ -80,9 +86,10 @@ class PrometheusMetricsReporter(private val reporter: ProfilerReporter) : AutoCl
 
     private fun convertIdentityToMetricName(identity: Identity): String {
         val metricName = normalizeName(identity.name)
-        if (identity.tags.isNotEmpty()) {
+        val tags = identity.tags + reportTags
 
-            return "$metricName" + identity.tags.asSequence()
+        if (tags.isNotEmpty()) {
+            return "$metricName" + tags.asSequence()
                     .sortedBy { tag -> tag.key }
                     .map { tag -> """${tag.key}="${escapeTagValue(tag.value)}"""" }
                     .joinToString(separator = ",", prefix = "{", postfix = "}")
