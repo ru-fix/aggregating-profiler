@@ -26,7 +26,7 @@ object Libs {
     val kotlin_logging = "io.github.microutils:kotlin-logging:${Vers.kotlin_logging}"
     val hamcrest = "org.hamcrest:hamcrest-all:1.3"
 
-    val jmhGradlePlugin = "me.champeau.gradle:jmh-gradle-plugin:0.4.7"
+    val jmhGradlePlugin = "me.champeau.gradle:jmh-gradle-plugin:0.5.0-rc-2"
     val jmh = "org.openjdk.jmh:jmh-core:${Vers.jmh}"
     val jmhGeneratorAnn = "org.openjdk.jmh:jmh-generator-annprocess:${Vers.jmh}"
     val jmhGeneratorBytecode = "org.openjdk.jmh:jmh-generator-bytecode:${Vers.jmh}"
