@@ -1,21 +1,25 @@
 object Vers {
-    val kotlin = "1.3.10"
+    val kotlin = "1.3.41"
     val kotlin_logging = "1.6.22"
     val sl4j = "1.7.25"
-    val dokkav = "0.9.16"
-    val gradleReleasePlugin = "1.3.3"
+    val dokkav = "0.9.18"
+    val gradle_release_plugin = "1.3.9"
     val junit = "5.2.0"
     val jmh = "1.21"
 
 }
 
 object Libs {
+    //Plugins
+    val gradle_release_plugin = "ru.fix:gradle-release-plugin:${Vers.gradle_release_plugin}"
+    val dokka_gradle_plugin = "org.jetbrains.dokka:dokka-gradle-plugin:${Vers.dokkav}"
+    val nexus_staging_plugin = "io.codearte.nexus-staging"
+    val nexus_publish_plugin = "de.marcphilipp.nexus-publish"
+
+    //Dependencies
     val kotlin_stdlib = "org.jetbrains.kotlin:kotlin-stdlib:${Vers.kotlin}"
     val kotlin_jdk8 = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Vers.kotlin}"
     val kotlin_reflect = "org.jetbrains.kotlin:kotlin-reflect:${Vers.kotlin}"
-
-    val gradleReleasePlugin = "ru.fix:gradle-release-plugin:${Vers.gradleReleasePlugin}"
-    val dokkaGradlePlugin = "org.jetbrains.dokka:dokka-gradle-plugin:${Vers.dokkav}"
 
     val slf4j_api = "org.slf4j:slf4j-api:${Vers.sl4j}"
     val slf4j_simple = "org.slf4j:slf4j-simple:${Vers.sl4j}"
