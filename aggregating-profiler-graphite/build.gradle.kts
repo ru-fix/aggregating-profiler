@@ -1,6 +1,3 @@
-import org.gradle.kotlin.dsl.*
-
-
 plugins {
     java
     kotlin("jvm")
@@ -19,8 +16,8 @@ dependencies {
     compile(Libs.kotlin_reflect)
 
     compile(Libs.kotlin_logging)
-    compile(Libs.dynamicPropertyApi)
-    compile(Libs.jfixStdlibConcurrency){
+    compile(Libs.dynamic_property_api)
+    compile(Libs.jfix_stdlib_concurrency){
         exclude("ru.fix")
     }
 

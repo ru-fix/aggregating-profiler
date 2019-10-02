@@ -20,7 +20,7 @@ buildscript {
         classpath(Libs.kotlin_reflect)
 
         classpath(Libs.shadowPlugin)
-        classpath(Libs.jmhGradlePlugin)
+        classpath(Libs.jmh_gradle_plugin)
     }
 }
 
