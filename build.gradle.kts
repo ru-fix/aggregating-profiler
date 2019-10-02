@@ -1,11 +1,13 @@
 import de.marcphilipp.gradle.nexus.NexusPublishExtension
+import org.asciidoctor.gradle.AsciidoctorTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
-
 
 buildscript {
     repositories {
@@ -18,6 +20,7 @@ buildscript {
         classpath(Libs.kotlin_stdlib)
         classpath(Libs.kotlin_jdk8)
         classpath(Libs.kotlin_reflect)
+        classpath(Libs.asciidoctor)
 
         classpath(Libs.shadowPlugin)
         classpath(Libs.jmh_gradle_plugin)
@@ -30,6 +33,7 @@ plugins {
     `maven-publish`
     id(Libs.nexus_publish_plugin) version "0.3.0" apply false
     id(Libs.nexus_staging_plugin) version "0.21.0"
+    id("org.asciidoctor.convert") version Vers.asciidoctor
 }
 
 /**
@@ -78,6 +82,7 @@ subprojects {
     repositories {
         jcenter()
         mavenCentral()
+        mavenLocal()
     }
 
     val sourcesJar by tasks.creating(Jar::class) {
@@ -89,6 +94,10 @@ subprojects {
     val dokkaTask by tasks.creating(DokkaTask::class) {
         outputFormat = "javadoc"
         outputDirectory = "$buildDir/dokka"
+
+        //TODO: wait dokka support JDK11 - https://github.com/Kotlin/dokka/issues/428
+        //TODO: wait dokka fix https://github.com/Kotlin/dokka/issues/464
+        enabled = false
     }
 
     val dokkaJar by tasks.creating(Jar::class) {
@@ -104,9 +113,9 @@ subprojects {
                 username.set("$repositoryUser")
                 password.set("$repositoryPassword")
                 useStaging.set(true)
-                stagingProfileId.set("1f0730098fd259")
             }
         }
+        clientTimeout.set(Duration.of(3, ChronoUnit.MINUTES))
     }
 
     project.afterEvaluate {
@@ -134,7 +143,7 @@ subprojects {
 
                     pom {
                         name.set("${project.group}:${project.name}")
-                        description.set("https://github.com/ru-fix/")
+                        description.set("https://github.com/ru-fix/${rootProject.name}")
                         url.set("https://github.com/ru-fix/${rootProject.name}")
                         licenses {
                             license {
@@ -176,7 +185,9 @@ subprojects {
 
     tasks {
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions {
+                jvmTarget = "1.8"
+            }
         }
         withType<Test> {
             useJUnitPlatform()
@@ -189,9 +200,21 @@ subprojects {
                 exceptionFormat = TestExceptionFormat.FULL
             }
         }
-        withType<KotlinCompile>{
-            kotlinOptions {
-                jvmTarget = "1.8"
+    }
+}
+
+tasks {
+    withType<AsciidoctorTask> {
+        sourceDir = project.file("asciidoc")
+        resources(closureOf<CopySpec> {
+            from("asciidoc")
+            include("**/*.png")
+        })
+        doLast {
+            copy {
+                from(outputDir.resolve("html5"))
+                into(project.file("docs"))
+                include("**/*.html", "**/*.png")
             }
         }
     }

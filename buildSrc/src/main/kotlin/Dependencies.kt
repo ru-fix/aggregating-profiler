@@ -1,4 +1,5 @@
 object Vers {
+    val asciidoctor = "1.5.9.2"
     val kotlin = "1.3.41"
     val kotlin_logging = "1.6.22"
     val sl4j = "1.7.25"
@@ -13,6 +14,7 @@ object Libs {
     //Plugins
     val gradle_release_plugin = "ru.fix:gradle-release-plugin:${Vers.gradle_release_plugin}"
     val dokka_gradle_plugin = "org.jetbrains.dokka:dokka-gradle-plugin:${Vers.dokkav}"
+    val asciidoctor = "org.asciidoctor:asciidoctor-gradle-plugin:${Vers.asciidoctor}"
     val nexus_staging_plugin = "io.codearte.nexus-staging"
     val nexus_publish_plugin = "de.marcphilipp.nexus-publish"
     val jmh_gradle_plugin = "me.champeau.gradle:jmh-gradle-plugin:0.4.7"
