@@ -1,40 +1,40 @@
-import org.gradle.kotlin.dsl.kotlin
-import org.gradle.kotlin.dsl.maven
-import org.gradle.kotlin.dsl.repositories
-import java.net.URI
-import ru.fix.gradle.release.plugin.ReleaseExtension
-import org.gradle.api.tasks.bundling.Jar
+import de.marcphilipp.gradle.nexus.NexusPublishExtension
+import org.asciidoctor.gradle.AsciidoctorTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.api.artifacts.dsl.*
-import org.gradle.kotlin.dsl.extra
-import org.gradle.api.publication.maven.internal.action.MavenInstallAction
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.gradle.internal.authentication.DefaultBasicAuthentication
-import org.gradle.kotlin.dsl.repositories
-import org.gradle.kotlin.dsl.version
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import kotlin.properties.Delegates
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 buildscript {
     repositories {
         jcenter()
-        gradlePluginPortal()
         mavenCentral()
     }
     dependencies {
-        classpath(Libs.gradleReleasePlugin)
-        classpath(Libs.dokkaGradlePlugin)
+        classpath(Libs.gradle_release_plugin)
+        classpath(Libs.dokka_gradle_plugin)
         classpath(Libs.kotlin_stdlib)
         classpath(Libs.kotlin_jdk8)
         classpath(Libs.kotlin_reflect)
+        classpath(Libs.asciidoctor)
+
         classpath(Libs.shadowPlugin)
-        classpath(Libs.jmhGradlePlugin)
+        classpath(Libs.jmh_gradle_plugin)
     }
 }
 
+plugins {
+    kotlin("jvm") version Vers.kotlin apply false
+    signing
+    `maven-publish`
+    id(Libs.nexus_publish_plugin) version "0.3.0" apply false
+    id(Libs.nexus_staging_plugin) version "0.21.0"
+    id("org.asciidoctor.convert") version Vers.asciidoctor
+}
 
 /**
  * Project configuration by properties and environment
@@ -55,16 +55,13 @@ val signingKeyId by envConfig()
 val signingPassword by envConfig()
 val signingSecretKeyRingFile by envConfig()
 
-repositories {
-    jcenter()
-    gradlePluginPortal()
-    mavenCentral()
-}
-
-plugins {
-    kotlin("jvm") version Vers.kotlin apply false
-    signing
-    `maven-publish`
+nexusStaging {
+    packageGroup = "ru.fix"
+    stagingProfileId = "1f0730098fd259"
+    username = "$repositoryUser"
+    password = "$repositoryPassword"
+    numberOfRetries = 50
+    delayBetweenRetriesInMillis = 3_000
 }
 
 apply {
@@ -79,13 +76,14 @@ subprojects {
         plugin("signing")
         plugin("java")
         plugin("org.jetbrains.dokka")
+        plugin(Libs.nexus_publish_plugin)
     }
 
     repositories {
-        mavenCentral()
         jcenter()
+        mavenCentral()
+        mavenLocal()
     }
-
 
     val sourcesJar by tasks.creating(Jar::class) {
         classifier = "sources"
@@ -96,6 +94,10 @@ subprojects {
     val dokkaTask by tasks.creating(DokkaTask::class) {
         outputFormat = "javadoc"
         outputDirectory = "$buildDir/dokka"
+
+        //TODO: wait dokka support JDK11 - https://github.com/Kotlin/dokka/issues/428
+        //TODO: wait dokka fix https://github.com/Kotlin/dokka/issues/464
+        enabled = false
     }
 
     val dokkaJar by tasks.creating(Jar::class) {
@@ -105,51 +107,62 @@ subprojects {
         dependsOn(dokkaTask)
     }
 
-    publishing {
+    configure<NexusPublishExtension> {
         repositories {
-            maven {
-                url = uri("$repositoryUrl")
-                if (url.scheme.startsWith("http", true)) {
-                    credentials {
-                        username = "$repositoryUser"
-                        password = "$repositoryPassword"
-                    }
-                }
+            sonatype {
+                username.set("$repositoryUser")
+                password.set("$repositoryPassword")
+                useStaging.set(true)
             }
         }
-        publications {
-            register("maven", MavenPublication::class) {
-                from(components["java"])
+        clientTimeout.set(Duration.of(3, ChronoUnit.MINUTES))
+    }
 
-                artifact(sourcesJar)
-                artifact(dokkaJar)
+    project.afterEvaluate {
+        publishing {
 
-                pom {
-                    name.set("${project.group}:${project.name}")
-                    description.set("Aggregating Profiler provide basic API for application metrics measurement.")
-                    url.set("https://github.com/ru-fix/commons-profiler")
-                    licenses {
-                        license {
-                            name.set("The Apache License, Version 2.0")
-                            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            publications {
+                //Internal repository setup
+                repositories {
+                    maven {
+                        url = uri("$repositoryUrl")
+                        if (url.scheme.startsWith("http", true)) {
+                            credentials {
+                                username = "$repositoryUser"
+                                password = "$repositoryPassword"
+                            }
                         }
                     }
-                    developers {
-                        developer {
-                            id.set("swarmshine")
-                            name.set("Kamil Asfandiyarov")
-                            url.set("https://github.com/swarmshine")
+                }
+
+                create<MavenPublication>("maven") {
+                    from(components["java"])
+
+                    artifact(sourcesJar)
+                    artifact(dokkaJar)
+
+                    pom {
+                        name.set("${project.group}:${project.name}")
+                        description.set("https://github.com/ru-fix/${rootProject.name}")
+                        url.set("https://github.com/ru-fix/${rootProject.name}")
+                        licenses {
+                            license {
+                                name.set("The Apache License, Version 2.0")
+                                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                            }
                         }
-                        developer {
-                            id.set("gbelyaev")
-                            name.set("Gleb Belyaev")
-                            url.set("https://github.com/gbelyaev")
+                        developers {
+                            developer {
+                                id.set("JFix Team")
+                                name.set("JFix Team")
+                                url.set("https://github.com/ru-fix/")
+                            }
                         }
-                    }
-                    scm {
-                        url.set("https://github.com/ru-fix/aggregating-profiler")
-                        connection.set("https://github.com/ru-fix/aggregating-profiler.git")
-                        developerConnection.set("https://github.com/ru-fix/aggregating-profiler.git")
+                        scm {
+                            url.set("https://github.com/ru-fix/${rootProject.name}")
+                            connection.set("https://github.com/ru-fix/${rootProject.name}.git")
+                            developerConnection.set("https://github.com/ru-fix/${rootProject.name}.git")
+                        }
                     }
                 }
             }
@@ -157,43 +170,51 @@ subprojects {
     }
 
     configure<SigningExtension> {
-
         if (!signingKeyId.isNullOrEmpty()) {
             project.ext["signing.keyId"] = signingKeyId
             project.ext["signing.password"] = signingPassword
             project.ext["signing.secretKeyRingFile"] = signingSecretKeyRingFile
-
             logger.info("Signing key id provided. Sign artifacts for $project.")
-
             isRequired = true
         } else {
-            logger.warn("${project.name}: Signing key not provided. Disable signing for  $project.")
+            logger.info("${project.name}: Signing key not provided. Disable signing for  $project.")
             isRequired = false
         }
-
         sign(publishing.publications)
     }
 
     tasks {
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions {
+                jvmTarget = "1.8"
+            }
         }
-
         withType<Test> {
             useJUnitPlatform()
 
             maxParallelForks = 10
-            
+
             testLogging {
                 events(TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.SKIPPED)
                 showStandardStreams = true
                 exceptionFormat = TestExceptionFormat.FULL
             }
         }
+    }
+}
 
-        withType<KotlinCompile>{
-            kotlinOptions {
-                jvmTarget = "1.8"
+tasks {
+    withType<AsciidoctorTask> {
+        sourceDir = project.file("asciidoc")
+        resources(closureOf<CopySpec> {
+            from("asciidoc")
+            include("**/*.png")
+        })
+        doLast {
+            copy {
+                from(outputDir.resolve("html5"))
+                into(project.file("docs"))
+                include("**/*.html", "**/*.png")
             }
         }
     }

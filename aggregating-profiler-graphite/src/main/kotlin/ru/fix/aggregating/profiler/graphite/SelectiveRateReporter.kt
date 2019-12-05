@@ -29,8 +29,7 @@ class SelectiveRateReporter(
     private val scheduler = mutableListOf<ReschedulableScheduler>()
 
     init {
-        settings.addListener(this::reScheduleReporting)
-        reScheduleReporting(settings.get())
+        settings.addAndCallListener{oldVal, newVal -> reScheduleReporting(newVal)}
     }
 
     private fun reScheduleReporting(config: SelectiveRateProfilingConfig) {
@@ -87,7 +86,7 @@ class SelectiveRateReporter(
 
     private fun makeScheduler(rate: Long, task: () -> Unit): ReschedulableScheduler {
         val newScheduler = NamedExecutors.newSingleThreadScheduler(THREAD_NAME_PREFIX, profiler)
-        newScheduler.schedule({ Schedule.withRate(rate) }, 0L, task)
+        newScheduler.schedule(DynamicProperty.of(Schedule.withRate(rate)), 0L, task)
         return newScheduler
     }
 

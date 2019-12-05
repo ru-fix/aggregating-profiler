@@ -27,8 +27,7 @@ class GraphiteProfilerReporter(
     private val graphiteReportWriter = GraphiteReportWriter(metricPrefix, graphiteWriter)
 
     init {
-        settings.addListener(this::onSettingsChanged)
-        onSettingsChanged(settings.get())
+        settings.addAndCallListener{ _, newVal-> onSettingsChanged(newVal)}
 
         selectiveReporter = SelectiveRateReporter(
                 profiler,
