@@ -89,7 +89,7 @@ public class CallAggregate implements AutoLabelStickerable {
         startMaxThroughputPerSecondAcc.call(currentTimestamp, 1);
 
         activeCallsCountSumAdder.increment();
-        if (numberOfActiveCallsToTrackAndKeepBetweenReports.get() > 0) {
+        if (numberOfActiveCallsToTrackAndKeepBetweenReports.get() > activeCalls.size()) {
             activeCalls.add(profiledCall);
         }
 
@@ -133,23 +133,7 @@ public class CallAggregate implements AutoLabelStickerable {
             return Optional.empty();
         }
 
-        AggregatingCall[] longest = new AggregatingCall[1];
-
-        Set<AggregatingCall> top = new HashSet<>();
-        activeCalls
-                .stream()
-                .sorted(Comparator.comparingLong(AggregatingCall::startNanoTime))
-                .limit(numberOfActiveCallsToTrackAndKeepBetweenReports.get())
-                .forEachOrdered(call -> {
-                    if (top.isEmpty()) {
-                        longest[0] = call;
-                    }
-                    top.add(call);
-                });
-
-        activeCalls.removeIf(call -> !top.contains(call));
-
-        return Optional.ofNullable(longest[0]);
+        return activeCalls.stream().min(Comparator.comparingLong(AggregatingCall::startNanoTime));
     }
 
     public ProfiledCallReport buildReportAndReset(long elapsed) {
