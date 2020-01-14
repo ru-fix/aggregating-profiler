@@ -4,6 +4,7 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import ru.fix.aggregating.profiler.Identity;
+import ru.fix.aggregating.profiler.PercentileSettings;
 import ru.fix.aggregating.profiler.engine.AggregatingCall;
 import ru.fix.aggregating.profiler.engine.CallAggregate;
 
@@ -17,7 +18,8 @@ public class CallAggregateJmh {
 
     final CallAggregate callAggregate = new CallAggregate(
             new Identity("name"),
-            new AtomicInteger(0)
+            new AtomicInteger(0),
+            new PercentileSettings()
     );
 
     final AggregatingCall call = new AggregatingCall(
