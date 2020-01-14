@@ -34,7 +34,7 @@ public class AggregatingProfiler implements Profiler {
     /**
      * if 0 then tracking uncompleted profiled calls is disabled
      */
-    private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports = new AtomicInteger(10);
+    private final AtomicInteger numberOfLongestActiveCallsToTrack = new AtomicInteger(10);
 
     public ProfiledCall profiledCall(String name) {
         return profiledCall(new Identity(name));
@@ -99,7 +99,7 @@ public class AggregatingProfiler implements Profiler {
         AggregatingReporter[] reporter = new AggregatingReporter[1];
         reporter[0] = new AggregatingReporter(
                 this,
-                numberOfActiveCallsToTrackAndKeepBetweenReports,
+                numberOfLongestActiveCallsToTrack,
                 percentileSettings,
                 () -> this.unregisterReporter(reporter[0]),
                 new NoopLabelSticker());
@@ -109,15 +109,15 @@ public class AggregatingProfiler implements Profiler {
     }
 
     /**
-     * @param numberOfActiveCallsToTrackAndKeepBetweenReports if 0 then tracking uncompleted profiled calls is disabled
+     * @param numberOfLongestActiveCallsToTrack if 0 then tracking uncompleted profiled calls is disabled
      */
-    public AggregatingProfiler setNumberOfActiveCallsToTrackAndKeepBetweenReports(
-            int numberOfActiveCallsToTrackAndKeepBetweenReports) {
-        this.numberOfActiveCallsToTrackAndKeepBetweenReports.set(numberOfActiveCallsToTrackAndKeepBetweenReports);
+    public AggregatingProfiler setNumberOfLongestActiveCallsToTrack(
+            int numberOfLongestActiveCallsToTrack) {
+        this.numberOfLongestActiveCallsToTrack.set(numberOfLongestActiveCallsToTrack);
         return this;
     }
 
-    public int getNumberOfActiveCallsToTrackAndKeepBetweenReports(){
-        return numberOfActiveCallsToTrackAndKeepBetweenReports.get();
+    public int getNumberOfLongestActiveCallsToTrack(){
+        return numberOfLongestActiveCallsToTrack.get();
     }
 }
