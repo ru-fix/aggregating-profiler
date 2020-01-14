@@ -124,7 +124,7 @@ public class CallAggregate implements AutoLabelStickerable {
         activeCallsCountSumAdder.decrement();
     }
 
-    public Optional<AggregatingCall> resetActiveCallsAndGetLongest() {
+    public Optional<AggregatingCall> findLongestActiveCall() {
         if (numberOfLongestActiveCallsToTrack.get() == 0) {
             if (!activeCalls.isEmpty()) {
                 activeCalls.clear();
@@ -144,7 +144,7 @@ public class CallAggregate implements AutoLabelStickerable {
                 .setReportingTimeAvg(elapsed)
 
                 .setActiveCallsCountMax(activeCallsCountSumAdder.sum())
-                .setActiveCallsLatencyMax(activeCallsMaxLatencyAndResetActiveCalls());
+                .setActiveCallsLatencyMax(calculateActiveCallsMaxLatency());
 
         if (stopSum == 0) {
             return report;
@@ -178,8 +178,8 @@ public class CallAggregate implements AutoLabelStickerable {
                 ;
     }
 
-    private long activeCallsMaxLatencyAndResetActiveCalls() {
-        Optional<AggregatingCall> longestCall = resetActiveCallsAndGetLongest();
+    private long calculateActiveCallsMaxLatency() {
+        Optional<AggregatingCall> longestCall = findLongestActiveCall();
         return longestCall
                 .map(AggregatingCall::timeFromCallStart)
                 .orElse(0L);
