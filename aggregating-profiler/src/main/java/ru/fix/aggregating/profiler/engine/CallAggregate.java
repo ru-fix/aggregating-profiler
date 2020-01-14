@@ -31,7 +31,7 @@ public class CallAggregate implements AutoLabelStickerable {
     final MaxThroughputPerSecondAccumulator startMaxThroughputPerSecondAcc = new MaxThroughputPerSecondAccumulator();
     final MaxThroughputPerSecondAccumulator stopMaxThroughputPerSecondAcc = new MaxThroughputPerSecondAccumulator();
 
-    final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
+    final AtomicInteger numberOfLongestActiveCallsToTrack;
 
     final LongAdder activeCallsCountSumAdder = new LongAdder();
     final Set<AggregatingCall> activeCalls = ConcurrentHashMap.newKeySet();
@@ -42,11 +42,11 @@ public class CallAggregate implements AutoLabelStickerable {
 
     public CallAggregate(
             Identity callIdentity,
-            AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
+            AtomicInteger numberOfLongestActiveCallsToTrack,
             PercentileSettings percentileSettings
     ) {
         this.callIdentity = callIdentity;
-        this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
+        this.numberOfLongestActiveCallsToTrack = numberOfLongestActiveCallsToTrack;
         this.latencyPercentile = new PercentileAccumulator(percentileSettings);
 
     }
@@ -89,7 +89,7 @@ public class CallAggregate implements AutoLabelStickerable {
         startMaxThroughputPerSecondAcc.call(currentTimestamp, 1);
 
         activeCallsCountSumAdder.increment();
-        if (numberOfActiveCallsToTrackAndKeepBetweenReports.get() > 0) {
+        if (numberOfLongestActiveCallsToTrack.get() > activeCalls.size()) {
             activeCalls.add(profiledCall);
         }
 
@@ -124,8 +124,8 @@ public class CallAggregate implements AutoLabelStickerable {
         activeCallsCountSumAdder.decrement();
     }
 
-    public Optional<AggregatingCall> resetActiveCallsAndGetLongest() {
-        if (numberOfActiveCallsToTrackAndKeepBetweenReports.get() == 0) {
+    public Optional<AggregatingCall> findLongestActiveCall() {
+        if (numberOfLongestActiveCallsToTrack.get() == 0) {
             if (!activeCalls.isEmpty()) {
                 activeCalls.clear();
                 activeCallsCountSumAdder.reset();
@@ -133,23 +133,7 @@ public class CallAggregate implements AutoLabelStickerable {
             return Optional.empty();
         }
 
-        AggregatingCall[] longest = new AggregatingCall[1];
-
-        Set<AggregatingCall> top = new HashSet<>();
-        activeCalls
-                .stream()
-                .sorted(Comparator.comparingLong(AggregatingCall::startNanoTime))
-                .limit(numberOfActiveCallsToTrackAndKeepBetweenReports.get())
-                .forEachOrdered(call -> {
-                    if (top.isEmpty()) {
-                        longest[0] = call;
-                    }
-                    top.add(call);
-                });
-
-        activeCalls.removeIf(call -> !top.contains(call));
-
-        return Optional.ofNullable(longest[0]);
+        return activeCalls.stream().min(Comparator.comparingLong(AggregatingCall::startNanoTime));
     }
 
     public ProfiledCallReport buildReportAndReset(long elapsed) {
@@ -160,7 +144,7 @@ public class CallAggregate implements AutoLabelStickerable {
                 .setReportingTimeAvg(elapsed)
 
                 .setActiveCallsCountMax(activeCallsCountSumAdder.sum())
-                .setActiveCallsLatencyMax(activeCallsMaxLatencyAndResetActiveCalls());
+                .setActiveCallsLatencyMax(calculateActiveCallsMaxLatency());
 
         if (stopSum == 0) {
             return report;
@@ -194,8 +178,8 @@ public class CallAggregate implements AutoLabelStickerable {
                 ;
     }
 
-    private long activeCallsMaxLatencyAndResetActiveCalls() {
-        Optional<AggregatingCall> longestCall = resetActiveCallsAndGetLongest();
+    private long calculateActiveCallsMaxLatency() {
+        Optional<AggregatingCall> longestCall = findLongestActiveCall();
         return longestCall
                 .map(AggregatingCall::timeFromCallStart)
                 .orElse(0L);
