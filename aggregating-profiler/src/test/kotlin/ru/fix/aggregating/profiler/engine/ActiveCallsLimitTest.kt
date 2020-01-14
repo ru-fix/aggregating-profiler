@@ -20,7 +20,7 @@ class ActiveCallsLimitTest {
 
     @BeforeEach
     fun setup() {
-        profiler = AggregatingProfiler().setNumberOfActiveCallsToTrackAndKeepBetweenReports(numberOfActiveCalls)
+        profiler = AggregatingProfiler().setNumberOfLongestActiveCallsToTrack(numberOfActiveCalls)
         reporter = profiler.createReporter() as AggregatingReporter
     }
 

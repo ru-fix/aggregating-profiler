@@ -18,12 +18,12 @@ public class AggregatingReporterActiveCallsTest {
     private AggregatingProfiler profiler;
     private AggregatingReporter reporter;
 
-    private final int numberOfActiveCallsToTrackAndKeepBetweenReports = 25;
+    private final int numberOfLongestActiveCallsToTrack = 25;
 
     @BeforeEach
     public void setup() {
         profiler = new AggregatingProfiler()
-                        .setNumberOfActiveCallsToTrackAndKeepBetweenReports(25);
+                        .setNumberOfLongestActiveCallsToTrack(25);
         reporter = (AggregatingReporter) profiler.createReporter();
     }
 
@@ -87,7 +87,7 @@ public class AggregatingReporterActiveCallsTest {
     @Test
     public void hasEndedCalls_resetsActiveCallsToLimit() throws Exception {
         Collection<ProfiledCall> longestCalls = new ArrayList<>();
-        for (int i = 0; i < numberOfActiveCallsToTrackAndKeepBetweenReports; i++) {
+        for (int i = 0; i < numberOfLongestActiveCallsToTrack; i++) {
             longestCalls.add(profiler.start("Test"));
         }
 
@@ -100,7 +100,7 @@ public class AggregatingReporterActiveCallsTest {
         reporter.buildReportAndReset();
 
         reporter.updateCallAggregates(new Identity("Test"), counters -> {
-            assertEquals(numberOfActiveCallsToTrackAndKeepBetweenReports, counters.activeCalls.size());
+            assertEquals(numberOfLongestActiveCallsToTrack, counters.activeCalls.size());
             assertTrue(counters.activeCalls.containsAll(longestCalls));
         });
     }
@@ -108,7 +108,7 @@ public class AggregatingReporterActiveCallsTest {
     @Test
     public void noCallsEnded_resetsActiveCallsToLimit() throws Exception{
         Collection<ProfiledCall> longestCalls = new ArrayList<>();
-        for (int i = 0; i < numberOfActiveCallsToTrackAndKeepBetweenReports; i++) {
+        for (int i = 0; i < numberOfLongestActiveCallsToTrack; i++) {
             longestCalls.add(profiler.start("Test"));
         }
 
@@ -120,7 +120,7 @@ public class AggregatingReporterActiveCallsTest {
         reporter.buildReportAndReset();
 
         reporter.updateCallAggregates(new Identity("Test"), counters -> {
-            assertEquals(numberOfActiveCallsToTrackAndKeepBetweenReports, counters.activeCalls.size());
+            assertEquals(numberOfLongestActiveCallsToTrack, counters.activeCalls.size());
             assertTrue(counters.activeCalls.containsAll(longestCalls));
         });
     }
@@ -130,7 +130,7 @@ public class AggregatingReporterActiveCallsTest {
         profiler.start("Test");
         profiler.start("Test");
 
-        profiler.setNumberOfActiveCallsToTrackAndKeepBetweenReports(0);
+        profiler.setNumberOfLongestActiveCallsToTrack(0);
 
         reporter.buildReportAndReset();
 

@@ -31,7 +31,7 @@ public class CallAggregate implements AutoLabelStickerable {
     final MaxThroughputPerSecondAccumulator startMaxThroughputPerSecondAcc = new MaxThroughputPerSecondAccumulator();
     final MaxThroughputPerSecondAccumulator stopMaxThroughputPerSecondAcc = new MaxThroughputPerSecondAccumulator();
 
-    final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
+    final AtomicInteger numberOfLongestActiveCallsToTrack;
 
     final LongAdder activeCallsCountSumAdder = new LongAdder();
     final Set<AggregatingCall> activeCalls = ConcurrentHashMap.newKeySet();
@@ -42,11 +42,11 @@ public class CallAggregate implements AutoLabelStickerable {
 
     public CallAggregate(
             Identity callIdentity,
-            AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
+            AtomicInteger numberOfLongestActiveCallsToTrack,
             PercentileSettings percentileSettings
     ) {
         this.callIdentity = callIdentity;
-        this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
+        this.numberOfLongestActiveCallsToTrack = numberOfLongestActiveCallsToTrack;
         this.latencyPercentile = new PercentileAccumulator(percentileSettings);
 
     }
@@ -89,7 +89,7 @@ public class CallAggregate implements AutoLabelStickerable {
         startMaxThroughputPerSecondAcc.call(currentTimestamp, 1);
 
         activeCallsCountSumAdder.increment();
-        if (numberOfActiveCallsToTrackAndKeepBetweenReports.get() > activeCalls.size()) {
+        if (numberOfLongestActiveCallsToTrack.get() > activeCalls.size()) {
             activeCalls.add(profiledCall);
         }
 
@@ -125,7 +125,7 @@ public class CallAggregate implements AutoLabelStickerable {
     }
 
     public Optional<AggregatingCall> resetActiveCallsAndGetLongest() {
-        if (numberOfActiveCallsToTrackAndKeepBetweenReports.get() == 0) {
+        if (numberOfLongestActiveCallsToTrack.get() == 0) {
             if (!activeCalls.isEmpty()) {
                 activeCalls.clear();
                 activeCallsCountSumAdder.reset();

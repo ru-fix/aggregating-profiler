@@ -23,18 +23,18 @@ public class AggregatingReporter implements ProfilerReporter {
 
     private final AtomicLong lastReportTimestamp;
 
-    private final AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports;
+    private final AtomicInteger numberOfLongestActiveCallsToTrack;
     private final ClosingCallback closingCallback;
     private final PercentileSettings percentileSettings;
     private volatile LabelSticker labelSticker;
 
     public AggregatingReporter(AggregatingProfiler profiler,
-                               AtomicInteger numberOfActiveCallsToTrackAndKeepBetweenReports,
+                               AtomicInteger numberOfLongestActiveCallsToTrack,
                                PercentileSettings percentileSettings,
                                ClosingCallback closingCallback,
                                LabelSticker labelSticker) {
         this.profiler = profiler;
-        this.numberOfActiveCallsToTrackAndKeepBetweenReports = numberOfActiveCallsToTrackAndKeepBetweenReports;
+        this.numberOfLongestActiveCallsToTrack = numberOfLongestActiveCallsToTrack;
         this.closingCallback = closingCallback;
         this.labelSticker = labelSticker;
         this.percentileSettings = percentileSettings;
@@ -45,13 +45,11 @@ public class AggregatingReporter implements ProfilerReporter {
         Objects.requireNonNull(labelSticker);
         this.labelSticker = labelSticker;
 
-        this.sharedCounters.forEach((identity, aggregate) -> {
-            labelSticker.buildLabels(identity.getName()).forEach(aggregate::setAutoLabel);
-        });
+        this.sharedCounters.forEach((identity, aggregate) ->
+                labelSticker.buildLabels(identity.getName()).forEach(aggregate::setAutoLabel));
 
-        profiler.getIndicators().forEach((indicatorIdentity, indicatorProvider) -> {
-            labelSticker.buildLabels(indicatorIdentity.getName()).forEach(indicatorProvider::setAutoLabel);
-        });
+        profiler.getIndicators().forEach((indicatorIdentity, indicatorProvider) ->
+                labelSticker.buildLabels(indicatorIdentity.getName()).forEach(indicatorProvider::setAutoLabel));
     }
 
     public void updateCallAggregates(Identity callIdentity, Consumer<CallAggregate> updateAction) {
@@ -61,7 +59,7 @@ public class AggregatingReporter implements ProfilerReporter {
                         key -> {
                             CallAggregate aggregate = new CallAggregate(
                                     callIdentity,
-                                    numberOfActiveCallsToTrackAndKeepBetweenReports,
+                                    numberOfLongestActiveCallsToTrack,
                                     percentileSettings);
                             labelSticker.buildLabels(callIdentity.getName()).forEach(aggregate::setAutoLabel);
                             return aggregate;
@@ -101,7 +99,7 @@ public class AggregatingReporter implements ProfilerReporter {
                 .map(entry -> {
                     Identity name = entry.getKey();
                     try {
-                        return new SimpleEntry<Identity, Long>(name, entry.getValue().getProvider().get());
+                        return new SimpleEntry<>(name, entry.getValue().getProvider().get());
                     } catch (Exception ex) {
                         log.error("Retrieve value for "
                                         + entry.getKey()
