@@ -1,5 +1,10 @@
 rootProject.name = "aggregating-profiler"
 
-Projs.values().forEach {
-    include(it.directory)
+for (project in listOf(
+        "aggregating-profiler",
+        "aggregating-profiler_graphite",
+        "aggregating-profiler_jmh",
+        "aggregating-profiler_prometheus")) {
+
+    include(project)
 }
