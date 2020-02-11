@@ -271,7 +271,9 @@ public class AggregatingProfilerTest {
 
     @Test
     void skip_empty_metrics() throws Exception {
-        Profiler profiler = new AggregatingProfiler();
+        Profiler profiler = new AggregatingProfiler()
+                .setStaleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved(0);
+
         ProfilerReporter reporter = profiler.createReporter();
 
         ProfiledCall call = profiler.profiledCall("call_1");
