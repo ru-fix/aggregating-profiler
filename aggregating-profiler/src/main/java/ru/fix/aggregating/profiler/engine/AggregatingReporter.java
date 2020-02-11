@@ -154,16 +154,16 @@ public class AggregatingReporter implements ProfilerReporter {
             // We need to check if stamped lock could help us not to lose performance
             // and in a same time save us in this situation
 
-            boolean notActiveCalls = counterReport.getActiveCallsCountMax() == 0;
-            boolean notCallsBetweenPreviousAndCurrentReporting = counterReport.getStopSum() == 0;
+            boolean noActiveCalls = counterReport.getActiveCallsCountMax() == 0;
+            boolean noCallsBetweenPreviousAndCurrentReporting = counterReport.getStopSum() == 0;
             long lastAccessTimestamp = callAggregate.lastAccessTimestamp.get();
-            boolean wasAccessedAtLeastOnces = lastAccessTimestamp != 0;
-            boolean noCallsForALongTime = System.currentTimeMillis() - callAggregate.lastAccessTimestamp.get() >
+            boolean wasAccessedAtLeastOnce = lastAccessTimestamp != 0;
+            boolean noCallsForALongTime = (System.currentTimeMillis() - lastAccessTimestamp) >
                     staleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved.get();
 
-            if (notActiveCalls &&
-                    notCallsBetweenPreviousAndCurrentReporting &&
-                    wasAccessedAtLeastOnces &&
+            if (noActiveCalls &&
+                    noCallsBetweenPreviousAndCurrentReporting &&
+                    wasAccessedAtLeastOnce &&
                     noCallsForALongTime) {
 
                 iterator.remove();
