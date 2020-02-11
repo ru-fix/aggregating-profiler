@@ -2,9 +2,9 @@ rootProject.name = "aggregating-profiler"
 
 for (project in listOf(
         "aggregating-profiler",
-        "aggregating-profiler_graphite",
-        "aggregating-profiler_jmh",
-        "aggregating-profiler_prometheus")) {
+        "aggregating-profiler-graphite",
+        "aggregating-profiler-jmh",
+        "aggregating-profiler-prometheus")) {
 
     include(project)
 }
