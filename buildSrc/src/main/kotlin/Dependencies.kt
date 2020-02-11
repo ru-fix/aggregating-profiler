@@ -7,7 +7,7 @@ object Vers {
     val dokkav = "0.9.18"
     val gradle_release_plugin = "1.3.9"
     val junit = "5.2.0"
-    val jmh = "1.21"
+    val jmh = "1.23"
 
 }
 
@@ -18,7 +18,7 @@ object Libs {
     val asciidoctor = "org.asciidoctor:asciidoctor-gradle-plugin:${Vers.asciidoctor}"
     val nexus_staging_plugin = "io.codearte.nexus-staging"
     val nexus_publish_plugin = "de.marcphilipp.nexus-publish"
-    val jmh_gradle_plugin = "me.champeau.gradle:jmh-gradle-plugin:0.4.7"
+    val jmh_gradle_plugin = "me.champeau.gradle:jmh-gradle-plugin:0.5.0"
 
     //Dependencies
     val kotlin_stdlib = "org.jetbrains.kotlin:kotlin-stdlib:${Vers.kotlin}"
