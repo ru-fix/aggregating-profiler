@@ -4,7 +4,10 @@ import ru.fix.aggregating.profiler.Identity;
 import ru.fix.aggregating.profiler.PercentileSettings;
 import ru.fix.aggregating.profiler.ProfiledCallReport;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.*;
 
@@ -40,6 +43,8 @@ public class CallAggregate implements AutoLabelStickerable {
 
     final PercentileAccumulator latencyPercentile;
 
+    final AtomicLong lastAccessTimestamp = new AtomicLong(0L);
+
     public CallAggregate(
             Identity callIdentity,
             AtomicInteger numberOfLongestActiveCallsToTrack,
@@ -63,6 +68,8 @@ public class CallAggregate implements AutoLabelStickerable {
 
 
     public void call(long currentTimestamp, long latency, double payload) {
+        updateLastAccessTimestamp();
+
         startSumAdder.increment();
         stopSumAdder.increment();
 
@@ -85,6 +92,8 @@ public class CallAggregate implements AutoLabelStickerable {
     }
 
     public void start(AggregatingCall profiledCall, long currentTimestamp) {
+        updateLastAccessTimestamp();
+
         startSumAdder.increment();
         startMaxThroughputPerSecondAcc.call(currentTimestamp, 1);
 
@@ -96,6 +105,8 @@ public class CallAggregate implements AutoLabelStickerable {
     }
 
     public void stop(AggregatingCall profiledCall, long currentTimestamp, long latency, double payload) {
+        updateLastAccessTimestamp();
+
         stopSumAdder.increment();
 
         latencyMinAcc.accumulate(latency);
@@ -120,11 +131,16 @@ public class CallAggregate implements AutoLabelStickerable {
     }
 
     public void close(AggregatingCall call) {
+        updateLastAccessTimestamp();
         activeCalls.remove(call);
         activeCallsCountSumAdder.decrement();
     }
 
-    public Optional<AggregatingCall> findLongestActiveCall() {
+    private void updateLastAccessTimestamp() {
+        lastAccessTimestamp.set(System.currentTimeMillis());
+    }
+
+    private Optional<AggregatingCall> findLongestActiveCall() {
         if (numberOfLongestActiveCallsToTrack.get() == 0) {
             if (!activeCalls.isEmpty()) {
                 activeCalls.clear();

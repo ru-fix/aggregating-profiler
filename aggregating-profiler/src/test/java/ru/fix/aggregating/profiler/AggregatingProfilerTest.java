@@ -271,7 +271,8 @@ public class AggregatingProfilerTest {
 
     @Test
     void skip_empty_metrics() throws Exception {
-        Profiler profiler = new AggregatingProfiler();
+        Profiler profiler = new AggregatingProfiler()
+                .setStaleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved(0);
         ProfilerReporter reporter = profiler.createReporter();
 
         ProfiledCall call = profiler.profiledCall("call_1");
@@ -372,7 +373,8 @@ public class AggregatingProfilerTest {
         ProfilerReport profilerReport = reporter.buildReportAndReset();
 
         assertNotNull(profilerReport);
-        List<ProfiledCallReport> reports = profilerReport.getProfilerCallReports();
+        List<ProfiledCallReport> reports = profilerReport.getProfilerCallReports().stream()
+                .filter(it->it.stopSum > 0).collect(Collectors.toList());
         assertNotNull(reports);
         assertEquals(1, reports.size());
         ProfiledCallReport report = reports.get(0);
@@ -569,7 +571,9 @@ public class AggregatingProfilerTest {
 
         profilerReport = reporter.buildReportAndReset();
         assertNotNull(profilerReport);
-        reports = profilerReport.getProfilerCallReports();
+        reports = profilerReport.getProfilerCallReports().stream()
+                .filter(it->it.stopSum > 0)
+                .collect(Collectors.toList());
         assertNotNull(reports);
         assertEquals(4, reports.size());
         Set<String> names = reports.stream()
@@ -584,6 +588,7 @@ public class AggregatingProfilerTest {
     @Test
     void blocks() throws Exception {
         AggregatingProfiler profiler = new AggregatingProfiler();
+
         ProfilerReporter reporter = profiler.createReporter();
 
         profiler.profile("profile.1", AggregatingProfilerTest::resThrowableUnchecked);
@@ -614,7 +619,7 @@ public class AggregatingProfilerTest {
 
         profilerReport = reporter.buildReportAndReset();
         assertNotNull(profilerReport);
-        reports = profilerReport.getProfilerCallReports();
+        reports = profilerReport.getProfilerCallReports().stream().filter(it->it.stopSum > 0).collect(Collectors.toList());
         assertNotNull(reports);
         assertEquals(2, reports.size());
         Set<String> names = reports.stream()
@@ -734,7 +739,9 @@ public class AggregatingProfilerTest {
 
         profilerReport = reporter.buildReportAndReset();
         assertNotNull(profilerReport);
-        reports = profilerReport.getProfilerCallReports();
+        reports = profilerReport.getProfilerCallReports().stream()
+                .filter(it->it.stopSum > 0)
+                .collect(Collectors.toList());
         assertNotNull(reports);
         assertEquals(2, reports.size());
         Set<String> names = reports.stream()

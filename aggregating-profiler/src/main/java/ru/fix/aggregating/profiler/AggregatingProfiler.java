@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -35,6 +36,7 @@ public class AggregatingProfiler implements Profiler {
      * if 0 then tracking uncompleted profiled calls is disabled
      */
     private final AtomicInteger numberOfLongestActiveCallsToTrack = new AtomicInteger(10);
+    private final AtomicLong staleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved = new AtomicLong(15 * 60_000);
 
     public ProfiledCall profiledCall(String name) {
         return profiledCall(new Identity(name));
@@ -72,7 +74,7 @@ public class AggregatingProfiler implements Profiler {
 
         //TODO: call back will be replaced by direct Reporter::attachIndicator invocation
         // Each report will have it's own indicator provider with populated auto labels.
-        for (AggregatingReporter reporter : profilerReporters){
+        for (AggregatingReporter reporter : profilerReporters) {
             reporter.onIndicatorAttached(identity, provider);
         }
     }
@@ -89,7 +91,6 @@ public class AggregatingProfiler implements Profiler {
     }
 
 
-
     public Map<Identity, AggregatingIndicationProvider> getIndicators() {
         return indicators;
     }
@@ -100,6 +101,7 @@ public class AggregatingProfiler implements Profiler {
         reporter[0] = new AggregatingReporter(
                 this,
                 numberOfLongestActiveCallsToTrack,
+                staleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved,
                 percentileSettings,
                 () -> this.unregisterReporter(reporter[0]),
                 new NoopLabelSticker());
@@ -117,7 +119,27 @@ public class AggregatingProfiler implements Profiler {
         return this;
     }
 
-    public int getNumberOfLongestActiveCallsToTrack(){
+    public int getNumberOfLongestActiveCallsToTrack() {
         return numberOfLongestActiveCallsToTrack.get();
+    }
+
+    /**
+     * Profiler will skip and remove empty counters that was not accessed for a long time.
+     * There are always a lot of ProfiledCalls that are rarely active, or active only during short period of time
+     * during application startup or first launch of long running tasks.
+     * Removing empty counters reduce amount of memory consumed by profiler in this cases.
+     * In reporter this looks like metric reports series of zeros and after this timeout metric stop reporting at all.
+     *
+     * Default value is 15 minutes.
+     * @param staleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved timeout in milliseconds
+     */
+    public AggregatingProfiler setStaleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved(
+            long staleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved){
+        this.staleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved.set(staleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved);
+        return this;
+    }
+
+    public long getStaleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved(){
+        return staleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved.get();
     }
 }

@@ -56,11 +56,8 @@ object Libs {
 }
 
 enum class Projs{
-    aggregating_profiler,
-    aggregating_profiler_graphite,
-    aggregating_profiler_jmh,
-    aggregating_profiler_prometheus;
-
-    val directory get() = this.name.replace('_', '-')
-    val dependency get(): String = ":$directory"
+    `aggregating-profiler`,
+    `aggregating-profiler-graphite`,
+    `aggregating-profiler-jmh`,
+    `aggregating-profiler-prometheus`;
 }
