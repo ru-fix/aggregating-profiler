@@ -271,8 +271,7 @@ public class AggregatingProfilerTest {
 
     @Test
     void skip_empty_metrics() throws Exception {
-        Profiler profiler = new AggregatingProfiler()
-                .setStaleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved(0);
+        Profiler profiler = new AggregatingProfiler();
         ProfilerReporter reporter = profiler.createReporter();
 
         ProfiledCall call = profiler.profiledCall("call_1");
@@ -301,9 +300,11 @@ public class AggregatingProfilerTest {
         call2.start();
         call2.stop();
 
+
+
         report = reporter.buildReportAndReset();
         assertTrue(report.getIndicators().isEmpty());
-        assertEquals(1, report.getProfilerCallReports().size());
+        assertEquals(1, report.getProfilerCallReports().size(), report.toString());
         assertEquals(3L, report.getProfilerCallReports().get(0).getStopSum());
         assertEquals("call_2", report.getProfilerCallReports().get(0).getIdentity().getName());
     }

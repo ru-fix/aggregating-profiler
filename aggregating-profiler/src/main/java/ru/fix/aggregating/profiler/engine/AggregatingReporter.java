@@ -158,7 +158,7 @@ public class AggregatingReporter implements ProfilerReporter {
             boolean noCallsBetweenPreviousAndCurrentReporting = counterReport.getStopSum() == 0;
             long lastAccessTimestamp = callAggregate.lastAccessTimestamp.get();
             boolean wasAccessedAtLeastOnce = lastAccessTimestamp != 0;
-            boolean noCallsForALongTime = (System.currentTimeMillis() - lastAccessTimestamp) >
+            boolean noCallsForALongTime = (System.currentTimeMillis() - lastAccessTimestamp) >=
                     staleTimeoutAfterWhichProfiledCallAggregatedWillBeRemoved.get();
 
             if (noActiveCalls &&
