@@ -29,21 +29,21 @@ Profiler profiler = new AggregatingProfiler();
 ...
 
 // Create profiled call each time you want to make measurement 
-ProfiledCall call = profiler.profiledCall("smart.service");
-call.start();
-
-SmartResult result = smartService.doSmartComputation();
-
-call.stop();
+try(ProfiledCall call = profiler.profiledCall("smart.service")){
+    call.start();
+    SmartResult result = smartService.doSmartComputation();
+    call.stop();
+}
+// In case of Exception in doSmartComputation 
+// the measurement will be discarded by `call.close()` 
 ```
 or short version
 
 ```java
-ProfiledCall call = profiler.start("smart.service");
-
-SmartResult result = smartService.doSmartComputation();
-
-call.stop();
+try(ProfiledCall call = profiler.start("smart.service")){
+    SmartResult result = smartService.doSmartComputation();
+    call.stop();
+}
 ```
 or even shorter
 ```java

@@ -1,31 +1,32 @@
 4 threads
 
 Benchmark                                                           Mode  Cnt          Score          Error  Units
-CallAggregateJmh.call                                              thrpt    5  111984814.911 ±  4952247.584  ops/s
-CallAggregateJmh.call_with_latency                                 thrpt    5   93550973.427 ±  7603339.432  ops/s
-CallAggregateJmh.start_stop                                        thrpt    5   55545173.803 ±  8942876.036  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.atomic_long1            thrpt    5   48195095.458 ±   342059.913  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.atomic_long3            thrpt    5   17302396.312 ±   220091.586  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.atomic_long5            thrpt    5   16135721.155 ±   543410.298  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.atomic_long_array5      thrpt    5    6484991.029 ±   526423.704  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.cas1                    thrpt    5   48953396.108 ±  4188697.157  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.cas5                    thrpt    5   16079067.562 ±   148057.863  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.long_adder1             thrpt    5  482114295.571 ± 22758231.923  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.long_adder3             thrpt    5  208352962.762 ± 17176630.705  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.long_adder5             thrpt    5  134336126.361 ±  4820266.237  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.read_write_lock_read1   thrpt    5    6501308.017 ±   305573.892  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.read_write_lock_read5   thrpt    5    6237547.503 ±   162839.120  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.read_write_lock_write5  thrpt    5   33124633.699 ± 19962231.911  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.stamped_lock1           thrpt    5   19936691.464 ±  6755153.205  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.stamped_lock5           thrpt    5   17334789.833 ±  1934094.205  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.swapLong1               thrpt    5   49489696.837 ±  4013736.190  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.swapLong3               thrpt    5   16647312.694 ±   833587.632  ops/s
-DifferentWaysToIncrementBatchOfCountersJmh.swapLong5               thrpt    5   10896950.124 ±   560624.458  ops/s
-ProfilerJmh.profiledCall_call                                      thrpt    5  189712043.663 ± 14251172.474  ops/s
-ProfilerJmh.profiledCall_call_with_latency                         thrpt    5  142335320.814 ± 11226955.821  ops/s
-ProfilerJmh.profiledCall_call_with_latency_and_payload             thrpt    5   76701823.748 ±  5813785.505  ops/s
-ProfilerJmh.profiledCall_start_stop                                thrpt    5   51349246.198 ±  2051799.651  ops/s
-ProfilerJmh.profiler_call                                          thrpt    5  193076168.332 ±  2369465.952  ops/s
-ProfilerJmh.system_current_time                                    thrpt    5  198894430.667 ±  7801246.107  ops/s
-ProfilerJmh.system_nanotime                                        thrpt    5  181457755.221 ± 47084483.866  ops/s
-MaxThrougputPerSecondAccumulatorJmh.timestamp_and_call             thrpt    5  143647684.472 ± 37455754.127  ops/s
+CallAggregateJmh.call                                              thrpt    5  111 984 814.911 ±  4 952 247.584  ops/s
+CallAggregateJmh.call_with_latency                                 thrpt    5   93 550 973.427 ±  7 603 339.432  ops/s
+CallAggregateJmh.start_stop                                        thrpt    5   55 545 173.803 ±  8 942 876.036  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.atomic_long1            thrpt    5   48 804 236.725 ±    520 096.527  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.atomic_long3            thrpt    5   22 962 152.029 ±    754 952.381  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.atomic_long5            thrpt    5   14 084 513.227 ±    218 271.632  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.atomic_long_array5      thrpt    5   10 922 389.565 ±    600 572.172  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.cas1                    thrpt    5   47 851 031.202 ±  1 530 621.777  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.cas5                    thrpt    5   14 952 959.998 ±    791 328.909  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.long_adder1             thrpt    5  647 529 252.124 ± 54 324 264.609  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.long_adder3             thrpt    5  203 633 656.176 ± 10 946 269.137  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.long_adder5             thrpt    5  120 524 535.454 ±  6 498 405.293  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.read_write_lock_read1   thrpt    5    5 279 624.206 ±     54 979.436  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.read_write_lock_read5   thrpt    5    5 576 530.750 ±    249 884.535  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.read_write_lock_write5  thrpt    5   20 909 881.634 ±  9 837 290.969  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.stamped_lock1           thrpt    5   20 567 284.487 ±  7 385 903.386  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.stamped_lock5           thrpt    5   21 234 076.334 ± 11 045 594.953  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.swapLong1               thrpt    5   49 267 808.571 ±  1 213 840.080  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.swapLong3               thrpt    5   16 485 331.120 ±    595 127.592  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.swapLong5               thrpt    5    9 831 260.524 ±    605 122.152  ops/s
+DifferentWaysToIncrementBatchOfCountersJmh.synchronized5           thrpt    5   15 684 458.109 ±  2 813 807.164  ops/s
+ProfilerJmh.profiledCall_call                                      thrpt    5  189 712 043.663 ± 14 251 172.474  ops/s
+ProfilerJmh.profiledCall_call_with_latency                         thrpt    5  142 335 320.814 ± 11 226 955.821  ops/s
+ProfilerJmh.profiledCall_call_with_latency_and_payload             thrpt    5   76 701 823.748 ±  5 813 785.505  ops/s
+ProfilerJmh.profiledCall_start_stop                                thrpt    5   51 349 246.198 ±  2 051 799.651  ops/s
+ProfilerJmh.profiler_call                                          thrpt    5  193 076 168.332 ±  2 369 465.952  ops/s
+ProfilerJmh.system_current_time                                    thrpt    5  198 894 430.667 ±  7 801 246.107  ops/s
+ProfilerJmh.system_nanotime                                        thrpt    5  181 457 755.221 ± 47 084 483.866  ops/s
+MaxThrougputPerSecondAccumulatorJmh.timestamp_and_call             thrpt    5  143 647 684.472 ± 37 455 754.127  ops/s

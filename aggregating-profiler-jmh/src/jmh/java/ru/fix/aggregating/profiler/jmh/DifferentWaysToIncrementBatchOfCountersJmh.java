@@ -20,12 +20,12 @@ public class DifferentWaysToIncrementBatchOfCountersJmh {
     AtomicLong atomicLong5 = new AtomicLong();
 
     @Benchmark
-    public void atomic_long1(){
+    public void atomic_long1() {
         atomicLong1.incrementAndGet();
     }
 
     @Benchmark
-    public void atomic_long3(){
+    public void atomic_long3() {
         atomicLong1.incrementAndGet();
         atomicLong2.incrementAndGet();
         atomicLong3.incrementAndGet();
@@ -41,6 +41,7 @@ public class DifferentWaysToIncrementBatchOfCountersJmh {
     }
 
     AtomicLongArray atomicLongArray = new AtomicLongArray(5);
+
     @Benchmark
     public void atomic_long_array5() {
         atomicLongArray.incrementAndGet(0);
@@ -51,27 +52,27 @@ public class DifferentWaysToIncrementBatchOfCountersJmh {
     }
 
     @Benchmark
-    public long swapLong1(){
+    public long swapLong1() {
         long v1 = atomicLong1.getAndSet(174L);
         return v1;
     }
 
     @Benchmark
-    public long swapLong3(){
+    public long swapLong3() {
         long v1 = atomicLong1.getAndSet(174L);
         long v2 = atomicLong1.getAndSet(174L);
         long v3 = atomicLong1.getAndSet(174L);
-        return v1+v2+v3;
+        return v1 + v2 + v3;
     }
 
     @Benchmark
-    public long swapLong5(){
+    public long swapLong5() {
         long v1 = atomicLong1.getAndSet(174L);
         long v2 = atomicLong1.getAndSet(174L);
         long v3 = atomicLong1.getAndSet(174L);
         long v4 = atomicLong1.getAndSet(174L);
         long v5 = atomicLong1.getAndSet(174L);
-        return v1+v2+v3+v4+v5;
+        return v1 + v2 + v3 + v4 + v5;
     }
 
     LongAdder adder1 = new LongAdder();
@@ -149,6 +150,7 @@ public class DifferentWaysToIncrementBatchOfCountersJmh {
 
 
     StampedLock stampedLock = new StampedLock();
+
     @Benchmark
     public void stamped_lock5() {
 
@@ -170,12 +172,12 @@ public class DifferentWaysToIncrementBatchOfCountersJmh {
     }
 
     @Benchmark
-    public void cas1(){
+    public void cas1() {
         atomicLong1.compareAndSet(105L, 106L);
     }
 
     @Benchmark
-    public boolean cas5(){
+    public boolean cas5() {
         boolean r1 = atomicLong1.compareAndSet(105L, 106L);
         boolean r2 = atomicLong2.compareAndSet(106L, 107L);
         boolean r3 = atomicLong3.compareAndSet(107L, 108L);
@@ -183,4 +185,18 @@ public class DifferentWaysToIncrementBatchOfCountersJmh {
         boolean r5 = atomicLong5.compareAndSet(109L, 110L);
         return r1 && r2 && r3 && r4 && r5;
     }
+
+    Object syncMon = new Object();
+
+    @Benchmark
+    public void synchronized5() {
+        synchronized (syncMon) {
+            long1++;
+            long2++;
+            long3++;
+            long4++;
+            long5++;
+        }
+    }
+
 }
