@@ -13,6 +13,8 @@ You can tune time span for aggregation and flushing rate.
 This approach with pre-aggregation metrics in memory allows profiler to record huge amount of measurements 
 and do not depend on storage performance.     
 
+![](docs/aggregating-profiler.png?raw=true)
+
 Profiler consist of two parts: 
 * Metric recording API to trace events 
 * Metric reporting API to flush metrics aggregates to external storage system
