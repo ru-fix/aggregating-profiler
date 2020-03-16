@@ -1,5 +1,7 @@
 package ru.fix.aggregating.profiler;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +16,10 @@ public class Identity {
         this.name = name;
     }
 
-    public Identity(String name, String... tags) {
+    /**
+     * @param tags should not contains null values. It should have even size (key-value)
+     * */
+    public Identity(@NotNull String name, @NotNull String... tags) {
         this.name = name;
         if (tags.length % 2 != 0) {
             throw new IllegalArgumentException("Invalid tags array size: " + tags.length + ". Expected even size.");
@@ -24,7 +29,10 @@ public class Identity {
         }
     }
 
-    public Identity(String name, Map<String, String> tags) {
+    /**
+     * @param tags should not contains null values or keys
+     * */
+    public Identity(@NotNull String name, @NotNull Map<String, String> tags) {
         this.name = name;
 
         for (Map.Entry<String, String> tag : tags.entrySet()) {
