@@ -3,6 +3,7 @@ package ru.fix.aggregating.profiler.engine
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import ru.fix.aggregating.profiler.Identity
 
 class IdentityTest {
@@ -39,5 +40,13 @@ class IdentityTest {
     fun `identity string without tags`() {
         val identity = Identity("name")
         assertThat(identity.identityString(), equalTo("name"))
+    }
+
+    @Test
+    fun `tags are not mutable`() {
+        val identity = Identity("name", mapOf("foo" to "bar"))
+        assertThrows<UnsupportedOperationException> {
+            (identity.tags as MutableMap<String, String>)["foo"] = "mut"
+        }
     }
 }
