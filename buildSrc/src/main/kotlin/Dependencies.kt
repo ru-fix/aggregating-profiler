@@ -6,6 +6,7 @@ object Vers {
     val sl4j = "1.7.25"
     val dokkav = "0.9.18"
     val gradle_release_plugin = "1.3.9"
+    val jetbrains_annotations = "15.0"
     val junit = "5.2.0"
     val jmh = "1.23"
 
@@ -25,6 +26,8 @@ object Libs {
     val kotlin_jdk8 = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Vers.kotlin}"
     val kotlin_reflect = "org.jetbrains.kotlin:kotlin-reflect:${Vers.kotlin}"
     val kotlinx_coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Vers.kotlinx_coroutines}"
+
+    val jetbrains_annotations = "org.jetbrains:annotations:${Vers.jetbrains_annotations}"
 
     val slf4j_api = "org.slf4j:slf4j-api:${Vers.sl4j}"
     val slf4j_simple = "org.slf4j:slf4j-simple:${Vers.sl4j}"

@@ -8,6 +8,7 @@ dependencies {
      * Runtime
      */
     compile(Libs.slf4j_api)
+    compile(Libs.jetbrains_annotations)
 
     /**
      * Tests
