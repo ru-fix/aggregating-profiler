@@ -43,7 +43,7 @@ public class AggregatingProfilerTest {
 
             ProfilerReport report = reporter.buildReportAndReset();
             assertEquals(1, report.getProfilerCallReports().size());
-            assertEquals("call.name", report.getProfilerCallReports().get(0).getIdentity().name);
+            assertEquals("call.name", report.getProfilerCallReports().get(0).getIdentity().getName());
         }
     }
 
@@ -291,9 +291,9 @@ public class AggregatingProfilerTest {
         assertTrue(report.getIndicators().isEmpty());
         assertEquals(2, report.getProfilerCallReports().size());
         assertEquals(2L, report.getProfilerCallReports().get(0).getStopSum());
-        assertEquals("call_1", report.getProfilerCallReports().get(0).getIdentity().name);
+        assertEquals("call_1", report.getProfilerCallReports().get(0).getIdentity().getName());
         assertEquals(1L, report.getProfilerCallReports().get(1).getStopSum());
-        assertEquals("call_2", report.getProfilerCallReports().get(1).getIdentity().name);
+        assertEquals("call_2", report.getProfilerCallReports().get(1).getIdentity().getName());
 
         call2.start();
         call2.stop();
@@ -308,7 +308,7 @@ public class AggregatingProfilerTest {
         assertTrue(report.getIndicators().isEmpty());
         assertEquals(1, report.getProfilerCallReports().size(), report.toString());
         assertEquals(3L, report.getProfilerCallReports().get(0).getStopSum());
-        assertEquals("call_2", report.getProfilerCallReports().get(0).getIdentity().name);
+        assertEquals("call_2", report.getProfilerCallReports().get(0).getIdentity().getName());
     }
 
     @Test
@@ -580,7 +580,7 @@ public class AggregatingProfilerTest {
         assertNotNull(reports);
         assertEquals(4, reports.size());
         Set<String> names = reports.stream()
-                .map(report -> report.getIdentity().name)
+                .map(report -> report.getIdentity().getName())
                 .collect(Collectors.toSet());
         assertEquals(
                 new HashSet<>(Arrays.asList("profile.1", "profile.2", "profile.5", "profile.6")),
@@ -626,7 +626,7 @@ public class AggregatingProfilerTest {
         assertNotNull(reports);
         assertEquals(2, reports.size());
         Set<String> names = reports.stream()
-                .map(report -> report.getIdentity().name)
+                .map(report -> report.getIdentity().getName())
                 .collect(Collectors.toSet());
         assertEquals(
                 new HashSet<>(Arrays.asList("profile.1", "profile.5")),
@@ -748,7 +748,7 @@ public class AggregatingProfilerTest {
         assertNotNull(reports);
         assertEquals(2, reports.size());
         Set<String> names = reports.stream()
-                .map(report -> report.getIdentity().name)
+                .map(report -> report.getIdentity().getName())
                 .collect(Collectors.toSet());
         assertEquals(
                 new HashSet<>(Arrays.asList("profile.1", "profile.5")),

@@ -11,7 +11,7 @@ class IdentityTest {
     fun `no tags`() {
         val identity = Identity("name")
         assertThat(identity.name, equalTo("name"))
-        assertThat(identity.tags.size, equalTo(0))
+        assertThat(identity.getTags().size, equalTo(0))
     }
 
     @Test

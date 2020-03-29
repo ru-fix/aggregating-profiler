@@ -51,10 +51,10 @@ public class AggregatingReporter implements ProfilerReporter {
         this.labelSticker = labelSticker;
 
         this.sharedCounters.forEach((identity, aggregate) ->
-                labelSticker.buildLabels(identity.name).forEach(aggregate::setAutoLabel));
+                labelSticker.buildLabels(identity.getName()).forEach(aggregate::setAutoLabel));
 
         profiler.getIndicators().forEach((indicatorIdentity, indicatorProvider) ->
-                labelSticker.buildLabels(indicatorIdentity.name).forEach(indicatorProvider::setAutoLabel));
+                labelSticker.buildLabels(indicatorIdentity.getName()).forEach(indicatorProvider::setAutoLabel));
     }
 
     public void updateCallAggregates(Identity callIdentity, Consumer<CallAggregate> updateAction) {
@@ -65,7 +65,7 @@ public class AggregatingReporter implements ProfilerReporter {
                             callIdentity,
                             numberOfLongestActiveCallsToTrack,
                             percentileSettings);
-                    labelSticker.buildLabels(callIdentity.name).forEach(aggregate::setAutoLabel);
+                    labelSticker.buildLabels(callIdentity.getName()).forEach(aggregate::setAutoLabel);
                     return aggregate;
                 });
 
@@ -174,7 +174,7 @@ public class AggregatingReporter implements ProfilerReporter {
         }
 
 
-        collect.sort(Comparator.comparing(report -> report.getIdentity().name));
+        collect.sort(Comparator.comparing(report -> report.getIdentity().getName()));
 
         return new ProfilerReport(indicators, collect);
     }
@@ -185,6 +185,6 @@ public class AggregatingReporter implements ProfilerReporter {
     }
 
     public void onIndicatorAttached(Identity identity, AggregatingIndicationProvider provider) {
-        labelSticker.buildLabels(identity.name).forEach(provider::setAutoLabel);
+        labelSticker.buildLabels(identity.getName()).forEach(provider::setAutoLabel);
     }
 }
