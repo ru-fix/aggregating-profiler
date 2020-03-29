@@ -17,7 +17,7 @@ public class Identity {
      * @param tags should not contains null values. It should have even size (key-value)
      * */
     public Identity(@NotNull String name, @NotNull String... tags) {
-        if(List.of(tags).contains(null)) {
+        if(Arrays.asList(tags).contains(null)) {
             throw new NullPointerException("tags must not contains nulls. tags = " + Arrays.toString(tags));
         }
         if (tags.length % 2 != 0) {
