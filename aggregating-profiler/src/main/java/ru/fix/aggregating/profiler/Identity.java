@@ -2,10 +2,7 @@ package ru.fix.aggregating.profiler;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Identity {
@@ -20,10 +17,15 @@ public class Identity {
      * @param tags should not contains null values. It should have even size (key-value)
      * */
     public Identity(@NotNull String name, @NotNull String... tags) {
-        this.name = name;
+        if(List.of(tags).contains(null)) {
+            throw new NullPointerException("tags must not contains nulls. tags = " + Arrays.toString(tags));
+        }
         if (tags.length % 2 != 0) {
             throw new IllegalArgumentException("Invalid tags array size: " + tags.length + ". Expected even size.");
         }
+
+        this.name = name;
+
         for (int i = 0; i < tags.length - 1; i += 2) {
             this.tags.put(tags[i], tags[i + 1]);
         }
@@ -33,6 +35,10 @@ public class Identity {
      * @param tags should not contains null values or keys
      * */
     public Identity(@NotNull String name, @NotNull Map<String, String> tags) {
+        if (tags.containsKey(null) || tags.containsValue(null)) {
+            throw new NullPointerException("tags must not contains null keys or values. tags = " + tags);
+        }
+
         this.name = name;
 
         for (Map.Entry<String, String> tag : tags.entrySet()) {
