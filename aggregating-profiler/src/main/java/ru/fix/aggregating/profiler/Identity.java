@@ -1,7 +1,6 @@
 package ru.fix.aggregating.profiler;
 
-import org.jetbrains.annotations.NotNull;
-
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ public class Identity {
     /**
      * @param tags should not contains null values. It should have even size (key-value)
      * */
-    public Identity(@NotNull String name, @NotNull String... tags) {
+    public Identity(@Nonnull String name, @Nonnull String... tags) {
         if(Arrays.asList(tags).contains(null)) {
             throw new NullPointerException("tags must not contains nulls. tags = " + Arrays.toString(tags));
         }
@@ -34,7 +33,7 @@ public class Identity {
     /**
      * @param tags should not contains null values or keys
      * */
-    public Identity(@NotNull String name, @NotNull Map<String, String> tags) {
+    public Identity(@Nonnull String name, @Nonnull Map<String, String> tags) {
         if (tags.containsKey(null) || tags.containsValue(null)) {
             throw new NullPointerException("tags must not contains null keys or values. tags = " + tags);
         }

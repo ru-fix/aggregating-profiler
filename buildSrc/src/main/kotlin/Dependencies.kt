@@ -6,7 +6,7 @@ object Vers {
     val sl4j = "1.7.25"
     val dokkav = "0.9.18"
     val gradle_release_plugin = "1.3.9"
-    val jetbrains_annotations = "15.0"
+    val javax_annotation_jsr305 = "3.0.2"
     val junit = "5.2.0"
     val jmh = "1.23"
 
@@ -27,7 +27,7 @@ object Libs {
     val kotlin_reflect = "org.jetbrains.kotlin:kotlin-reflect:${Vers.kotlin}"
     val kotlinx_coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Vers.kotlinx_coroutines}"
 
-    val jetbrains_annotations = "org.jetbrains:annotations:${Vers.jetbrains_annotations}"
+    val javax_annotation_jsr305 = "com.google.code.findbugs:jsr305:${Vers.javax_annotation_jsr305}"
 
     val slf4j_api = "org.slf4j:slf4j-api:${Vers.sl4j}"
     val slf4j_simple = "org.slf4j:slf4j-simple:${Vers.sl4j}"
@@ -58,7 +58,7 @@ object Libs {
     val mockk = "io.mockk:mockk:1.8.13"
 }
 
-enum class Projs{
+enum class Projs {
     `aggregating-profiler`,
     `aggregating-profiler-graphite`,
     `aggregating-profiler-jmh`,
