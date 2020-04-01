@@ -31,8 +31,8 @@ plugins {
     kotlin("jvm") version Vers.kotlin apply false
     signing
     `maven-publish`
-    id(Libs.nexus_publish_plugin) version "0.3.0" apply false
-    id(Libs.nexus_staging_plugin) version "0.21.0"
+    id(Libs.nexus_publish_plugin) version "0.4.0" apply false
+    id(Libs.nexus_staging_plugin) version "0.21.2"
     id("org.asciidoctor.convert") version Vers.asciidoctor
 }
 
@@ -115,7 +115,8 @@ subprojects {
                 useStaging.set(true)
             }
         }
-        clientTimeout.set(Duration.of(3, ChronoUnit.MINUTES))
+        clientTimeout.set(Duration.of(4, ChronoUnit.MINUTES))
+        connectTimeout.set(Duration.of(4, ChronoUnit.MINUTES))
     }
 
     project.afterEvaluate {
