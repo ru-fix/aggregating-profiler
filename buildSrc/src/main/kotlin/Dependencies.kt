@@ -1,7 +1,7 @@
 object Vers {
     val asciidoctor = "1.5.9.2"
     val kotlin = "1.3.41"
-    val kotlin_logging = "1.6.22"
+    val kotlin_logging = "1.7.9"
     val kotlinx_coroutines = "1.3.3"
     val sl4j = "1.7.25"
     val dokkav = "0.9.18"
@@ -41,14 +41,14 @@ object Libs {
     val jmhGeneratorBytecode = "org.openjdk.jmh:jmh-generator-bytecode:${Vers.jmh}"
     val shadowPlugin = "com.github.jengelman.gradle.plugins:shadow:2.0.4"
 
-    val testcontainers_core = "org.testcontainers:testcontainers:1.10.2"
+    val testcontainers_core = "org.testcontainers:testcontainers:1.13.0"
 
     val retrofit = "com.squareup.retrofit2:retrofit:2.5.0"
     val okhttp_logging = "com.squareup.okhttp3:logging-interceptor:3.12.0"
     val awaitility = "org.awaitility:awaitility:3.1.4"
 
-    val dynamic_property_api = "ru.fix:dynamic-property-api:1.1.3"
-    val jfix_stdlib_concurrency = "ru.fix:jfix-stdlib-concurrency:1.0.59"
+    val dynamic_property_api = "ru.fix:dynamic-property-api:2.0.3"
+    val jfix_stdlib_concurrency = "ru.fix:jfix-stdlib-concurrency:3.0.0"
 
     val wiremock = "com.github.tomakehurst:wiremock:2.19.0"
 

@@ -5,6 +5,7 @@ import ru.fix.aggregating.profiler.Profiler
 import ru.fix.aggregating.profiler.ProfilerReport
 import ru.fix.aggregating.profiler.RegexpLabelSticker
 import ru.fix.dynamic.property.api.DynamicProperty
+import ru.fix.dynamic.property.api.PropertySubscription
 import ru.fix.stdlib.concurrency.threads.NamedExecutors
 import ru.fix.stdlib.concurrency.threads.ReschedulableScheduler
 import ru.fix.stdlib.concurrency.threads.Schedule
@@ -16,7 +17,7 @@ private val log = KotlinLogging.logger {}
  */
 class SelectiveRateReporter(
         private val profiler: Profiler,
-        private val settings: DynamicProperty<SelectiveRateProfilingConfig>,
+        settings: DynamicProperty<SelectiveRateProfilingConfig>,
         private val storeMetrics: (ProfilerReport) -> Unit) : AutoCloseable {
 
     companion object {
@@ -24,12 +25,16 @@ class SelectiveRateReporter(
         private const val RATE_LABEL = "logRate"
     }
 
+    private val settingsSubn: PropertySubscription<SelectiveRateProfilingConfig>
+
     private val profilerReporter = profiler.createReporter()
 
     private val scheduler = mutableListOf<ReschedulableScheduler>()
 
     init {
-        settings.addAndCallListener{oldVal, newVal -> reScheduleReporting(newVal)}
+        this.settingsSubn = settings
+                .createSubscription()
+                .setAndCallListener() { _, newVal -> reScheduleReporting(newVal) }
     }
 
     private fun reScheduleReporting(config: SelectiveRateProfilingConfig) {
@@ -93,7 +98,7 @@ class SelectiveRateReporter(
     private fun buildAndSaveReportInStore(buildReport: () -> ProfilerReport) {
         val report = buildReport()
 
-        if (settings.get().enableReporting) {
+        if (settingsSubn.get().enableReporting) {
             try {
                 storeMetrics(report)
             } catch (e: Exception) {
@@ -104,6 +109,7 @@ class SelectiveRateReporter(
 
 
     override fun close() {
+        settingsSubn.close()
         synchronized(scheduler) {
             scheduler.forEach { it.shutdown() }
         }

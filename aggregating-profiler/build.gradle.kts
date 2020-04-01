@@ -10,7 +10,7 @@ dependencies {
     /**
      * Runtime
      */
-    compile(Libs.slf4j_api)
+    api(Libs.slf4j_api)
 
     /**
      * Tests

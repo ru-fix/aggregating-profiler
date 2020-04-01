@@ -5,6 +5,7 @@ import ru.fix.aggregating.profiler.Profiler
 import ru.fix.aggregating.profiler.ProfilerReport
 import ru.fix.aggregating.profiler.graphite.client.GraphiteWriter
 import ru.fix.dynamic.property.api.DynamicProperty
+import ru.fix.dynamic.property.api.PropertySubscription
 
 private val log = KotlinLogging.logger {}
 
@@ -25,9 +26,12 @@ class GraphiteProfilerReporter(
 
     private val graphiteWriter = GraphiteWriter()
     private val graphiteReportWriter = GraphiteReportWriter(metricPrefix, graphiteWriter)
+    private val settingsSubn: PropertySubscription<GraphiteProfilerReporterSettings>
 
     init {
-        settings.addAndCallListener{ _, newVal-> onSettingsChanged(newVal)}
+        this.settingsSubn = settings
+                .createSubscription()
+                .setAndCallListener{ _, newVal-> onSettingsChanged(newVal)}
 
         selectiveReporter = SelectiveRateReporter(
                 profiler,
@@ -54,6 +58,7 @@ class GraphiteProfilerReporter(
     }
 
     override fun close() {
+        this.settingsSubn.close()
         selectiveReporter.close()
     }
 }
