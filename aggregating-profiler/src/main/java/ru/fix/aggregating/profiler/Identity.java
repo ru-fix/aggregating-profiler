@@ -1,9 +1,7 @@
 package ru.fix.aggregating.profiler;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import javax.annotation.Nonnull;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Identity {
@@ -14,17 +12,32 @@ public class Identity {
         this.name = name;
     }
 
-    public Identity(String name, String... tags) {
-        this.name = name;
+    /**
+     * @param tags should not contains null values. It should have even size (key-value)
+     * */
+    public Identity(@Nonnull String name, @Nonnull String... tags) {
+        if(Arrays.asList(tags).contains(null)) {
+            throw new NullPointerException("tags must not contains nulls. tags = " + Arrays.toString(tags));
+        }
         if (tags.length % 2 != 0) {
             throw new IllegalArgumentException("Invalid tags array size: " + tags.length + ". Expected even size.");
         }
+
+        this.name = name;
+
         for (int i = 0; i < tags.length - 1; i += 2) {
             this.tags.put(tags[i], tags[i + 1]);
         }
     }
 
-    public Identity(String name, Map<String, String> tags) {
+    /**
+     * @param tags should not contains null values or keys
+     * */
+    public Identity(@Nonnull String name, @Nonnull Map<String, String> tags) {
+        if (tags.containsKey(null) || tags.containsValue(null)) {
+            throw new NullPointerException("tags must not contains null keys or values. tags = " + tags);
+        }
+
         this.name = name;
 
         for (Map.Entry<String, String> tag : tags.entrySet()) {
