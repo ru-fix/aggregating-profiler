@@ -8,6 +8,7 @@ object Vers {
     val gradle_release_plugin = "1.3.16"
     val javax_annotation_jsr305 = "3.0.2"
     val junit = "5.2.0"
+    val kotlintest = "3.4.2"
     val jmh = "1.23"
 
 }
@@ -56,11 +57,14 @@ object Libs {
     val wiremock = "com.github.tomakehurst:wiremock:2.19.0"
 
     val mockk = "io.mockk:mockk:1.8.13"
+
+    val kotlintest = "io.kotlintest:kotlintest-runner-junit5:${Vers.kotlintest}"
 }
 
 enum class Projs {
     `aggregating-profiler`,
     `aggregating-profiler-graphite`,
+    `aggregating-profiler-kotlin`,
     `aggregating-profiler-jmh`,
     `aggregating-profiler-prometheus`;
 }
