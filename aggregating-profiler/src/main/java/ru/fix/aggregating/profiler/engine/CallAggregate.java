@@ -159,6 +159,10 @@ public class CallAggregate implements AutoLabelStickerable {
         ProfiledCallReport report = new ProfiledCallReport(this.callIdentity)
                 .setReportingTimeAvg(elapsed)
 
+                .setStartSum(startSum)
+                .setStartThroughputPerSecondMax(startMaxThroughputPerSecondAcc.getAndReset(System.currentTimeMillis()))
+                .setStartThroughputAvg(elapsed != 0 ? ((double) startSum * 1000) / elapsed : 0)
+
                 .setActiveCallsCountMax(activeCallsCountSumAdder.sum())
                 .setActiveCallsLatencyMax(calculateActiveCallsMaxLatency());
 
@@ -172,10 +176,6 @@ public class CallAggregate implements AutoLabelStickerable {
         long latencyMax = latencyMaxAcc.getThenReset();
 
         return report
-                .setStartSum(startSum)
-                .setStartThroughputPerSecondMax(startMaxThroughputPerSecondAcc.getAndReset(System.currentTimeMillis()))
-                .setStartThroughputAvg(elapsed != 0 ? ((double) startSum * 1000) / elapsed : 0)
-
                 .setLatencyMin(latencyMin)
                 .setLatencyMax(latencyMax)
                 .setLatencyAvg(AdderDrainer.drain(latencySum) / stopSum)
