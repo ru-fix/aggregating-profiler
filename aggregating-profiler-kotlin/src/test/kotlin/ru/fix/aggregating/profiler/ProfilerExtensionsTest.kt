@@ -15,12 +15,12 @@ class ProfilerExtensionsTest {
     @Test
     fun `profileInline should support suspend functions`() = runBlocking {
         noopProfiler.profiledCall("test")
-            .profileInline {
+            .profileBlock {
                 delay(0)
             }
 
-        noopProfiler.profileInline("test") { delay(0) }
-        noopProfiler.profileInline(Identity("test")) { delay(0) }
+        noopProfiler.profileBlock("test") { delay(0) }
+        noopProfiler.profileBlock(Identity("test")) { delay(0) }
     }
 
     @Test
@@ -28,7 +28,7 @@ class ProfilerExtensionsTest {
         val call = spyk(noopProfiler.profiledCall("test"))
 
         shouldThrowAny {
-            call.profileInline { error("test error") }
+            call.profileBlock { error("test error") }
         }
 
         verify {
@@ -38,8 +38,8 @@ class ProfilerExtensionsTest {
 
     @Test
     fun `profileInline should support both Runnable and Supplier`() {
-        noopProfiler.profileInline("test") { 1 } shouldBe 1
-        noopProfiler.profileInline("test") { doSomething() }
+        noopProfiler.profileBlock("test") { 1 } shouldBe 1
+        noopProfiler.profileBlock("test") { doSomething() }
     }
 
     private fun doSomething() {
