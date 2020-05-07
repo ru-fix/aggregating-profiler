@@ -5,7 +5,7 @@ object Vers {
     val kotlinx_coroutines = "1.3.3"
     val sl4j = "1.7.25"
     val dokkav = "0.9.18"
-    val gradle_release_plugin = "1.3.16"
+    val gradle_release_plugin = "1.3.17"
     val javax_annotation_jsr305 = "3.0.2"
     val junit = "5.2.0"
     val kotlintest = "3.4.2"
