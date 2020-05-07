@@ -16,6 +16,7 @@ import org.awaitility.Awaitility.await
 import org.awaitility.Duration
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
+import org.testcontainers.Testcontainers
 import org.testcontainers.containers.BindMode
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.Slf4jLogConsumer
@@ -98,26 +99,27 @@ class PrometheusIntegrationTest {
         endpont.start()
         println("Metrics endpoint awaits at: http://localhost:${endpont.port()}/metrics")
 
-        val prometheusConfig = File.createTempFile(PrometheusIntegrationTest::class.qualifiedName, ".prometheus.yml").apply {
-            deleteOnExit()
-            writeText("""
-                |global:
-                |  scrape_interval: 1s
-                """.trimMargin())
-        }.absoluteFile
+        Testcontainers.exposeHostPorts(endpont.port())
 
-        val prometheus = Prometheus(prometheusConfig)
-        prometheus.start()
-        println("Prometheus available at: ${prometheus.url}")
-
-        prometheusConfig.writeText("""
+        val configContent = """
             |global:
             |  scrape_interval: 1s
             |scrape_configs:
             |- job_name: integrationTest
             |  static_configs:
-            |  - targets: ['${prometheus.hostHost}:${endpont.port()}']
-        """.trimMargin())
+            |  - targets: ['host.testcontainers.internal:${endpont.port()}']
+        """.trimMargin()
+
+        println(configContent)
+
+        val prometheusConfig = File.createTempFile(PrometheusIntegrationTest::class.qualifiedName, ".prometheus.yml").apply {
+            deleteOnExit()
+            writeText(configContent)
+        }.absoluteFile
+
+        val prometheus = Prometheus(prometheusConfig)
+        prometheus.start()
+        println("Prometheus available at: ${prometheus.url}")
 
         val prometheusPid = prometheus.execInContainer("pgrep", "prometheus").stdout.trim().toInt()
         val prometheusHupOutput = prometheus.execInContainer("kill", "-HUP", prometheusPid.toString()).run { "$stdout\n$stderr" }
