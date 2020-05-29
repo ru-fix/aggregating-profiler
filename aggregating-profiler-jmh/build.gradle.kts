@@ -19,16 +19,16 @@ dependencies {
     /**
      * Runtime
      */
-    compile(Libs.slf4j_api)
-    compile(Libs.kotlin_jdk8)
-    compile(Libs.kotlin_stdlib)
-    compile(Libs.kotlin_reflect)
-    compile(Libs.slf4j_simple)
-    compile(Libs.jmh)
-    compile(Libs.jmhGeneratorAnn)
-    compile(Libs.jmhGeneratorBytecode)
+    implementation(Libs.slf4j_api)
+    implementation(Libs.kotlin_jdk8)
+    implementation(Libs.kotlin_stdlib)
+    implementation(Libs.kotlin_reflect)
+    implementation(Libs.slf4j_simple)
+    implementation(Libs.jmh)
+    implementation(Libs.jmhGeneratorAnn)
+    implementation(Libs.jmhGeneratorBytecode)
 
-    compile(project(":aggregating-profiler"))
+    implementation(project(":aggregating-profiler"))
 }
 
 

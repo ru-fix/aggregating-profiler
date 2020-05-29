@@ -1,6 +1,3 @@
-import org.gradle.kotlin.dsl.*
-
-
 plugins {
     java
     kotlin("jvm")
@@ -10,15 +7,12 @@ dependencies {
     /**
      * Runtime
      */
-    compile(Libs.slf4j_api)
+    api(project(":aggregating-profiler"))
 
-    compile(project(":aggregating-profiler"))
+    implementation(Libs.kotlin_jdk8)
+    implementation(Libs.kotlin_stdlib)
+    implementation(Libs.kotlin_reflect)
 
-    compile(Libs.kotlin_jdk8)
-    compile(Libs.kotlin_stdlib)
-    compile(Libs.kotlin_reflect)
-
-    compile(Libs.kotlin_logging)
 
     /**
      * Tests
@@ -28,17 +22,17 @@ dependencies {
     testRuntimeOnly(Libs.junit_engine)
 
 
-    testCompile(Libs.slf4j_simple)
-    testCompile(Libs.kotlin_logging)
-    testCompile(Libs.hamcrest)
+    testImplementation(Libs.slf4j_simple)
+    testImplementation(Libs.kotlin_logging)
+    testImplementation(Libs.hamcrest)
 
-    testCompile(Libs.testcontainers_core)
+    testImplementation(Libs.testcontainers_core)
 
-    testCompile(Libs.retrofit)
-    testCompile(Libs.okhttp_logging)
-    testCompile(Libs.awaitility)
+    testImplementation(Libs.retrofit)
+    testImplementation(Libs.okhttp_logging)
+    testImplementation(Libs.awaitility)
 
-    testCompile(Libs.wiremock)
+    testImplementation(Libs.wiremock)
 
 }
 
