@@ -7,9 +7,7 @@ dependencies {
     /**
      * Runtime
      */
-    api(Libs.slf4j_api)
     api(project(":aggregating-profiler"))
-    api(Libs.kotlin_logging)
 
     implementation(Libs.kotlin_jdk8)
     implementation(Libs.kotlin_stdlib)
