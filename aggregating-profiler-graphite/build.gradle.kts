@@ -7,17 +7,17 @@ dependencies {
     /**
      * Runtime
      */
-    compile(Libs.slf4j_api)
+    implementation(Libs.slf4j_api)
 
-    compile(project(":aggregating-profiler"))
+    implementation(project(":aggregating-profiler"))
 
-    compile(Libs.kotlin_jdk8)
-    compile(Libs.kotlin_stdlib)
-    compile(Libs.kotlin_reflect)
+    implementation(Libs.kotlin_jdk8)
+    implementation(Libs.kotlin_stdlib)
+    implementation(Libs.kotlin_reflect)
 
-    compile(Libs.kotlin_logging)
-    compile(Libs.dynamic_property_api)
-    compile(Libs.jfix_stdlib_concurrency){
+    implementation(Libs.kotlin_logging)
+    implementation(Libs.dynamic_property_api)
+    implementation(Libs.jfix_stdlib_concurrency){
         exclude("ru.fix")
     }
 
@@ -30,17 +30,17 @@ dependencies {
 
 
 
-    testCompile(Libs.slf4j_simple)
-    testCompile(Libs.hamcrest)
+    testImplementation(Libs.slf4j_simple)
+    testImplementation(Libs.hamcrest)
 
-    testCompile(Libs.testcontainers_core)
+    testImplementation(Libs.testcontainers_core)
 
-    testCompile(Libs.retrofit)
-    testCompile(Libs.okhttp_logging)
-    testCompile(Libs.hamcrest)
-    testCompile(Libs.awaitility)
+    testImplementation(Libs.retrofit)
+    testImplementation(Libs.okhttp_logging)
+    testImplementation(Libs.hamcrest)
+    testImplementation(Libs.awaitility)
 
-    testCompile(Libs.mockk)
+    testImplementation(Libs.mockk)
 
 
 }
