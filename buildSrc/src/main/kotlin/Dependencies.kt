@@ -50,8 +50,8 @@ object Libs {
     val okhttp_logging = "com.squareup.okhttp3:logging-interceptor:3.12.0"
     val awaitility = "org.awaitility:awaitility:3.1.4"
 
-    val dynamic_property_api = "ru.fix:dynamic-property-api:1.1.3"
-    val jfix_stdlib_concurrency = "ru.fix:jfix-stdlib-concurrency:1.0.59"
+    val dynamic_property_api = "ru.fix:dynamic-property-api:1.1.11"
+    val jfix_stdlib_concurrency = "ru.fix:jfix-stdlib-concurrency:2.0.16"
 
     val wiremock = "com.github.tomakehurst:wiremock:2.19.0"
 
