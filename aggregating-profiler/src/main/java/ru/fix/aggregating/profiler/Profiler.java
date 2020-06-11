@@ -81,6 +81,19 @@ public interface Profiler {
 
     /**
      * Add named indicator to profiler.
+     * IndicationProvider callback should be fast and non  blocking.
+     * Blocking IndicationProvider callback could lead to stale reporting or could totally stop reporting.
+     * <pre>{@code
+     * //DO NOT DO THAT
+     * //THIS IS BAD IDEA
+     *
+     * // jdbcConnectionPool.getConnection() - usually blocking operation, and load on database
+     * // could stop profiler from generating reports.
+     * // And metrics are essential at moments with big load on the application.
+     * profiler.attachIndicator("bad-metric", ()->{
+     *     jdbcConnectionPool.getConnection().execute("select count from TABLE")
+     * });
+     * }</pre>
      *
      * @param name               Name of indicator
      *                           Indicator name could be separated by dot '.'
@@ -88,6 +101,24 @@ public interface Profiler {
      */
     void attachIndicator(String name, IndicationProvider indicationProvider);
 
+    /**
+     * Add named indicator to profiler.
+     * IndicationProvider callback should be fast and non  blocking.
+     * Blocking IndicationProvider callback could lead to stale reporting or could totally stop reporting.
+     * <pre>{@code
+     * //DO NOT DO THAT
+     * //THIS IS BAD IDEA
+     *
+     * // jdbcConnectionPool.getConnection() - usually blocking operation, and load on database
+     * // could stop profiler from generating reports.
+     * // And metrics are essential at moments with big load on the application.
+     * profiler.attachIndicator("bad-metric", ()->{
+     *     jdbcConnectionPool.getConnection().execute("select count from TABLE")
+     * });
+     * }</pre>
+     * @param identity
+     * @param indicationProvider
+     */
     void attachIndicator(Identity identity, IndicationProvider indicationProvider);
     /**
      * Remove indicator
