@@ -2,6 +2,10 @@ package ru.fix.aggregating.profiler;
 
 import ru.fix.aggregating.profiler.engine.NameNormalizer;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Attach fixed prefix to profiled calls and indicator names
  *
@@ -9,16 +13,22 @@ import ru.fix.aggregating.profiler.engine.NameNormalizer;
  */
 public class PrefixedProfiler implements Profiler {
     private final Profiler profiler;
-    private final String profilerPrefix;
+    private final String identityNamePrefix;
+    private final Map<String, String> tags;
 
-    public PrefixedProfiler(Profiler profiler, String profilerPrefix) {
+    public PrefixedProfiler(Profiler profiler, String identityNamePrefix) {
+        this(profiler, identityNamePrefix, Collections.emptyMap());
+    }
+
+    public PrefixedProfiler(Profiler profiler, String identityNamePrefix, Map<String, String> tags) {
         this.profiler = profiler;
-        this.profilerPrefix = NameNormalizer.trimDots(profilerPrefix);
+        this.identityNamePrefix = NameNormalizer.trimDots(identityNamePrefix);
+        this.tags = tags;
     }
 
     @Override
     public ProfiledCall profiledCall(String name) {
-        return profiler.profiledCall(profilerPrefix + "." + NameNormalizer.trimDots(name));
+        return profiler.profiledCall(prefixedIdentity(new Identity(name)));
     }
 
     @Override
@@ -28,7 +38,7 @@ public class PrefixedProfiler implements Profiler {
 
     @Override
     public void attachIndicator(String name, IndicationProvider indicationProvider) {
-        profiler.attachIndicator(profilerPrefix + "." + NameNormalizer.trimDots(name), indicationProvider);
+        profiler.attachIndicator(prefixedIdentity(new Identity(name)), indicationProvider);
     }
 
     @Override
@@ -38,7 +48,7 @@ public class PrefixedProfiler implements Profiler {
 
     @Override
     public void detachIndicator(String name) {
-        profiler.detachIndicator(profilerPrefix + "." + NameNormalizer.trimDots(name));
+        profiler.detachIndicator(prefixedIdentity(new Identity(name)));
     }
 
     @Override
@@ -52,9 +62,22 @@ public class PrefixedProfiler implements Profiler {
     }
 
     private Identity prefixedIdentity(Identity identity){
-        return new Identity(
-                profilerPrefix + "." + NameNormalizer.trimDots(identity.name),
-                identity.getTags()
-        );
+        HashMap<String, String> newIdentityTags;
+        if(!this.tags.isEmpty()){
+            newIdentityTags = new HashMap<>();
+            newIdentityTags.putAll(this.tags);
+            newIdentityTags.putAll(identity.tags);
+        } else {
+            newIdentityTags = identity.tags;
+        }
+
+        String newIdentityName;
+        if(identityNamePrefix != null && !identityNamePrefix.isEmpty()){
+            newIdentityName = identityNamePrefix + "." +NameNormalizer.trimDots(identity.name);
+        } else {
+             newIdentityName = identity.name;
+        }
+
+        return new Identity(newIdentityName, newIdentityTags);
     }
 }

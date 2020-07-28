@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 public class Identity {
     final String name;
-    final Map<String, String> tags = new HashMap<>();
+    final HashMap<String, String> tags = new HashMap<>();
 
     public Identity(String name) {
         this.name = name;

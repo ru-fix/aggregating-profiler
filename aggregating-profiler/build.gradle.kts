@@ -27,6 +27,7 @@ dependencies {
 
     testImplementation(Libs.slf4j_simple)
     testImplementation(Libs.hamcrest)
+    testImplementation(Libs.kotlintest)
 }
 
 

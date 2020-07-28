@@ -81,6 +81,7 @@ public interface ProfiledCall extends AutoCloseable {
      */
     void profile(Runnable block);
 
+
     /**
      * Profile provided future
      */
