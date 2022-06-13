@@ -1,3 +1,4 @@
+# Builds the project, runs tests and deploys artifacts to Maven Central repository.
 name: deploy-action
 on:
   push:
